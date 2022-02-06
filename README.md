@@ -18,8 +18,8 @@ to a simple sequence-tosequence learning framework.
 ## Open-Ended VQA
 ![open_vqa](examples/open_vqa.png)
 
-## grounded QA
+## Grounded QA (unseen task)
 ![grounded_qa](examples/grounded_qa.png)
 
-## Viusal Grounding
+## Viusal Grounding (unseen domain)
 ![vg](examples/viusal_grounding.png)
