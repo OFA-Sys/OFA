@@ -10,6 +10,8 @@ OFA is a unified multimodal pretrained model that unifies modalities (i.e., cros
 to a simple sequence-tosequence learning framework.
 
 # Examples
+Below we provide examples of OFA in different tasks.
+
 ## Image Generation (normal query)
 ![t2i_normal](examples/normal_images.png)
 
@@ -24,3 +26,17 @@ to a simple sequence-tosequence learning framework.
 
 ## Viusal Grounding (unseen domain)
 ![vg](examples/viusal_grounding.png)
+
+
+# Citation
+Please cite our paper if you find it helpful:)
+
+```
+@article{wang2022OFA,
+  title={Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework},
+  author={Peng Wang, An Yang, Rui Men, Junyang Lin, Shuai Bai, Zhikang Li, Jianxin Ma, Chang Zhou, Jingren Zhou and Hongxia Yang},
+  journal={arXiv e-prints},
+  pages={arXiv--2202},
+  year={2022}
+}
+```
