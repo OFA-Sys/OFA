@@ -7,7 +7,7 @@
 
 OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
-to a simple sequence-tosequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
+to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
 
 We plan to release the code and colab notebooks soon (Feb. 2022). 
 
