@@ -40,7 +40,7 @@ Please cite our paper if you find it helpful :)
 ```
 @article{wang2022OFA,
   title={Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework},
-  author={Peng Wang, An Yang, Rui Men, Junyang Lin, Shuai Bai, Zhikang Li, Jianxin Ma, Chang Zhou, Jingren Zhou and Hongxia Yang},
+  author={Wang, Peng and Yang, An and Men, Rui and Lin, Junyang and Bai, Shuai and Li, Zhikang and Ma, Jianxin and Zhou, Chang and Zhou, Jingren and Yang, Hongxia},
   journal={arXiv e-prints},
   pages={arXiv--2202},
   year={2022}
