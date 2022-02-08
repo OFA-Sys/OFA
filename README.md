@@ -1,21 +1,27 @@
 # OFA
 
-> This is the official repo for the paper: [UNIFYING ARCHITECTURES, TASKS, AND MODALITIES THROUGH A SIMPLE SEQUENCE-TO-SEQUENCE LEARNING FRAMEWORK](http://arxiv.org/abs/2202.03052
-)
+[[Paper]](http://arxiv.org/abs/2202.03052) [Blog] [Colab]
+
 
 ![Overview](examples/overview.png)
 
 OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
-to a simple sequence-tosequence learning framework.
+to a simple sequence-tosequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
+
+We plan to release the code and colab notebooks soon (Feb. 2022). 
+
+
+# Approach
+![approach](examples/approach.jpg)
 
 # Examples
-Below we provide examples of OFA in different tasks.
+Below we provide examples of OFA in text-to-image generation and open-ended VQA. Also, we demonstrate its performance in unseen task (Grounded QA) as well as unseen domain (Visual Grounding on images from unseen domains). 
 
-## Image Generation (normal query)
+## Text-to-Image Generation (normal query)
 ![t2i_normal](examples/normal_images.png)
 
-## Image Generation (counterfactual query)
+## Text-to-Image Generation (counterfactual query)
 ![t2i_counterfactual](examples/counterfactual_images.png)
 
 ## Open-Ended VQA
