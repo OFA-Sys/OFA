@@ -35,7 +35,7 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 
 
 # Citation
-Please cite our paper if you find it helpful:)
+Please cite our paper if you find it helpful :)
 
 ```
 @article{wang2022OFA,
