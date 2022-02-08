@@ -1,6 +1,7 @@
 # OFA
 
-> This is the official repo for the paper: UNIFYING ARCHITECTURES, TASKS, AND MODALITIES THROUGH A SIMPLE SEQUENCE-TO-SEQUENCE LEARNING FRAMEWORK
+> This is the official repo for the paper: [UNIFYING ARCHITECTURES, TASKS, AND MODALITIES THROUGH A SIMPLE SEQUENCE-TO-SEQUENCE LEARNING FRAMEWORK](http://arxiv.org/abs/2202.03052
+)
 
 ![Overview](examples/overview.png)
 
