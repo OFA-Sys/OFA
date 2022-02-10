@@ -2,7 +2,6 @@
 
 [[Paper]](http://arxiv.org/abs/2202.03052) [Blog] [Colab]
 
-
 ![Overview](examples/overview.png)
 
 OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
@@ -10,31 +9,44 @@ OFA is a unified multimodal pretrained model that unifies modalities (i.e., cros
 to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
 
 
-# Approach
+## News
+* 2022.2.10: Released the code of inference for image captioning
+
+
+## TODO
+* To release finetuning and inference codes for multimodal downstream tasks, including image captionining, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc.
+* To release codes for pretraning.
+
+
+## Approach
 ![approach](examples/approach.jpg)
 
 
-# Requirements
+## Requirements
 * python 3.7.4
 * pytorch 1.8.1
 * JAVA 1.8 (for COCO evaluation)
 
 
-# Installation
+## Installation
 ```bash
 git clone https://github.com/OFA-Sys/OFA
 pip install -r requirements.txt
 ```
 
-# Datasets and Checkpoints
+
+## Datasets and Checkpoints
 See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
 
-# Pretraining
+
+## Pretraining
 To release soon:)
 
-# Finetuning & Inference
+
+## Finetuning & Inference
 Below we provide methods for fintuning and inference on different downstream tasks. At this moment we only provide the scripts for inference, and we will soon release those for finetuning. 
-## Caption
+
+### Caption
 1. Download data and files and put them in the correct directory
 2. Run the commands below,
 
@@ -42,6 +54,7 @@ Below we provide methods for fintuning and inference on different downstream tas
 cd run_scripts/caption
 sh evaluate_caption.sh
 ```
+
 
 # Gallery
 Below we provide examples of OFA in text-to-image generation and open-ended VQA. Also, we demonstrate its performance in unseen task (Grounded QA) as well as unseen domain (Visual Grounding on images from unseen domains). 
@@ -62,7 +75,7 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 ![vg](examples/viusal_grounding.png)
 
 
-# Citation
+## Citation
 Please cite our paper if you find it helpful :)
 
 ```
@@ -75,8 +88,10 @@ Please cite our paper if you find it helpful :)
 }
 ```
 
-# Related Codebase
+
+## Related Codebase
 * [fairseq](https://github.com/pytorch/fairseq)
 
-# License
+
+## License
 Apache-2.0
