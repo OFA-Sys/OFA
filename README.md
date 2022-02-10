@@ -10,7 +10,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 
 
 ## News
-* 2022.2.10: Released the code of inference for image captioning, which can reproduce **the test results on COCO (149.6 CIDEr)**
+* 2022.2.10: Released the code of inference for image captioning, which can reproduce **the results on COCO Karparthy test (149.6 CIDEr)**
 
 
 ## TODO
