@@ -9,13 +9,39 @@ OFA is a unified multimodal pretrained model that unifies modalities (i.e., cros
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
 to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
 
-We plan to release the code and colab notebooks soon (Feb. 2022). 
-
 
 # Approach
 ![approach](examples/approach.jpg)
 
-# Examples
+
+# Requirements
+* python 3.7.4
+* pytorch 1.8.1
+
+# Installation
+```bash
+git clone https://github.com/OFA-Sys/OFA
+pip install -r requirements.txt
+```
+
+# Datasets and Checkpoints
+See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
+
+# Pretraining
+To release soon:)
+
+# Finetuning & Inference
+Below we provide methods for fintuning and inference on different downstream tasks. At this moment we only provide the scripts for inference, and we will soon release those for finetuning. 
+## Caption
+1. Download data and files and put them in the correct directory
+2. Run the commands below,
+
+```bash
+cd run_scripts/caption
+sh evaluate_caption.sh
+```
+
+# Gallery
 Below we provide examples of OFA in text-to-image generation and open-ended VQA. Also, we demonstrate its performance in unseen task (Grounded QA) as well as unseen domain (Visual Grounding on images from unseen domains). 
 
 ## Text-to-Image Generation (normal query)
