@@ -10,12 +10,12 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 
 
 ## News
-* 2022.2.10: Released the code of inference for image captioning
+* 2022.2.10: Released the code of inference for image captioning.
 
 
 ## TODO
-* To release finetuning and inference codes for multimodal downstream tasks, including image captionining, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc.
-* To release codes for pretraning.
+* To release finetuning and inference codes for multimodal downstream tasks, including image captionining, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. Expected time: Mar. 2022.
+* To release codes for pretraning. Expected time: Apr. 2022.
 
 
 ## Approach
