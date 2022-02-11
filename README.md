@@ -10,6 +10,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 
 
 ## News
+* 2022.2.11: Released the complete (2-staged) finetuning code for image captioning and pretrained checkpoint of OFA-Large.
 * 2022.2.10: Released the inference code & finetuned checkpoint for image captioning, which can reproduce **the results on COCO Karparthy test split (149.6 CIDEr)**
 
 
