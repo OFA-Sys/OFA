@@ -14,8 +14,8 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 
 
 ## TODO
-* To release finetuning and inference codes for multimodal downstream tasks, including image captioning, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. Expected time: Mar. 2022.
-* To release codes for pretraining. Expected time: Apr. 2022.
+* To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. 
+* To release codes for pretraining soon.
 
 
 ## Approach
