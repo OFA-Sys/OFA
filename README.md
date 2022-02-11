@@ -10,10 +10,11 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 
 
 ## News
-* 2022.2.11: Released the Colab notebook for image captioning ([URL](https://colab.research.google.com/drive/1Q4eNhhhLcgOP4hHqwZwU1ijOlabgve1W?usp=sharing)). Enjoy! 
+* 2022.2.11: Released the Colab notebook for image captioning [![][colab]](https://colab.research.google.com/drive/1Q4eNhhhLcgOP4hHqwZwU1ijOlabgve1W?usp=sharing). Enjoy! 
 * 2022.2.11: Released the pretrained checkpoint of OFA-Large and the complete (2-staged) finetuning code for image captioning.
 * 2022.2.10: Released the inference code & finetuned checkpoint for image captioning, which can reproduce **the results on COCO Karparthy test split (149.6 CIDEr)**
 
+[colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 
 ## TODO
 * To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. 
@@ -46,7 +47,7 @@ To release soon:)
 
 
 # Finetuning & Inference
-Below we provide methods for finetuning and inference on different downstream tasks.
+Below we provide methods for fintuning and inference on different downstream tasks.
 ## Caption
 1. Download data and files and put them in the correct directory
 2. Train
