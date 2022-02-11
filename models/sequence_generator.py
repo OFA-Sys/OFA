@@ -10,11 +10,11 @@ import sys
 import torch
 import torch.nn as nn
 from fairseq import search, utils
-from fairseq.data import data_utils
 from fairseq.models import FairseqIncrementalDecoder
 from torch import Tensor
 from fairseq.ngram_repeat_block import NGramRepeatBlock
 
+from data import data_utils
 
 class SequenceGenerator(nn.Module):
     def __init__(

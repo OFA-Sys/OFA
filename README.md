@@ -43,18 +43,20 @@ See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
 To release soon:)
 
 
-## Finetuning & Inference
-Below we provide methods for fintuning and inference on different downstream tasks. At this moment we only provide the scripts for inference, and we will soon release those for finetuning. 
-
-### Caption
+# Finetuning & Inference
+Below we provide methods for fintuning and inference on different downstream tasks.
+## Caption
 1. Download data and files and put them in the correct directory
-2. Run the commands below,
-
+2. Train
 ```bash
 cd run_scripts/caption
-sh evaluate_caption.sh
+nohup sh train_caption_stage1.sh &  # stage1, train with cross-entropy loss
+nohup sh train_caption_stage2.sh &  # stage2, load the best ckpt of stage1 and train with CIDEr optimization 
 ```
-
+3. Inference
+```bash
+cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
+```
 
 # Gallery
 Below we provide examples of OFA in text-to-image generation and open-ended VQA. Also, we demonstrate its performance in unseen task (Grounded QA) as well as unseen domain (Visual Grounding on images from unseen domains). 

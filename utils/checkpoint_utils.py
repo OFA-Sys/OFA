@@ -17,7 +17,6 @@ from collections import OrderedDict
 from typing import Any, Dict, Optional, Union
 
 import torch
-from fairseq.data import data_utils
 from fairseq.dataclass.configs import CheckpointConfig
 from fairseq.dataclass.utils import (
     convert_namespace_to_omegaconf,
@@ -28,6 +27,7 @@ from fairseq.file_io import PathManager
 from fairseq.models import FairseqDecoder, FairseqEncoder
 from omegaconf import DictConfig, open_dict, OmegaConf
 
+from data import data_utils
 
 logger = logging.getLogger(__name__)
 

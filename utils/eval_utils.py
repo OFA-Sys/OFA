@@ -3,7 +3,7 @@ import math
 
 import torch
 
-from fairseq.data import data_utils
+from data import data_utils
 
 
 def get_symbols_to_strip_from_output(generator):

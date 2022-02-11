@@ -11,11 +11,11 @@ from typing import Optional
 
 import torch
 from fairseq import metrics, utils
-from fairseq.data import data_utils
 from fairseq.criterions import FairseqCriterion, register_criterion
 from fairseq.dataclass import FairseqDataclass
 from omegaconf import II
 
+from data import data_utils
 from utils.cider.pyciderevalcap.ciderD.ciderD import CiderD
 
 
@@ -76,7 +76,7 @@ class ScstRewardCriterion(FairseqCriterion):
             self.constraint_start = int(constraint_start)
             self.constraint_end = int(constraint_end)
 
-    def forward(self, model, generator, bpe, sample, reduce=True):
+    def forward(self, model, sample, reduce=True):
         """Compute the loss for the given sample.
 
         Returns a tuple with three elements:
@@ -84,7 +84,7 @@ class ScstRewardCriterion(FairseqCriterion):
         2) the sample size, which is used as the denominator for the gradient
         3) logging outputs to display while training
         """
-        loss, score, ntokens, nsentences = self.compute_loss(model, generator, bpe, sample, reduce=reduce)
+        loss, score, ntokens, nsentences = self.compute_loss(model, sample, reduce=reduce)
 
         sample_size = (
             nsentences if self.sentence_avg else ntokens
@@ -135,17 +135,17 @@ class ScstRewardCriterion(FairseqCriterion):
         r += ' <eos>'
         return r
 
-    def get_generator_out(self, model, generator, bpe, sample):
+    def get_generator_out(self, model, sample):
         def decode(toks):
             hypo = toks.int().cpu()
             hypo_str = self.task.tgt_dict.string(hypo)
-            hypo_str = bpe.decode(hypo_str).strip()
+            hypo_str = self.task.bpe.decode(hypo_str).strip()
             return hypo, hypo_str
 
         model.eval()
         with torch.no_grad():
-            generator.model.eval()
-            gen_out = generator.generate([model], sample)
+            self.task.scst_generator.model.eval()
+            gen_out = self.task.scst_generator.generate([model], sample)
 
         gen_target = []
         gen_res = []
@@ -234,8 +234,8 @@ class ScstRewardCriterion(FairseqCriterion):
                 gen_target = gen_target[self.ignore_prefix_size :, :].contiguous()
         return lprobs, gen_target
 
-    def compute_loss(self, model, generator, bpe, sample, reduce=True):
-        gen_target, gen_res, gt_res = self.get_generator_out(model, generator, bpe, sample)
+    def compute_loss(self, model, sample, reduce=True):
+        gen_target, gen_res, gt_res = self.get_generator_out(model, sample)
         reward, scores = self.get_reward_and_scores(gen_res, gt_res, device=sample["target"].device)
         net_output, gen_target_tokens = self.get_net_output(model, sample, gen_target)
         gen_lprobs, gen_target_tokens = self.get_lprobs_and_target(model, net_output, gen_target_tokens)
