@@ -1,6 +1,6 @@
 # OFA
 
-[[Paper]](http://arxiv.org/abs/2202.03052) [Blog] [Colab]
+[[Paper]](http://arxiv.org/abs/2202.03052) [Blog] [[Colab](colab.md)]
 
 ![Overview](examples/overview.png)
 
