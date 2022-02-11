@@ -46,7 +46,7 @@ To release soon:)
 
 
 # Finetuning & Inference
-Below we provide methods for fintuning and inference on different downstream tasks.
+Below we provide methods for finetuning and inference on different downstream tasks.
 ## Caption
 1. Download data and files and put them in the correct directory
 2. Train
