@@ -24,7 +24,6 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 python3 ../../evaluate.py \
     --no-repeat-ngram-size=3 \
     --fp16 \
     --num-workers=0 \
-    --do-all-reduce-eval \
     --model-overrides="{\"data\":\"${data}\",\"bpe_dir\":\"${bpe_dir}\",\"eval_cider\":False,\"selected_cols\":\"${selected_cols}\"}"
 
 python coco_eval.py ../../results/caption/test_predict.json ../../dataset/caption_data/test_caption_coco_format.json
