@@ -7,10 +7,12 @@ from dataclasses import dataclass, field
 import logging
 import os
 import math
+import torch
 from typing import Dict, Optional
 
 from fairseq import search
 from fairseq.data import FairseqDataset, iterators
+from fairseq.optim.amp_optimizer import AMPOptimizer
 from fairseq.dataclass import FairseqDataclass
 from fairseq.tasks import FairseqTask, register_task
 from omegaconf import DictConfig
@@ -286,6 +288,40 @@ class OFATask(FairseqTask):
             constraint_range=self.cfg.constraint_range,
             **extra_gen_cls_kwargs,
         )
+
+    def train_step(
+        self, sample, model, criterion, optimizer, update_num, ignore_grad=False, **extra_kwargs
+    ):
+        """
+        Do forward and backward, and return the loss as computed by *criterion*
+        for the given *model* and *sample*.
+
+        Args:
+            sample (dict): the mini-batch. The format is defined by the
+                :class:`~fairseq.data.FairseqDataset`.
+            model (~fairseq.models.BaseFairseqModel): the model
+            criterion (~fairseq.criterions.FairseqCriterion): the criterion
+            optimizer (~fairseq.optim.FairseqOptimizer): the optimizer
+            update_num (int): the current update
+            ignore_grad (bool): multiply loss by 0 if this is set to True
+
+        Returns:
+            tuple:
+                - the loss
+                - the sample size, which is used as the denominator for the
+                  gradient
+                - logging outputs to display while training
+        """
+        model.train()
+        model.set_num_updates(update_num)
+        with torch.autograd.profiler.record_function("forward"):
+            with torch.cuda.amp.autocast(enabled=(isinstance(optimizer, AMPOptimizer))):
+                loss, sample_size, logging_output = criterion(model, sample, update_num)
+        if ignore_grad:
+            loss *= 0
+        with torch.autograd.profiler.record_function("backward"):
+            optimizer.backward(loss)
+        return loss, sample_size, logging_output
 
     def max_positions(self):
         """Return the max sentence length allowed by the task."""
