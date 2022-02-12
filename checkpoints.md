@@ -3,8 +3,8 @@
 We provide links for you to download our checkpoints. We will release all the checkpoints including pretrained and finetuned models on different tasks. 
 
 ## Pretraining
-* <a href="https://zheluo-mm.oss-cn-beijing.aliyuncs.com/ofa/checkpoints/ofa_large.pt"> Pre-trained checkpoint (OFA-Large) </a>
+* <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_large_clean.pt"> Pre-trained checkpoint (OFA-Large) </a>
 
 ## Finetuning
 
-* <a href="https://zheluo-mm.oss-cn-beijing.aliyuncs.com/ofa/checkpoints/caption_large_best.pt"> Finetuned checkpoint for Caption on COCO </a>
+* <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/caption_large_best_clean.pt"> Finetuned checkpoint for Caption on COCO </a>

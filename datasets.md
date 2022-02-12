@@ -4,4 +4,4 @@ We provide links to download our preprocessed dataset. If you would like to proc
 
 ## Finetuning
 
- * <a href="https://zheluo-mm.oss-cn-beijing.aliyuncs.com/ofa/dataset/caption_data/caption_data.zip"> Dataset for Caption </a>
+ * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/caption_data/caption_data.zip"> Dataset for Caption </a>
