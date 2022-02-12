@@ -4,7 +4,7 @@ user_dir=../../ofa_module
 bpe_dir=../../utils/BPE
 
 data=../../dataset/caption_data/caption_test.tsv
-path=../../checkpoints/caption_large_best.pt
+path=../../checkpoints/caption_large_best_clean.pt
 result_path=../../results/caption
 selected_cols=1,4,2
 split='test'
