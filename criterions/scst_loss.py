@@ -76,7 +76,7 @@ class ScstRewardCriterion(FairseqCriterion):
             self.constraint_start = int(constraint_start)
             self.constraint_end = int(constraint_end)
 
-    def forward(self, model, sample, reduce=True):
+    def forward(self, model, sample, update_num=0, reduce=True):
         """Compute the loss for the given sample.
 
         Returns a tuple with three elements:
