@@ -54,7 +54,7 @@ class FileDataset:
             for line in fp:
                 self.lineid_to_offset.append(offset)
                 self.total_row_count += 1
-                offset += len(line)
+                offset += len(line.encode('utf-8'))
         self._compute_start_pos_and_row_count()
         print("local datafile {} slice_id {} finished initializing row_count and line_idx-to-offset mapping".format(
             self.file_path, self.slice_id))
