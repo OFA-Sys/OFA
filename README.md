@@ -96,7 +96,7 @@ Please cite our paper if you find it helpful :)
 
 
 ## Related Codebase
-* [fairseq](https://github.com/pytorch/fairseq)
+* [Fairseq](https://github.com/pytorch/fairseq)
 
 
 ## License
