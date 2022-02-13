@@ -90,22 +90,12 @@ class CaptionDataset(OFADataset):
         imagenet_default_mean_and_std=False,
         scst=False
     ):
-        self.split = split
-        self.dataset = dataset
-        self.bpe = bpe
-        self.src_dict = src_dict
-        self.tgt_dict = tgt_dict
+        super().__init__(split, dataset, bpe, src_dict, tgt_dict)
         self.max_src_length = max_src_length
         self.max_tgt_length = max_tgt_length
-
         self.patch_image_size = patch_image_size
         self.scst = scst
 
-        self.bos = src_dict.bos()
-        self.eos = src_dict.eos()
-        self.pad = src_dict.pad()
-        self.bos_item = torch.LongTensor([self.bos])
-        self.eos_item = torch.LongTensor([self.eos])
         self.transtab = str.maketrans({key: None for key in string.punctuation})
 
         if imagenet_default_mean_and_std:
