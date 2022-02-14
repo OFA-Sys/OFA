@@ -29,6 +29,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 ## Requirements
 * python 3.7.4
 * pytorch 1.8.1
+* torchvision 0.9.1
 * JAVA 1.8 (for COCO evaluation)
 
 
