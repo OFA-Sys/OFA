@@ -52,7 +52,7 @@ To release soon:)
 # Finetuning & Inference
 Below we provide methods for fintuning and inference on different downstream tasks.
 ## Caption
-1. Download data and files and put them in the correct directory
+1. Download processed data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
 ```bash
 cd run_scripts/caption
@@ -65,7 +65,7 @@ cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
 ```
 
 ## Referring Expression Comprehension 
-1. Download data and files and put them in the correct directory
+1. Download processed data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
 ```bash
 cd run_scripts/refcoco
