@@ -1,14 +1,14 @@
 #!/usr/bin/env
 
-log_dir=./refcoco_logs
-save_dir=./refcoco_checkpoints
+log_dir=./refcocog_logs
+save_dir=./refcocog_checkpoints
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE
 user_dir=../../ofa_module
 
-data_dir=../../dataset/refcoco_data
-data=${data_dir}/refcoco_train.tsv,${data_dir}/refcoco_val.tsv
+data_dir=../../dataset/refcocog_data
+data=${data_dir}/refcocog_train.tsv,${data_dir}/refcocog_val.tsv
 restore_file=../../checkpoints/ofa_large.pt
 selected_cols=0,4,2,3
 
@@ -31,9 +31,9 @@ max_tgt_length=20
 num_bins=1000
 patch_image_size=512
 
-for max_epoch in {10,}; do
+for max_epoch in {10}; do
   echo "max_epoch "${max_epoch}
-  for lr in {3e-5,}; do
+  for lr in {3e-5,2e-5}; do
     echo "lr "${lr}
     for patch_image_size in {512,}; do
       echo "patch_image_size "${patch_image_size}
@@ -42,7 +42,7 @@ for max_epoch in {10,}; do
       save_path=${save_dir}/${max_epoch}"_"${lr}"_"${patch_image_size}
       mkdir -p $save_path
 
-      CUDA_VISIBLE_DEVICES=0,1,2,3 python3 ../../train.py \
+      CUDA_VISIBLE_DEVICES=4,5,6,7 python3 ../../train.py \
           $data \
           --selected-cols=${selected_cols} \
           --bpe-dir=${bpe_dir} \
@@ -91,7 +91,6 @@ for max_epoch in {10,}; do
           --patch-image-size=${patch_image_size} \
           --fp16 \
           --fp16-scale-window=512 \
-          --xx \
           --num-workers=0 >> ${log_file} 2>&1
     done
   done

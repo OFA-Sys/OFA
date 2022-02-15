@@ -1,14 +1,14 @@
 #!/usr/bin/env
 
-log_dir=./refcoco_logs
-save_dir=./refcoco_checkpoints
+log_dir=./refcocoplus_logs
+save_dir=./refcocoplus_checkpoints
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE
 user_dir=../../ofa_module
 
-data_dir=../../dataset/refcoco_data
-data=${data_dir}/refcoco_train.tsv,${data_dir}/refcoco_val.tsv
+data_dir=../../dataset/refcocoplus_data
+data=${data_dir}/refcocoplus_train.tsv,${data_dir}/refcocoplus_val.tsv
 restore_file=../../checkpoints/ofa_large.pt
 selected_cols=0,4,2,3
 
@@ -91,7 +91,6 @@ for max_epoch in {10,}; do
           --patch-image-size=${patch_image_size} \
           --fp16 \
           --fp16-scale-window=512 \
-          --xx \
           --num-workers=0 >> ${log_file} 2>&1
     done
   done

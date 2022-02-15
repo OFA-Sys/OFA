@@ -35,7 +35,7 @@ scst_cider_cached=${data_dir}/cider_cached_tokens/coco-train-words.p
 
 for lr in {1e-5,}; do
   echo "lr "${lr}
-  for max_epoch in {4,}; do
+  for max_epoch in {3,}; do
     echo "max_epoch "${max_epoch}
 
     log_file=${log_dir}/${lr}"_"${max_epoch}".log"
