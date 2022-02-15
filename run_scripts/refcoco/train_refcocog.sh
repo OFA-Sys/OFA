@@ -31,9 +31,9 @@ max_tgt_length=20
 num_bins=1000
 patch_image_size=512
 
-for max_epoch in {10}; do
+for max_epoch in {10,}; do
   echo "max_epoch "${max_epoch}
-  for lr in {3e-5,2e-5}; do
+  for lr in {3e-5,}; do
     echo "lr "${lr}
     for patch_image_size in {512,}; do
       echo "patch_image_size "${patch_image_size}
