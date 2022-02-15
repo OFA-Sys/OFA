@@ -91,7 +91,6 @@ for max_epoch in {10,}; do
           --patch-image-size=${patch_image_size} \
           --fp16 \
           --fp16-scale-window=512 \
-          --xx \
           --num-workers=0 >> ${log_file} 2>&1
     done
   done
