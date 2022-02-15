@@ -13,7 +13,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 * 2022.2.13: Released the demo of image captioning. Have fun! [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
 * 2022.2.11: Released the Colab notebook for image captioning [![][colab]](https://colab.research.google.com/drive/1Q4eNhhhLcgOP4hHqwZwU1ijOlabgve1W?usp=sharing). Enjoy! 
 * 2022.2.11: Released the pretrained checkpoint of OFA-Large and the complete (2-staged) finetuning code for image captioning.
-* 2022.2.10: Released the inference code & finetuned checkpoint for image captioning, which can reproduce **the results on COCO Karparthy test split (149.6 CIDEr)**
+* 2022.2.10: Released the inference code & finetuned checkpoint for image captioning, which can reproduce **the results on COCO Karparthy test split (149.6 CIDEr)**. OFA also achieves No.1 on the COCO image captioning online leaderboard [[Link](https://competitions.codalab.org/competitions/3221#results)] (marked as M6-Team)
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 
@@ -29,6 +29,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 ## Requirements
 * python 3.7.4
 * pytorch 1.8.1
+* torchvision 0.9.1
 * JAVA 1.8 (for COCO evaluation)
 
 
