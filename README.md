@@ -10,6 +10,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 
 
 ## News
+* 2022.2.15: Released finetuning & inference code/checkpoints for referring expression comprehension, including demo [![][colab]](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and Colab notebook [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
 * 2022.2.13: Released the demo of image captioning. Have fun! [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
 * 2022.2.11: Released the Colab notebook for image captioning [![][colab]](https://colab.research.google.com/drive/1Q4eNhhhLcgOP4hHqwZwU1ijOlabgve1W?usp=sharing). Enjoy! 
 * 2022.2.11: Released the pretrained checkpoint of OFA-Large and the complete (2-staged) finetuning code for image captioning.
@@ -55,12 +56,26 @@ Below we provide methods for fintuning and inference on different downstream tas
 2. Train
 ```bash
 cd run_scripts/caption
-nohup sh train_caption_stage1.sh &  # stage1, train with cross-entropy loss
-nohup sh train_caption_stage2.sh &  # stage2, load the best ckpt of stage1 and train with CIDEr optimization 
+nohup sh train_caption_stage1.sh > train_stage1.out &  # stage1, train with cross-entropy loss
+nohup sh train_caption_stage2.sh > train_stage2.out &  # stage2, load the best ckpt of stage1 and train with CIDEr optimization 
 ```
 3. Inference
 ```bash
 cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
+```
+
+## Referring Expression Comprehension 
+1. Download data and files and put them in the correct directory
+2. Train
+```bash
+cd run_scripts/refcoco
+nohup sh train_refcoco.sh > train_refcoco.out &  # finetune for refcoco
+nohup sh train_refcocoplus.sh > train_refcocoplus.out &  # finetune for refcoco+
+nohup sh train_refcocog.sh > train_refcocog.out &  # finetune for refcocog
+```
+3. Inference
+```bash
+cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refcoco/refcoco+/refcocog
 ```
 
 # Gallery
