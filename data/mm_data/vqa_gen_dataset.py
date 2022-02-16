@@ -27,6 +27,7 @@ warnings.filterwarnings("ignore", "(Possibly )?corrupt EXIF data", UserWarning)
 IMAGENET_DEFAULT_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_DEFAULT_STD = (0.229, 0.224, 0.225)
 
+
 def collate(samples, pad_idx, eos_idx):
     if len(samples) == 0:
         return {}
@@ -35,12 +36,11 @@ def collate(samples, pad_idx, eos_idx):
         return data_utils.collate_tokens(
             [s[key] for s in samples],
             pad_idx,
-            eos_idx,
+            eos_idx=eos_idx,
         )
 
     id = np.array([s["id"] for s in samples])
     src_tokens = merge("source")
-
     src_lengths = torch.LongTensor([s["source"].ne(pad_idx).long().sum() for s in samples])
 
     patch_images = torch.stack([sample['patch_image'] for sample in samples], dim=0)
@@ -208,9 +208,4 @@ class VqaGenDataset(OFADataset):
         Returns:
             dict: a mini-batch with the following keys:
         """
-        res = collate(
-            samples,
-            pad_idx=self.pad,
-            eos_idx=self.eos
-        )
-        return res
+        return collate(samples, pad_idx=self.pad, eos_idx=self.eos)
