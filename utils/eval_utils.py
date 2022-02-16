@@ -32,6 +32,66 @@ def eval_caption(task, generator, models, sample):
     return results, None
 
 
+def eval_vqa_gen(task, generator, models, sample):
+    encoder_out = models[0].encoder(
+        sample["net_input"]["src_tokens"],
+        src_lengths=sample["net_input"]["src_lengths"],
+        patch_images=sample["net_input"]["patch_images"],
+        patch_masks=sample["net_input"]["patch_masks"]
+    )
+    device = sample["net_input"]["src_tokens"].device
+    eos_item = torch.tensor([task.src_dict.eos()])
+    pad = task.src_dict.pad()
+    valid_result = []
+    for valid_answers, valid_constraint_masks in zip(task.valid_answers_list, task.valid_constraint_masks_list):
+        valid_size = len(valid_answers)
+        valid_tgt_items = [
+            torch.cat([torch.tensor(decoder_prompt[1:]), valid_answer, eos_item])
+            for decoder_prompt in sample["decoder_prompts"] for valid_answer in valid_answers
+        ]
+        valid_prev_items = [
+            torch.cat([torch.tensor(decoder_prompt), valid_answer])
+            for decoder_prompt in sample["decoder_prompts"] for valid_answer in valid_answers
+        ]
+        valid_constraint_mask_items = [
+            torch.cat(
+                [torch.zeros(len(decoder_prompt) - 1, valid_constraint_mask.size(1)).bool(), valid_constraint_mask],
+                dim=0
+            )
+            for decoder_prompt in sample["decoder_prompts"] for valid_constraint_mask in valid_constraint_masks
+        ]
+        valid_tgt = data_utils.collate_tokens(valid_tgt_items, pad_idx=pad).to(device)
+        valid_prev_output = data_utils.collate_tokens(valid_prev_items, pad_idx=pad).to(device)
+        valid_constraint_masks = data_utils.collate_tokens(valid_constraint_mask_items, pad_idx=pad).to(device)
+
+        new_encoder_out = {}
+        new_encoder_out["encoder_out"] = [
+            encoder_out["encoder_out"][0].repeat_interleave(valid_size, dim=1)
+        ]
+        new_encoder_out["encoder_padding_mask"] = [
+            encoder_out["encoder_padding_mask"][0].repeat_interleave(valid_size, dim=0)
+        ]
+        new_encoder_out["position_embeddings"] = [
+            encoder_out["position_embeddings"][0].repeat_interleave(valid_size, dim=0)
+        ]
+
+        decoder_out = models[0].decoder(valid_prev_output, encoder_out=new_encoder_out)
+        decoder_out[0].masked_fill_(~valid_constraint_masks, -math.inf)
+        lprobs = models[0].get_normalized_probs(decoder_out, log_probs=True)
+        scores = lprobs.gather(dim=-1, index=valid_tgt.unsqueeze(-1)).squeeze(-1)
+        scores = scores.masked_fill(valid_tgt.eq(task.tgt_dict.pad()), 0)
+        scores = scores.masked_fill((~valid_constraint_masks).all(2), 0)
+        scores = scores.sum(1)
+        scores = scores.view(-1, valid_size)
+        valid_result.append(scores)
+    valid_result = torch.cat(valid_result, dim=-1)
+    predicts = valid_result.argmax(1).tolist()
+    hyps = [task.index2ans[predict_index] for predict_index in predicts]
+    results = [{"question_id": int(id), "answer": hyp} for id, hyp in zip(sample["id"].tolist(), hyps)]
+    scores = [ref_dict.get(hyp, 0) for ref_dict, hyp in zip(sample['ref_dict'], hyps)]
+    return results, scores
+
+
 def eval_refcoco(task, generator, models, sample):
     def _calculate_ap_score(hyps, refs, thresh=0.5):
         interacts = torch.cat(
@@ -68,6 +128,8 @@ def eval_refcoco(task, generator, models, sample):
 def eval_step(task, generator, models, sample):
     if task.cfg._name == 'caption':
         return eval_caption(task, generator, models, sample)
+    elif task.cfg._name == 'vqa_gen':
+        return eval_vqa_gen(task, generator, models, sample)        
     elif task.cfg._name == 'refcoco':
         return eval_refcoco(task, generator, models, sample)
     else:

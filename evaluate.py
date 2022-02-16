@@ -37,7 +37,7 @@ def apply_half(t):
     return t
 
 
-def main(cfg: DictConfig):
+def main(cfg: DictConfig, **kwargs):
     utils.import_user_module(cfg.common)
 
     reset_logging()
@@ -73,7 +73,10 @@ def main(cfg: DictConfig):
     task.load_dataset(cfg.dataset.gen_subset, task_cfg=saved_cfg.task)
 
     # Move models to GPU
-    for model in models:
+    for model, ckpt_path in zip(models, utils.split_paths(cfg.common_eval.path)):
+        if kwargs['ema_eval']:
+            logger.info("loading EMA weights from {}".format(ckpt_path))
+            model.load_state_dict(checkpoint_utils.load_ema_from_checkpoint(ckpt_path)['model'])
         model.eval()
         if use_fp16:
             model.half()
@@ -143,9 +146,10 @@ def main(cfg: DictConfig):
 
 def cli_main():
     parser = options.get_generation_parser()
+    parser.add_argument("--ema-eval", action='store_true', help="Use EMA weights to make evaluation.")
     args = options.parse_args_and_arch(parser)
     cfg = convert_namespace_to_omegaconf(args)
-    distributed_utils.call_main(cfg, main)
+    distributed_utils.call_main(cfg, main, ema_eval=args.ema_eval)
 
 
 if __name__ == "__main__":
