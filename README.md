@@ -9,7 +9,7 @@ OFA is a unified multimodal pretrained model that unifies modalities (i.e., cros
 to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
 
 
-## News
+# News
 * 2022.2.15: Released finetuning & inference code/checkpoints for referring expression comprehension, as well as a Colab notebook [![][colab]](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and a demo in Hugging Face Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
 * 2022.2.13: Released the demo of image captioning. Have fun! [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
 * 2022.2.11: Released the Colab notebook for image captioning [![][colab]](https://colab.research.google.com/drive/1Q4eNhhhLcgOP4hHqwZwU1ijOlabgve1W?usp=sharing). Enjoy! 
@@ -18,34 +18,34 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 
-## TODO
+# TODO
 * To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. 
 * To release codes for pretraining soon.
 
 
-## Approach
+# Approach
 ![approach](examples/approach.jpg)
 
 
-## Requirements
+# Requirements
 * python 3.7.4
 * pytorch 1.8.1
 * torchvision 0.9.1
 * JAVA 1.8 (for COCO evaluation)
 
 
-## Installation
+# Installation
 ```bash
 git clone https://github.com/OFA-Sys/OFA
 pip install -r requirements.txt
 ```
 
 
-## Datasets and Checkpoints
+# Datasets and Checkpoints
 See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
 
 
-## Pretraining
+# Pretraining
 To release soon:)
 
 
@@ -97,7 +97,7 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 ![vg](examples/viusal_grounding.png)
 
 
-## Citation
+# Citation
 Please cite our paper if you find it helpful :)
 
 ```
@@ -111,9 +111,9 @@ Please cite our paper if you find it helpful :)
 ```
 
 
-## Related Codebase
+# Related Codebase
 * [Fairseq](https://github.com/pytorch/fairseq)
 
 
-## License
+# License
 Apache-2.0
