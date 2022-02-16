@@ -10,7 +10,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 
 
 ## News
-* 2022.2.15: Released finetuning & inference code/checkpoints for referring expression comprehension, including a Colab notebook [![][colab]](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and a demo in Hugging Face Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
+* 2022.2.15: Released finetuning & inference code/checkpoints for referring expression comprehension, as well as a Colab notebook [![][colab]](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and a demo in Hugging Face Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
 * 2022.2.13: Released the demo of image captioning. Have fun! [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
 * 2022.2.11: Released the Colab notebook for image captioning [![][colab]](https://colab.research.google.com/drive/1Q4eNhhhLcgOP4hHqwZwU1ijOlabgve1W?usp=sharing). Enjoy! 
 * 2022.2.11: Released the pretrained checkpoint of OFA-Large and the complete (2-staged) finetuning code for image captioning.
@@ -52,7 +52,7 @@ To release soon:)
 # Finetuning & Inference
 Below we provide methods for fintuning and inference on different downstream tasks.
 ## Caption
-1. Download data and files and put them in the correct directory
+1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
 ```bash
 cd run_scripts/caption
@@ -65,7 +65,7 @@ cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
 ```
 
 ## Referring Expression Comprehension 
-1. Download data and files and put them in the correct directory
+1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
 ```bash
 cd run_scripts/refcoco
