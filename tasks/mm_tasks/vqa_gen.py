@@ -44,22 +44,9 @@ class VqaGenConfig(OFAConfig):
         default=False,
         metadata={"help": "add object to encoder"},
     )
-    add_caption: bool = field(
-        default=False,
-        metadata={"help": "add caption to encoder"},
-    )
     valid_batch_size: int = field(
         default=20,
         metadata={"help": "valid batch size per step"},
-    )
-    scst: bool = field(
-        default=False, metadata={"help": "Self-critical sequence training"}
-    )
-    scst_args: str = field(
-        default='{}',
-        metadata={
-            "help": 'generation args for Self-critical sequence training, as JSON string'
-        },
     )
     prompt_type: Optional[str] = field(
         default=None,
@@ -105,7 +92,6 @@ class VqaGenTask(OFATask):
             max_tgt_length=self.cfg.max_tgt_length,
             patch_image_size=self.cfg.patch_image_size,
             add_object=self.cfg.add_object,
-            add_caption=self.cfg.add_caption,
             constraint_trie=self.constraint_trie,
             imagenet_default_mean_and_std=self.cfg.imagenet_default_mean_and_std,
             prompt_type=self.cfg.prompt_type
@@ -140,12 +126,6 @@ class VqaGenTask(OFATask):
         for i in range(0, len(answer_item_list), self.cfg.valid_batch_size):
             self.valid_answers_list += [answer_item_list[i:i+self.cfg.valid_batch_size]]
             self.valid_constraint_masks_list += [constraint_mask_list[i:i+self.cfg.valid_batch_size]]
-
-        if self.cfg.scst:
-            scst_args = json.loads(self.cfg.scst_args)
-            self.scst_generator = self.build_generator(
-                [model], Namespace(**scst_args)
-            )
 
         return model
 

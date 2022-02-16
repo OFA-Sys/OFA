@@ -35,12 +35,12 @@ def collate(samples, pad_idx, eos_idx):
         return data_utils.collate_tokens(
             [s[key] for s in samples],
             pad_idx,
-            eos_idx
+            eos_idx,
         )
 
     id = np.array([s["id"] for s in samples])
     src_tokens = merge("source")
-    # sort by descending source length
+
     src_lengths = torch.LongTensor([s["source"].ne(pad_idx).long().sum() for s in samples])
 
     patch_images = torch.stack([sample['patch_image'] for sample in samples], dim=0)
@@ -110,7 +110,6 @@ class VqaGenDataset(OFADataset):
         max_tgt_length=30,
         patch_image_size=224,
         add_object=False,
-        add_caption=False,
         constraint_trie=None,
         imagenet_default_mean_and_std=False,
         prompt_type="none"
@@ -122,7 +121,6 @@ class VqaGenDataset(OFADataset):
         self.patch_image_size = patch_image_size
 
         self.add_object = add_object
-        self.add_caption = add_caption
         self.constraint_trie = constraint_trie
         self.prompt_type = prompt_type
 
@@ -164,10 +162,6 @@ class VqaGenDataset(OFADataset):
             predict_object_seq = ' '.join(predict_objects.strip().split('&&')[:self.max_object_length])
             predict_object_item = self.encode_text(" object: {}".format(predict_object_seq))
             src_item = torch.cat([src_item, predict_object_item])
-        if self.add_caption:
-            caption = caption + '.' if not caption.endswith('.') else caption
-            caption_item = self.encode_text(" caption: {}".format(caption))
-            src_item = torch.cat([src_item, caption_item])
 
         src_item = torch.cat([self.bos_item, src_item, self.eos_item])
         if self.prompt_type == 'none':

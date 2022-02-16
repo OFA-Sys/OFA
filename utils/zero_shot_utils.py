@@ -10,13 +10,15 @@ def get_symbols_to_strip_from_output(generator):
     if hasattr(generator, "symbols_to_strip_from_output"):
         return generator.symbols_to_strip_from_output
     else:
-        return {generator.eos}
+        return {generator.bos, generator.eos}
 
 
-def decode_fn(x, tgt_dict, bpe, generator):
+def decode_fn(x, tgt_dict, bpe, generator, tokenizer=None):
     x = tgt_dict.string(x.int().cpu(), extra_symbols_to_ignore=get_symbols_to_strip_from_output(generator))
     if bpe is not None:
         x = bpe.decode(x)
+    if tokenizer is not None:
+        x = tokenizer.decode(x)
     return x
 
 
