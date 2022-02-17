@@ -9,8 +9,8 @@ OFA is a unified multimodal pretrained model that unifies modalities (i.e., cros
 to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
 
 
-## News
-* 2022.2.15: Released finetuning & inference code/checkpoints for referring expression comprehension, including a Colab notebook [![][colab]](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and a demo in Hugging Face Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
+# News
+* 2022.2.15: Released finetuning & inference code/checkpoints for referring expression comprehension, as well as a Colab notebook [![][colab]](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and a demo in Hugging Face Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
 * 2022.2.13: Released the demo of image captioning. Have fun! [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
 * 2022.2.11: Released the Colab notebook for image captioning [![][colab]](https://colab.research.google.com/drive/1Q4eNhhhLcgOP4hHqwZwU1ijOlabgve1W?usp=sharing). Enjoy! 
 * 2022.2.11: Released the pretrained checkpoint of OFA-Large and the complete (2-staged) finetuning code for image captioning.
@@ -18,41 +18,41 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 
-## TODO
+# TODO
 * To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. 
 * To release codes for pretraining soon.
 
 
-## Approach
+# Approach
 ![approach](examples/approach.jpg)
 
 
-## Requirements
+# Requirements
 * python 3.7.4
 * pytorch 1.8.1
 * torchvision 0.9.1
 * JAVA 1.8 (for COCO evaluation)
 
 
-## Installation
+# Installation
 ```bash
 git clone https://github.com/OFA-Sys/OFA
 pip install -r requirements.txt
 ```
 
 
-## Datasets and Checkpoints
+# Datasets and Checkpoints
 See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
 
 
-## Pretraining
+# Pretraining
 To release soon:)
 
 
 # Finetuning & Inference
 Below we provide methods for fintuning and inference on different downstream tasks.
 ## Caption
-1. Download data and files and put them in the correct directory
+1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
 ```bash
 cd run_scripts/caption
@@ -65,7 +65,7 @@ cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
 ```
 
 ## Referring Expression Comprehension 
-1. Download data and files and put them in the correct directory
+1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
 ```bash
 cd run_scripts/refcoco
@@ -97,7 +97,7 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 ![vg](examples/viusal_grounding.png)
 
 
-## Citation
+# Citation
 Please cite our paper if you find it helpful :)
 
 ```
@@ -111,9 +111,16 @@ Please cite our paper if you find it helpful :)
 ```
 
 
-## Related Codebase
+# Getting Involved
+Feel free to submit Github issues or pull requests. Welcome to contribute to our project!
+
+To contact us, never hestitate to send an email to `zheluo.wp@alibaba-inc.com` or `junyang.ljy@alibaba-inc.com`!
+
+
+
+# Related Codebase
 * [Fairseq](https://github.com/pytorch/fairseq)
 
 
-## License
+# License
 Apache-2.0
