@@ -111,6 +111,13 @@ Please cite our paper if you find it helpful :)
 ```
 
 
+# Getting Involved
+Feel free to submit Github issues or pull requests. Welcome to contribute to our project!
+
+To contact us, never hestitate to send an email to `zheluo.wp@alibaba-inc.com` or `junyang.ljy@alibaba-inc.com`!
+
+
+
 # Related Codebase
 * [Fairseq](https://github.com/pytorch/fairseq)
 
