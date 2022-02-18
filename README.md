@@ -36,7 +36,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
         <th>Task</th><th>Image Captioning</th><th colspan="3">Text-to-Image Generation</th><th colspan="2">VQA</th><th colspan="2">Visual Entailment</th><th colspan="8">Referring Expression Comprehension</th>
     </tr>
     <tr align="center">
-        <td>Dataset</td><td>COCO Captions</td><td colspan="3">COCO</td><td colspan="2">VQA v2</td><td colspan="2">SNLI-VE</td><td colspan="3">RefCOCO</td><td colspan="3">RefCOCO+</td><td colspan="2">RefCOCOg</td>
+        <td>Dataset</td><td>COCO</td><td colspan="3">COCO</td><td colspan="2">VQA v2</td><td colspan="2">SNLI-VE</td><td colspan="3">RefCOCO</td><td colspan="3">RefCOCO+</td><td colspan="2">RefCOCOg</td>
     </tr>
     <tr align="center">
         <td>Split</td><td>Kaparthy test</td><td colspan="3">test</td><td>test-dev</td><td>test-std</td><td>val</td><td>test</td><td>val</td><td>test-a</td><td>test-b</td><td>val</td><td>test-a</td><td>test-b</td><td>val-u</td><td>test-u</td>
