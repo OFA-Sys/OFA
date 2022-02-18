@@ -96,7 +96,7 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 ## Grounded QA (unseen task)
 ![grounded_qa](examples/grounded_qa.png)
 
-## Viusal Grounding (unseen domain)
+## Visual Grounding (unseen domain)
 ![vg](examples/viusal_grounding.png)
 
 
