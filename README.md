@@ -8,7 +8,7 @@
 OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
 to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
-
+<br></br>
 
 # News
 * 2022.2.18: Interactive Demo of **Text-to-Image Generation** is ready! Check it out in Huggingface Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation) !
@@ -19,16 +19,15 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 * 2022.2.10: Released the inference code & finetuned checkpoint for image captioning, which can reproduce **the results on COCO Karparthy test split (149.6 CIDEr)**. OFA also achieves No.1 on the COCO image captioning online leaderboard [[Link](https://competitions.codalab.org/competitions/3221#results)] (marked as M6-Team)
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
-
+<br></br>
 
 # TODO
 * To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. 
 * To release codes for pretraining soon.
-
+<br></br>
 
 # Approach
 ![approach](examples/approach.jpg)
-
 
 # Results
 <table border="1" width="100%">
@@ -48,25 +47,25 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
         <td>Score</td><td>149.6</td><td>10.5</td><td>34.4</td><td>31.1</td><td>79.87</td><td>80.02</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>84.49</td><td>90.10</td><td>77.77</td><td>85.54</td><td>85.20</td>
     </tr>
 </table>
-
+<br></br>
 
 # Requirements
 * python 3.7.4
 * pytorch 1.8.1
 * torchvision 0.9.1
 * JAVA 1.8 (for COCO evaluation)
-
+<br></br>
 
 # Installation
 ```bash
 git clone https://github.com/OFA-Sys/OFA
 pip install -r requirements.txt
 ```
-
+<br></br>
 
 # Datasets and Checkpoints
 See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
-
+<br></br>
 
 # Pretraining
 To release soon:)
@@ -100,6 +99,7 @@ nohup sh train_refcocog.sh > train_refcocog.out &  # finetune for refcocog
 ```bash
 cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refcoco/refcoco+/refcocog
 ```
+<br></br>
 
 # Gallery
 Below we provide examples of OFA in text-to-image generation and open-ended VQA. Also, we demonstrate its performance in unseen task (Grounded QA) as well as unseen domain (Visual Grounding on images from unseen domains). 
@@ -118,7 +118,7 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 
 ## Visual Grounding (unseen domain)
 ![vg](examples/viusal_grounding.png)
-
+<br></br>
 
 # Citation
 Please cite our paper if you find it helpful :)
@@ -132,15 +132,17 @@ Please cite our paper if you find it helpful :)
   year={2022}
 }
 ```
+<br></br>
 
 # Getting Involved
 Feel free to submit Github issues or pull requests. Welcome to contribute to our project!
 
 To contact us, never hestitate to send an email to `zheluo.wp@alibaba-inc.com` or `junyang.ljy@alibaba-inc.com`!
-
+<br></br>
 
 # Related Codebase
 * [Fairseq](https://github.com/pytorch/fairseq)
+<br></br>
 
 # License
 Apache-2.0
