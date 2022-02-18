@@ -1,5 +1,16 @@
 # OFA
 
+<div align='center'>
+<a href="my/link"> <img src='https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unifying-architectures-tasks-and-modalities/image-captioning-on-coco-captions'> </a>
+  <a href="my/link"> <img src='https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unifying-architectures-tasks-and-modalities/referring-expression-comprehension-on-refcoco'> </a>
+</div>
+
+<div align='center'>
+<a href="my/link"> <img src='https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unifying-architectures-tasks-and-modalities/visual-entailment-on-snli-ve-test'> </a>
+  <a href="my/link"> <img src='https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unifying-architectures-tasks-and-modalities/text-to-image-generation-on-coco'> </a>
+</div>
+<br></br>
+
 [[Paper]](http://arxiv.org/abs/2202.03052) [Blog] [[Colab](colab.md)] [[Spaces](spaces.md)]
 
 ![Overview](examples/overview.png)
@@ -17,6 +28,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 * 2022.2.10: Released the inference code & finetuned checkpoint for image captioning, which can reproduce **the results on COCO Karparthy test split (149.6 CIDEr)**. OFA also achieves No.1 on the COCO image captioning online leaderboard [[Link](https://competitions.codalab.org/competitions/3221#results)] (marked as M6-Team)
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
+
 
 # TODO
 * To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. 
@@ -110,17 +122,14 @@ Please cite our paper if you find it helpful :)
 }
 ```
 
-
 # Getting Involved
 Feel free to submit Github issues or pull requests. Welcome to contribute to our project!
 
 To contact us, never hestitate to send an email to `zheluo.wp@alibaba-inc.com` or `junyang.ljy@alibaba-inc.com`!
 
 
-
 # Related Codebase
 * [Fairseq](https://github.com/pytorch/fairseq)
-
 
 # License
 Apache-2.0
