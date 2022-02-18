@@ -30,6 +30,26 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 ![approach](examples/approach.jpg)
 
 
+# Results
+<table border="1" width="100%">
+    <tr align="center">
+        <th>Task</th><th>Image Captioning</th><th>Text2Image</th><th colspan="2">VQA</th><th colspan="2">Visual Entailment</th><th colspan="8">Referring Expression Comprehension</th>
+    </tr>
+    <tr align="center">
+        <td>Dataset</td><td>COCO Captions</td><td>COCO</td><td colspan="2">VQA v2</td><td colspan="2">SNLI-VE</td><td colspan="3">RefCOCO</td><td colspan="3">RefCOCO+</td><td colspan="2">RefCOCOg</td>
+    </tr>
+    <tr align="center">
+        <td>Split</td><td>Kaparthy test</td><td>test</td><td>test-dev</td><td>test-std</td><td>val</td><td>test</td><td>val</td><td>test-a</td><td>test-b</td><td>val</td><td>test-a</td><td>test-b</td><td>val-u</td><td>test-u</td>
+    </tr>
+    <tr align="center">
+        <td>Metric</td><td>CIDEr</td><td>FID</td><td colspan="2">Acc.</td><td colspan="2">Acc.</td><td colspan="8">Acc.</td>
+    </tr>
+    <tr align="center">
+        <td>Score</td><td>149.6</td><td>10.5</td><td>79.87</td><td>80.02</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>84.49</td><td>90.10</td><td>77.77</td><td>85.54</td><td>85.20</td>
+    </tr>
+</table>
+
+
 # Requirements
 * python 3.7.4
 * pytorch 1.8.1
