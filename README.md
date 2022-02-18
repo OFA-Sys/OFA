@@ -1,15 +1,5 @@
 # OFA
 
-<div align='center'>
-<a href="my/link"> <img src='https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unifying-architectures-tasks-and-modalities/image-captioning-on-coco-captions'> </a>
-  <a href="my/link"> <img src='https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unifying-architectures-tasks-and-modalities/referring-expression-comprehension-on-refcoco'> </a>
-</div>
-
-<div align='center'>
-<a href="my/link"> <img src='https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unifying-architectures-tasks-and-modalities/visual-entailment-on-snli-ve-test'> </a>
-  <a href="my/link"> <img src='https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unifying-architectures-tasks-and-modalities/text-to-image-generation-on-coco'> </a>
-</div>
-<br></br>
 
 [[Paper]](http://arxiv.org/abs/2202.03052) [Blog] [[Colab](colab.md)] [[Spaces](spaces.md)]
 
