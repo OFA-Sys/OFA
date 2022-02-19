@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+# This script supports distributed inference on multi-gpu workers (as well as single-worker inference). Please set the options below according to the comments. For multi-gpu workers inference, these options should be manually set for each worker. After setting the options, please run the script on each worker.
+
+# Number of GPUs per GPU worker
+GPUS_PER_NODE=8 
+# Number of GPU workers, for single-worker inference, please set to 1
+WORKER_CNT=4 
+# The ip address of the rank-0 worker, for single-worker inference, please set to localhost
+export MASTER_ADDR=XX.XX.XX.XX
+# The port for communication
+export MASTER_PORT=8216
+# The rank of this worker, should be in {0, ..., WORKER_CNT-1}, for single-worker inference, please set to 0
+export RANK=0 
+
 user_dir=../../ofa_module
 bpe_dir=../../utils/BPE
 
@@ -12,12 +25,13 @@ path=../../checkpoints/vqa_large_best_clean.pt
 result_path=../../results/vqa
 selected_cols=0,5,2,3,4
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 python3 ../../evaluate.py \
+python3 -m torch.distributed.launch --nproc_per_node=${GPUS_PER_NODE} --nnodes=${WORKER_CNT} --node_rank=${RANK} --master_addr=${MASTER_ADDR} --master_port=${MASTER_PORT} ../../evaluate.py \
     ${data} \
     --path=${path} \
     --user-dir=${user_dir} \
     --task=vqa_gen \
-    --batch-size=8 \
+    --batch-size=4 \
+    --valid-batch-size=20 \
     --log-format=simple --log-interval=10 \
     --seed=7 \
     --gen-subset=${split} \
