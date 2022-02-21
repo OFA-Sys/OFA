@@ -102,9 +102,18 @@ cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refc
 ```
 
 ## Visual Question Answering
-Here we provide the finetuning and inference codes to reproduce the VQAv2 result reported in our paper (**test-std 80.02**). We believe much improvement on accuracy can still be achieved based on this codebase :)
-1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. The dataset zipfile `vqa_data.zip` is around 100G and the decompressed data costs around 135G disk storage, which contains the training, validation and testing samples together with other necessary data resources. Following common practice, VG-QA samples are also included in the training data. To adapt to the seq2seq paradigm of OFA, we transform original VQA training questions with multiple golden answers into multiple training samples. 
-2. Shuffle the data
+Here we provide the finetuning and inference codes to easily reproduce the VQAv2 result reported in our paper (**test-std 80.02**). We believe much improvement on accuracy can still be achieved based on this codebase :)
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. The dataset zipfile `vqa_data.zip` is around 100G and the decompressed data costs around 135G disk storage, which contains the training, validation and testing samples together with other necessary data resources. Following common practice, VG-QA samples are also included in the training data. To adapt to the seq2seq paradigm of OFA, we transform original VQA training questions with multiple golden answers into multiple training samples. Each line of the dataset represents a VQA sample with the following format. The information of question-id, image-id, question, answer (with confidence), predicted object labels  (taken from [VinVL](https://github.com/pzzhang/VinVL), slightly improve the performance), image base64 string are separated by tabs.
+```
+79459   79459   is this person wearing shorts?  0.6|!+no    house&&short&&...&&sky  /9j/4AAQS...tigZ/9k=
+```
+2. **Shuffle the Training Data** (optional, but achieves better finetuning accuracy): If the disk storage is sufficient, we recommend to prepare the shuffled training data for each epoch in advance. In our experiments, we use shuffling which brings around **+0.3** improvement on VQA accuracy.
+```
+cd run_scripts/vqa_data
+ln vqa_train.tsv vqa_train_1.tsv
+for idx in `seq 1 9`;do shuf vqa_train_${idx}.tsv > vqa_train_$[${idx}+1].tsv;done # each file is used for an epoch
+```
+3. **Finetuning**: Run the command below. If the training data has been shuffled, replace the 
 
 <br></br>
 
