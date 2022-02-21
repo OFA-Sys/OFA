@@ -25,5 +25,8 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python3 ../../evaluate.py \
     --fp16 \
     --ema-eval \
     --beam-search-vqa-eval \
+    --beam=5 \
+    --unnormalized \
+    --temperature=1.0 \
     --num-workers=0 \
     --model-overrides="{\"data\":\"${data}\",\"bpe_dir\":\"${bpe_dir}\",\"selected_cols\":\"${selected_cols}\",\"ans2label_file\":\"${ans2label_file}\"}"
