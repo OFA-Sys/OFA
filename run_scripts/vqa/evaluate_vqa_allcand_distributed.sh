@@ -22,7 +22,7 @@ split=$1
 data=../../dataset/vqa_data/vqa_${split}.tsv
 ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
 path=../../checkpoints/vqa_large_best_clean.pt
-result_path=../../results/vqa
+result_path=../../results/vqa_${split}_allcand
 selected_cols=0,5,2,3,4
 
 python3 -m torch.distributed.launch --nproc_per_node=${GPUS_PER_NODE} --nnodes=${WORKER_CNT} --node_rank=${RANK} --master_addr=${MASTER_ADDR} --master_port=${MASTER_PORT} ../../evaluate.py \
