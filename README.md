@@ -73,7 +73,7 @@ To release soon:)
 
 
 # Finetuning & Inference
-Below we provide methods for fintuning and inference on different downstream tasks.
+Below we provide methods for finetuning and inference on different downstream tasks.
 ## Caption
 1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
@@ -101,6 +101,10 @@ nohup sh train_refcocog.sh > train_refcocog.out &  # finetune for refcocog
 cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refcoco/refcoco+/refcocog
 ```
 <br></br>
+
+## Visual Question Answering
+Here we provide the finetuning and inference codes to reproduce the VQAv2 result reported in our paper (**test-std 80.02**). We believe much improvement can still be achieved based on these scripts :)
+1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 
 # Gallery
 Below we provide examples of OFA in text-to-image generation and open-ended VQA. Also, we demonstrate its performance in unseen task (Grounded QA) as well as unseen domain (Visual Grounding on images from unseen domains). 
