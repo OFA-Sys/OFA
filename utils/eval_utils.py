@@ -22,7 +22,7 @@ def decode_fn(x, tgt_dict, bpe, generator, tokenizer=None):
     return x
 
 
-def eval_caption(task, generator, models, sample):
+def eval_caption(task, generator, models, sample, **kwargs):
     transtab = str.maketrans({key: None for key in string.punctuation})
     hypos = task.inference_step(generator, models, sample)
     results = []
@@ -32,7 +32,17 @@ def eval_caption(task, generator, models, sample):
     return results, None
 
 
-def eval_vqa_gen(task, generator, models, sample):
+def eval_vqa_gen(task, generator, models, sample, **kwargs):
+    if kwargs['beam_search_vqa_eval']:
+        hypos = task.inference_step(generator, models, sample, prefix_tokens=sample['prefix_tokens'])
+        results = []
+        for i, sample_id in enumerate(sample["id"].tolist()):
+            prefix_len = sample['prefix_tokens'][i].ne(1).sum().item()
+            detok_hypo_str = decode_fn(hypos[i][0]["tokens"][prefix_len:], task.tgt_dict, task.bpe, generator)
+            results.append({"question_id": int(sample_id), "answer": detok_hypo_str.strip()})
+        scores = [ref_dict.get(result['answer'], 0) for ref_dict, result in zip(sample['ref_dict'], results)]
+        return results, scores
+
     encoder_out = models[0].encoder(
         sample["net_input"]["src_tokens"],
         src_lengths=sample["net_input"]["src_lengths"],
@@ -92,7 +102,7 @@ def eval_vqa_gen(task, generator, models, sample):
     return results, scores
 
 
-def eval_refcoco(task, generator, models, sample):
+def eval_refcoco(task, generator, models, sample, **kwargs):
     def _calculate_ap_score(hyps, refs, thresh=0.5):
         interacts = torch.cat(
             [torch.where(hyps[:, :2] < refs[:, :2], refs[:, :2], hyps[:, :2]),
@@ -125,12 +135,12 @@ def eval_refcoco(task, generator, models, sample):
     return results, scores
 
 
-def eval_step(task, generator, models, sample):
+def eval_step(task, generator, models, sample, **kwargs):
     if task.cfg._name == 'caption':
-        return eval_caption(task, generator, models, sample)
+        return eval_caption(task, generator, models, sample, **kwargs)
     elif task.cfg._name == 'vqa_gen':
-        return eval_vqa_gen(task, generator, models, sample)        
+        return eval_vqa_gen(task, generator, models, sample, **kwargs)        
     elif task.cfg._name == 'refcoco':
-        return eval_refcoco(task, generator, models, sample)
+        return eval_refcoco(task, generator, models, sample, **kwargs)
     else:
         raise NotImplementedError
