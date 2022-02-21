@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-# This script supports distributed inference on multi-gpu workers (as well as single-worker inference). Please set the options below according to the comments. For multi-gpu workers inference, these options should be manually set for each worker. After setting the options, please run the script on each worker.
+# This script supports distributed inference on multi-gpu workers (as well as single-worker inference). 
+# Please set the options below according to the comments. 
+# For multi-gpu workers inference, these options should be manually set for each worker. 
+# After setting the options, please run the script on each worker.
 
 # Number of GPUs per GPU worker
 GPUS_PER_NODE=8 

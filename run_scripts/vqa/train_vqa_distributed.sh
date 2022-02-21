@@ -1,6 +1,9 @@
 #!/usr/bin/env
 
-# This script supports distributed training on multi-gpu workers (as well as single-worker training). Please set the options below according to the comments. For multi-gpu workers training, these options should be manually set for each worker. After setting the options, please run the script on each worker.
+# This script supports distributed training on multi-gpu workers (as well as single-worker training). 
+# Please set the options below according to the comments. 
+# For multi-gpu workers training, these options should be manually set for each worker. 
+# After setting the options, please run the script on each worker.
 
 # Number of GPUs per GPU worker
 GPUS_PER_NODE=8 
