@@ -21,7 +21,7 @@ split=$1
 
 data=../../dataset/vqa_data/vqa_${split}.tsv
 ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
-path=../../checkpoints/vqa_large_best_clean.pt
+path=../../checkpoints/vqa_large_best.pt
 result_path=../../results/vqa_${split}_allcand
 selected_cols=0,5,2,3,4
 
