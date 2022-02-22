@@ -4,6 +4,7 @@
 # Please set the options below according to the comments. 
 # For multi-gpu workers training, these options should be manually set for each worker. 
 # After setting the options, please run the script on each worker.
+# To use the shuffled data (if exists), please uncomment the Line 23.
 
 # Number of GPUs per GPU worker
 GPUS_PER_NODE=8 
@@ -16,18 +17,20 @@ export MASTER_PORT=8214
 # The rank of this worker, should be in {0, ..., WORKER_CNT-1}, for single-worker training, please set to 0
 export RANK=0 
 
+data_dir=../../dataset/vqa_data
+data=${data_dir}/vqa_train.tsv,${data_dir}/vqa_val.tsv
+# Note: If you have shuffled the data in advance, please uncomment the line below.
+# data=${data_dir}/vqa_train_1.tsv,${data_dir}/vqa_train_2.tsv,${data_dir}/vqa_train_3.tsv,${data_dir}/vqa_train_4.tsv,${data_dir}/vqa_train_5.tsv,${data_dir}/vqa_train_6.tsv,${data_dir}/vqa_train_7.tsv,${data_dir}/vqa_train_8.tsv,${data_dir}/vqa_train_9.tsv,${data_dir}/vqa_train_10.tsv,${data_dir}/vqa_val.tsv
+ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
+restore_file=../../checkpoints/ofa_large.pt
+selected_cols=0,5,2,3,4
+
 log_dir=./vqa_logs
 save_dir=./vqa_checkpoints
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE
 user_dir=../../ofa_module
-
-data_dir=../../dataset/vqa_data
-data=${data_dir}/vqa_train.tsv,${data_dir}/vqa_val.tsv
-ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
-restore_file=../../checkpoints/ofa_large.pt
-selected_cols=0,5,2,3,4
 
 task=vqa_gen
 arch=ofa_large
