@@ -102,7 +102,7 @@ cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refc
 ```
 
 ## Visual Question Answering
-Here we provide the finetuning and inference codes to easily reproduce the VQAv2 result reported in our paper (**test-std 80.02**). We believe much improvement on accuracy can still be achieved based on this codebase :)
+Here we provide the finetuning and inference codes to reproduce the VQAv2 result reported in our paper (**test-std 80.02**). We believe much improvement on accuracy can still be achieved based on this codebase :)
 1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. The dataset zipfile `vqa_data.zip` is around 100G and the decompressed data costs around 135G disk storage, which contains the training, validation and testing samples together with other necessary data resources. Following common practice, VG-QA samples are also included in the training data. To adapt to the seq2seq paradigm of OFA, we transform original VQA training questions with multiple golden answers into multiple training samples. For the original VQA validation set, we keep around 10k samples for our validation and utilize the other samples for training. Each line of the dataset represents a VQA sample with the following format. The information of question-id, image-id, question, answer (with confidence), predicted object labels  (taken from [VinVL](https://github.com/pzzhang/VinVL), slightly brings around +0.1 accuracy improvement), image base64 string are separated by tabs.
     ```
     79459   79459   is this person wearing shorts?  0.6|!+no    house&&short&&...&&sky  /9j/4AAQS...tigZ/9k=
@@ -113,7 +113,7 @@ Here we provide the finetuning and inference codes to easily reproduce the VQAv2
     ln vqa_train.tsv vqa_train_1.tsv
     for idx in `seq 1 9`;do shuf vqa_train_${idx}.tsv > vqa_train_$[${idx}+1].tsv;done # each file is used for an epoch
     ```
-3. **Finetuning**: In our experiments, the VQA finetuning is performed on 4 8-A100-GPU servers. Here provides the finetuning script `train_vqa_distributed.sh` which supports distributed training (as well as single-server training). Please refer to the comments in the beginning of the script and set the configs correctly according to your distribution environment. If you have shuffled the training data in the previous step, please correctly specify the training data path following the guide in the script comments. **The command should be run on each worker.** 
+3. **Finetuning**: In our experiments, the VQA finetuning is performed on 4 8-A100-GPU servers (_with RDMA_). Here provides the finetuning script `train_vqa_distributed.sh` which supports distributed training (as well as single-server training). Please refer to the comments in the beginning of the script and set the configs correctly according to your distribution environment. If you have shuffled the training data in the previous step, please correctly specify the training data path following the guide in the script comments. **The command should be run on each worker.** 
     ```bash
     # run on each worker after the distributed and data configs have been correctly set following the guide in train_vqa_distributed.sh 
     cd run_scripts/vqa
