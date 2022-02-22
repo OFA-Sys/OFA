@@ -109,7 +109,7 @@ Here we provide the finetuning and inference codes to easily reproduce the VQAv2
 ```
 2. **Shuffle the Training Data** (optional, but achieves better finetuning accuracy): If the disk storage is sufficient, we recommend to prepare the shuffled training data for each epoch in advance. In our experiments, we use shuffling which brings around **+0.3** improvement on VQA accuracy.
 ```
-cd run_scripts/vqa
+cd dataset/vqa_data
 ln vqa_train.tsv vqa_train_1.tsv
 for idx in `seq 1 9`;do shuf vqa_train_${idx}.tsv > vqa_train_$[${idx}+1].tsv;done # each file is used for an epoch
 ```
