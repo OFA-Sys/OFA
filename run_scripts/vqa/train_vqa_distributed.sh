@@ -1,5 +1,6 @@
 #!/usr/bin/env
 
+# Guide:
 # This script supports distributed training on multi-gpu workers (as well as single-worker training). 
 # Please set the options below according to the comments. 
 # For multi-gpu workers training, these options should be manually set for each worker. 

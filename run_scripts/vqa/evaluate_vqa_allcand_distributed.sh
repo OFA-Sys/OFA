@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Guide:
 # This script supports distributed inference on multi-gpu workers (as well as single-worker inference). 
 # Please set the options below according to the comments. 
 # For multi-gpu workers inference, these options should be manually set for each worker. 
