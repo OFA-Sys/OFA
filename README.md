@@ -75,32 +75,32 @@ To release soon:)
 
 # Finetuning & Inference
 Below we provide methods for finetuning and inference on different downstream tasks.
-## Caption
+## Image Captioning
 1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
-```bash
-cd run_scripts/caption
-nohup sh train_caption_stage1.sh > train_stage1.out &  # stage1, train with cross-entropy loss
-nohup sh train_caption_stage2.sh > train_stage2.out &  # stage2, load the best ckpt of stage1 and train with CIDEr optimization 
-```
+    ```bash
+    cd run_scripts/caption
+    nohup sh train_caption_stage1.sh > train_stage1.out &  # stage1, train with cross-entropy loss
+    nohup sh train_caption_stage2.sh > train_stage2.out &  # stage2, load the best ckpt of stage1 and train with CIDEr optimization 
+    ```
 3. Inference
-```bash
-cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
-```
+    ```bash
+    cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
+    ```
 
 ## Referring Expression Comprehension 
 1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
-```bash
-cd run_scripts/refcoco
-nohup sh train_refcoco.sh > train_refcoco.out &  # finetune for refcoco
-nohup sh train_refcocoplus.sh > train_refcocoplus.out &  # finetune for refcoco+
-nohup sh train_refcocog.sh > train_refcocog.out &  # finetune for refcocog
-```
+    ```bash
+    cd run_scripts/refcoco
+    nohup sh train_refcoco.sh > train_refcoco.out &  # finetune for refcoco
+    nohup sh train_refcocoplus.sh > train_refcocoplus.out &  # finetune for refcoco+
+    nohup sh train_refcocog.sh > train_refcocog.out &  # finetune for refcocog
+    ```
 3. Inference
-```bash
-cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refcoco/refcoco+/refcocog
-```
+    ```bash
+    cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refcoco/refcoco+/refcocog
+    ```
 
 ## Visual Question Answering
 Here we provide the finetuning and inference codes to reproduce the VQAv2 result reported in our paper (**test-std 80.02**). We believe much improvement on accuracy can still be achieved based on this codebase :)
