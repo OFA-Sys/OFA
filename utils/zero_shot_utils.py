@@ -22,7 +22,7 @@ def decode_fn(x, tgt_dict, bpe, generator, tokenizer=None):
     return x
 
 
-def eval_vqa_gen(task, generator, models, sample):
+def eval_vqa_gen(task, generator, models, sample, **kwargs):
     hypos = task.inference_step(generator, models, sample)
     results = []
     for i, sample_id in enumerate(sample["id"].tolist()):
@@ -32,10 +32,10 @@ def eval_vqa_gen(task, generator, models, sample):
     return results, scores
 
 
-def zero_shot_step(task, generator, models, sample):
+def zero_shot_step(task, generator, models, sample, **kwargs):
     generator.zero_shot = True
     if task.cfg._name == 'vqa_gen':
         generator.constraint_trie = None
-        return eval_vqa_gen(task, generator, models, sample)
+        return eval_vqa_gen(task, generator, models, sample, **kwargs)
     else:
         raise NotImplementedError

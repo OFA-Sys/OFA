@@ -157,7 +157,7 @@ def main(cfg: FairseqConfig) -> None:
         cfg.checkpoint,
         trainer,
         # don't cache epoch iterators for sharded datasets
-        disable_iterator_cache=task.has_sharded_data("train"),
+        disable_iterator_cache=True,
     )
     if cfg.common.tpu:
         import torch_xla.core.xla_model as xm
@@ -194,7 +194,7 @@ def main(cfg: FairseqConfig) -> None:
             # sharded data: get train iterator for next epoch
             load_dataset=True,
             # don't cache epoch iterators for sharded datasets
-            disable_iterator_cache=task.has_sharded_data("train"),
+            disable_iterator_cache=True,
         )
     train_meter.stop()
     logger.info("done training in {:.1f} seconds".format(train_meter.sum))
