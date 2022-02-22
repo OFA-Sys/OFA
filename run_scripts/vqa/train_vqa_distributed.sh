@@ -5,7 +5,7 @@
 # Please set the options below according to the comments. 
 # For multi-gpu workers training, these options should be manually set for each worker. 
 # After setting the options, please run the script on each worker.
-# To use the shuffled data (if exists), please uncomment the Line 23.
+# To use the shuffled data (if exists), please uncomment the Line 24.
 
 # Number of GPUs per GPU worker
 GPUS_PER_NODE=8 
