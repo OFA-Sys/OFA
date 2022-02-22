@@ -32,6 +32,7 @@ def scst_loss(lprobs, target, reward, ignore_index=None, reduce=True):
         loss = loss.sum()
     return loss, ntokens
 
+
 @dataclass
 class ScstRewardCriterionConfig(FairseqDataclass):
     scst_cider_cached_tokens: str = field(

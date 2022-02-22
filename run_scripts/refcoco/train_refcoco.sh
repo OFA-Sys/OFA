@@ -14,7 +14,7 @@ selected_cols=0,4,2,3
 
 task=refcoco
 arch=ofa_large
-criterion=ajust_label_smoothed_cross_entropy
+criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.1
 lr=3e-5
 max_epoch=5
@@ -91,7 +91,7 @@ for max_epoch in {10,}; do
           --patch-image-size=${patch_image_size} \
           --fp16 \
           --fp16-scale-window=512 \
-          --num-workers=0 >> ${log_file} 2>&1
+          --num-workers=0 > ${log_file} 2>&1
     done
   done
 done

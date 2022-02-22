@@ -17,7 +17,7 @@ from omegaconf import II
 
 
 @dataclass
-class AjustLabelSmoothedCrossEntropyCriterionConfig(FairseqDataclass):
+class AdjustLabelSmoothedCrossEntropyCriterionConfig(FairseqDataclass):
     label_smoothing: float = field(
         default=0.0,
         metadata={"help": "epsilon for label smoothing, 0 means no label smoothing"},
@@ -50,7 +50,7 @@ class AjustLabelSmoothedCrossEntropyCriterionConfig(FairseqDataclass):
         default=1.0, metadata={"help": "weight for R-Drop"}
     )
     sample_patch_num: int = field(
-        default=196, metadata={"help": "sample patchs for v1"}
+        default=196, metadata={"help": "sample patches for v1"}
     )
     constraint_range: Optional[str] = field(
         default=None,
@@ -128,9 +128,9 @@ def label_smoothed_nll_loss(
 
 
 @register_criterion(
-    "ajust_label_smoothed_cross_entropy", dataclass=AjustLabelSmoothedCrossEntropyCriterionConfig
+    "adjust_label_smoothed_cross_entropy", dataclass=AdjustLabelSmoothedCrossEntropyCriterionConfig
 )
-class AjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
+class AdjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
     def __init__(
         self,
         task,
