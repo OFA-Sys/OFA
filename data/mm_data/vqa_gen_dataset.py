@@ -62,6 +62,11 @@ def collate(samples, pad_idx, eos_idx):
     if samples[0].get("decoder_prompt", None) is not None:
         decoder_prompts = np.array([s['decoder_prompt'].tolist() for s in samples])
 
+    prefix_tokens = None
+    if samples[0].get("decoder_prompt", None) is not None:
+        prefix_tokens = merge("decoder_prompt")
+        prefix_tokens = prefix_tokens[:, 1:]
+
     prev_output_tokens = None
     target = None
     if samples[0].get("target", None) is not None:
@@ -91,7 +96,8 @@ def collate(samples, pad_idx, eos_idx):
         "ref_dict": ref_dict,
         "constraint_masks": constraint_masks,
         "decoder_prompts": decoder_prompts,
-        "target": target
+        "target": target,
+        "prefix_tokens": prefix_tokens
     }
 
     return batch

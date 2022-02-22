@@ -119,7 +119,7 @@ def main(cfg: DictConfig, **kwargs):
         sample = utils.move_to_cuda(sample) if use_cuda else sample
         sample = utils.apply_to_sample(apply_half, sample) if cfg.common.fp16 else sample
         with torch.no_grad():
-            result, scores = eval_step(task, generator, models, sample)
+            result, scores = eval_step(task, generator, models, sample, **kwargs)
         results += result
         score_sum += sum(scores) if scores is not None else 0
         score_cnt += len(scores) if scores is not None else 0
@@ -147,9 +147,10 @@ def main(cfg: DictConfig, **kwargs):
 def cli_main():
     parser = options.get_generation_parser()
     parser.add_argument("--ema-eval", action='store_true', help="Use EMA weights to make evaluation.")
+    parser.add_argument("--beam-search-vqa-eval", action='store_true', help="Use beam search for vqa evaluation (faster inference speed but sub-optimal result), if not specified, we compute scores for each answer in the candidate set, which is slower but can obtain best result.")
     args = options.parse_args_and_arch(parser)
     cfg = convert_namespace_to_omegaconf(args)
-    distributed_utils.call_main(cfg, main, ema_eval=args.ema_eval)
+    distributed_utils.call_main(cfg, main, ema_eval=args.ema_eval, beam_search_vqa_eval=args.beam_search_vqa_eval)
 
 
 if __name__ == "__main__":

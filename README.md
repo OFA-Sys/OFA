@@ -12,6 +12,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 <br></br>
 
 # News
+* 2022.2.22: Released the finetuning & inference code/checkpoints for VQA, which can reproduce **the reported VQA accuracy in OFA paper (80.02 on test-std)**. We believe much accuracy improvement can still be achieved based on this codebase. Recently we have used this codebase to achieve a better result **(80.45 on test-std)** on the [VQA Challenge](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278).
 * 2022.2.18: Interactive Demo of **Text-to-Image Generation** is ready! Check it out in Huggingface Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation) !
 * 2022.2.15: Released finetuning & inference code/checkpoints for referring expression comprehension, as well as a Colab notebook [![][colab]](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and a demo in Hugging Face Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
 * 2022.2.13: Released the demo of image captioning. Have fun! [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
@@ -73,7 +74,7 @@ To release soon:)
 
 
 # Finetuning & Inference
-Below we provide methods for fintuning and inference on different downstream tasks.
+Below we provide methods for finetuning and inference on different downstream tasks.
 ## Caption
 1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
@@ -100,6 +101,40 @@ nohup sh train_refcocog.sh > train_refcocog.out &  # finetune for refcocog
 ```bash
 cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refcoco/refcoco+/refcocog
 ```
+
+## Visual Question Answering
+Here we provide the finetuning and inference codes to reproduce the VQAv2 result reported in our paper (**test-std 80.02**). We believe much improvement on accuracy can still be achieved based on this codebase :)
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. The dataset zipfile `vqa_data.zip` is around 100G and the decompressed data costs around 135G disk storage, which contains the training, validation and testing samples together with other necessary data resources. Following common practice, VG-QA samples are also included in the training data. To adapt to the seq2seq paradigm of OFA, we transform original VQA training questions with multiple golden answers into multiple training samples. For the original VQA validation set, we keep around 10k samples for our validation and utilize the other samples for training. Each line of the dataset represents a VQA sample with the following format. The information of question-id, image-id, question, answer (with confidence), predicted object labels (taken from [VinVL](https://github.com/pzzhang/VinVL), slightly brings around +0.1 accuracy improvement), image base64 string are separated by tabs.
+    ```
+    79459   79459   is this person wearing shorts?  0.6|!+no    house&&short&&...&&sky  /9j/4AAQS...tigZ/9k=
+    ```
+2. **Shuffle the Training Data** (optional, but achieves better finetuning accuracy): If the disk storage is sufficient, we recommend to prepare the shuffled training data for each epoch in advance. In our experiments, we use shuffling which brings around **+0.3** improvement on VQA accuracy.
+    ```bash
+    cd dataset/vqa_data
+    ln vqa_train.tsv vqa_train_1.tsv
+    for idx in `seq 1 9`;do shuf vqa_train_${idx}.tsv > vqa_train_$[${idx}+1].tsv;done # each file is used for an epoch
+    ```
+3. **Finetuning**: In our experiments, the VQA finetuning is performed on 4 8-A100-GPU servers (_with RDMA_). Here provides the finetuning script `train_vqa_distributed.sh` which supports distributed training (as well as single-server training). Please refer to the comments in the beginning of the script and set the configs correctly according to your distribution environment. If you have shuffled the training data in the previous step, please correctly specify the training data path following the guide in the script comments. **The command should be run on each worker.** 
+    ```bash
+    # run on each worker after the distributed and data configs have been correctly set following the guide in train_vqa_distributed.sh 
+    cd run_scripts/vqa
+    bash train_vqa_distributed.sh 
+    ```
+    In our experiments, the finetuning costs around 36 hours (for 12 epochs). After each epoch, an evaluation on validation set is performed. The best validation accuracy during finetuning will be around 80.8. The log is saved in `${log_dir}`.
+4. **Inference**: We provide 2 types of inference, **beam-search** (much faster but gets sub-optimal accuracy) and **all-candidate evaluation** (slower but best accuracy).
+    
+    For beam-search inference, use the script `evaluate_vqa_beam.sh`. Refer to the command below. The inference on test set costs around 16 GPU hours. After inference on test set, you can submit the result `test_predict.json` to [EvalAI](https://eval.ai/web/challenges/challenge-page/830/overview). Using our released finetuned checkpoint, beam-search inference will get 80.15 validation accuracy and 79.48 test-std accuracy (around 0.6 lower than all-candidate evaluation).
+    ```bash
+    cd run_scripts/vqa
+    bash evaluate_vqa_beam.sh val # specify 'val' or 'test'
+    ```    
+    
+    For all-candidate evaluation, we recommend to use the distributed scripts `evaluate_vqa_allcand_distributed.sh`. Please refer to the guide in the script to set the distributed configs. All-candidate evaluation computes scores on all the candidate answers in the VQA dataset, which achieves **80.82 validation accuracy and 80.02 test-std accuracy**, reproducing our reported results in the paper. However, the inference on test set costs around 1k GPU hours, which is much slower.
+    ```bash
+    # run on each worker after the distributed configs have been correctly set following the guide in evaluate_vqa_allcand_distributed.sh
+    cd run_scripts/vqa
+    bash evaluate_vqa_allcand_distributed.sh val # specify 'val' or 'test'
+    ```      
 <br></br>
 
 # Gallery
