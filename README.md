@@ -115,7 +115,7 @@ Here we provide the finetuning and inference codes to easily reproduce the VQAv2
     ```
 3. **Finetuning**: In our experiments, the VQA finetuning is performed on 4 8-A100-GPU servers. Here provides the finetuning script `train_vqa_distributed.sh` which supports distributed training (as well as single-server training). Please refer to the comments in the beginning of the script and set the configs correctly according to your distribution environment. If you have shuffled the training data in the previous step, please correctly specify the training data path following the guide in the script comments. **The command should be run on each worker.** 
     ```
-    # run on each worker after the distributed and data configs has been correctly set following the guide in train_vqa_distributed.sh 
+    # run on each worker after the distributed and data configs have been correctly set following the guide in train_vqa_distributed.sh 
     cd run_scripts/vqa
     bash train_vqa_distributed.sh 
     ```
@@ -130,7 +130,7 @@ Here we provide the finetuning and inference codes to easily reproduce the VQAv2
     
     For all-candidate evaluation, we recommend to use the distributed scripts `evaluate_vqa_allcand_distributed.sh`. Please refer to the guide in the script to set the distributed configs. All-candidate evaluation computes scores on all the candidate answers in the VQA dataset, which achieves **80.82 validation accuracy and 80.02 test-std accuracy**, reproducing our reported results in the paper. However, the inference on test set costs around 1k GPU hours, which is much slower.
     ```
-    # run on each worker after the distributed configs has been correctly set following the guide in evaluate_vqa_allcand_distributed.sh
+    # run on each worker after the distributed configs have been correctly set following the guide in evaluate_vqa_allcand_distributed.sh
     cd run_scripts/vqa
     bash evaluate_vqa_allcand_distributed.sh val # specify 'val' or 'test'
     ```      
