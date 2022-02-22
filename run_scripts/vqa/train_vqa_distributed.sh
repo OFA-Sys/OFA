@@ -35,7 +35,7 @@ user_dir=../../ofa_module
 
 task=vqa_gen
 arch=ofa_large
-criterion=ajust_label_smoothed_cross_entropy
+criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.1
 batch_size=4
 update_freq=4
@@ -135,7 +135,7 @@ for total_num_updates in {40000,}; do
             ${ema_fp32} \
             --ema-decay=${ema_decay} \
             --ema-start-update=${ema_start_update} \
-            --num-workers=0 >> ${log_file} 2>&1
+            --num-workers=0 > ${log_file} 2>&1
       done
     done
   done

@@ -96,6 +96,6 @@ for lr in {1e-5,}; do
         --scst-args='{"beam":5,"max_len_b":16,"no_repeat_ngram_size":3}' \
         --memory-efficient-fp16 \
         --fp16-scale-window=512 \
-        --num-workers=0 >> ${log_file} 2>&1
+        --num-workers=0 > ${log_file} 2>&1
   done
 done
