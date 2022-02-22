@@ -109,11 +109,16 @@ Here we provide the finetuning and inference codes to easily reproduce the VQAv2
 ```
 2. **Shuffle the Training Data** (optional, but achieves better finetuning accuracy): If the disk storage is sufficient, we recommend to prepare the shuffled training data for each epoch in advance. In our experiments, we use shuffling which brings around **+0.3** improvement on VQA accuracy.
 ```
-cd run_scripts/vqa_data
+cd run_scripts/vqa
 ln vqa_train.tsv vqa_train_1.tsv
 for idx in `seq 1 9`;do shuf vqa_train_${idx}.tsv > vqa_train_$[${idx}+1].tsv;done # each file is used for an epoch
 ```
-3. **Finetuning**: Run the command below. If the training data has been shuffled, replace the 
+3. **Finetuning**: In our experiments, the VQA finetuning is performed on 4 8-A100-GPU servers. Here provide the finetuning script `train_vqa_distributed.sh` which supports distributed training (as well as single-server training). Please refer to the comments in the beginning of the script and set the configs correctly according to your distribution environment. If you have shuffled the training data in the previous step, please correctly specify the training data path following the guide in the script comments. **The command should be run on each worker.** 
+```
+# run on each worker after the distributed and data configs has been correctly set following the guide in train_vqa_distributed.sh 
+cd run_scripts/vqa
+bash train_vqa_distributed.sh 
+```
 
 <br></br>
 
