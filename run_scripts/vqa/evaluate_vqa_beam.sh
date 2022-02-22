@@ -17,7 +17,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python3 ../../evaluate.py \
     --path=${path} \
     --user-dir=${user_dir} \
     --task=vqa_gen \
-    --batch-size=8 \
+    --batch-size=16 \
     --log-format=simple --log-interval=10 \
     --seed=7 \
     --gen-subset=${split} \
