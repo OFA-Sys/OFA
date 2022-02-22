@@ -68,7 +68,7 @@ for lr in {1e-5,}; do
         --dropout=${dropout} \
         --attention-dropout=${attention_dropout} \
         --weight-decay=0.01 --optimizer=adam --adam-betas="(0.9,0.999)" --adam-eps=1e-08 --clip-norm=1.0 \
-        --lr-scheduler=polynomial_decay --lr=${lr} \
+        --lr-scheduler=polynomial_decay --lr=${lr} --end-learning-rate=2e-7 \
         --max-epoch=${max_epoch} --warmup-ratio=${warmup_ratio} \
         --log-format=simple --log-interval=10 \
         --fixed-validation-seed=7 \
