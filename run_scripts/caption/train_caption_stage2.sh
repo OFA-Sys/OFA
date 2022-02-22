@@ -68,7 +68,7 @@ for lr in {1e-5,}; do
         --dropout=${dropout} \
         --attention-dropout=${attention_dropout} \
         --weight-decay=0.01 --optimizer=adam --adam-betas="(0.9,0.999)" --adam-eps=1e-08 --clip-norm=1.0 \
-        --lr-scheduler=polynomial_decay --lr=${lr} \
+        --lr-scheduler=polynomial_decay --lr=${lr} --end-learning-rate=2e-7 \
         --max-epoch=${max_epoch} --warmup-ratio=${warmup_ratio} \
         --log-format=simple --log-interval=10 \
         --fixed-validation-seed=7 \
@@ -96,6 +96,6 @@ for lr in {1e-5,}; do
         --scst-args='{"beam":5,"max_len_b":16,"no_repeat_ngram_size":3}' \
         --memory-efficient-fp16 \
         --fp16-scale-window=512 \
-        --num-workers=0 >> ${log_file} 2>&1
+        --num-workers=0 > ${log_file} 2>&1
   done
 done

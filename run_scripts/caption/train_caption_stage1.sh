@@ -14,7 +14,7 @@ selected_cols=0,4,2
 
 task=caption
 arch=ofa_large
-criterion=ajust_label_smoothed_cross_entropy
+criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.1
 lr=1e-5
 max_epoch=5
@@ -98,7 +98,7 @@ for max_epoch in {2,}; do
           --drop-worst-after=${drop_worst_after} \
           --fp16 \
           --fp16-scale-window=512 \
-          --num-workers=0 >> ${log_file} 2>&1
+          --num-workers=0 > ${log_file} 2>&1
     done
   done
 done
