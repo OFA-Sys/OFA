@@ -77,28 +77,34 @@ To release soon:)
 # Finetuning & Inference
 Below we provide methods for finetuning and inference on different downstream tasks.
 ## Image Captioning
-1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
-2. Train
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. The dataset zipfile `caption_data.zip` contains caption_stage1_train.tsv, caption_stage2_train.tsv, caption_val.tsv and caption_test.tsv. Each image corresponds to only 1 caption in `caption_stage1_train.tsv` and corresponds to multiple captions in other TSV files (about 5 captions per image). Each line of the dataset represents a caption sample with the following format. The information of uniq-id, image-id, caption, predicted object labels (taken from [VinVL](https://github.com/pzzhang/VinVL), not used), image base64 string are separated by tabs.
+    ```
+    162365  12455   the sun sets over the trees beyond some docks.  sky&&water&&dock&&pole  /9j/4AAQSkZJ....UCP/2Q==
+    ```
+2. **Finetuning**: Following previous standard practice, we divide the finetuning process of image captioning into two stages. In stage 1, we finetune OFA with cross-entropy loss on 4 NVIDIA-V100 GPUs with 32GB memory (expected to obtain ~139.5 CIDEr on the validation set at this stage). In stage 2, we select the best checkpoint of stage 1 and train with CIDEr optimization on 8 NVIDIA-V100 GPUs (expected to get ~149.4 CIDEr on the validation set at this stage).
     ```bash
     cd run_scripts/caption
-    nohup sh train_caption_stage1.sh > train_stage1.out &  # stage1, train with cross-entropy loss
-    nohup sh train_caption_stage2.sh > train_stage2.out &  # stage2, load the best ckpt of stage1 and train with CIDEr optimization 
+    nohup sh train_caption_stage1.sh > train_stage1.out &  # stage 1, train with cross-entropy loss
+    nohup sh train_caption_stage2.sh > train_stage2.out &  # stage 2, load the best ckpt of stage1 and train with CIDEr optimization 
     ```
-3. Inference
+3. **Inference**
     ```bash
     cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
     ```
 
 ## Referring Expression Comprehension 
-1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
-2. Train
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. We provide RefCOCO (split by UNC), RefCOCO+ (split by UNC) and RefCOCOg (split by UMD) datasets. See (https://www.tensorflow.org/datasets/catalog/ref_coco) and (https://github.com/lichengunc/refer) for more details. Each line of the dataset represents a sample with the following format. The information of uniq-id, image-id, text, region-coord (separated by commas), image base64 string are separated by tabs.
+    ```
+    79_1    237367  A woman in a white blouse holding a glass of wine.  230.79,121.75,423.66,463.06 9j/4AAQ...1pAz/9k=
+    ```
+2. **Finetuning**: Unlike the original paper, we finetune OFA with a drop-path rate of 0.2, and found that training with this hyper-parameter achieves better results. We will update the reported results of the paper later.
     ```bash
     cd run_scripts/refcoco
     nohup sh train_refcoco.sh > train_refcoco.out &  # finetune for refcoco
     nohup sh train_refcocoplus.sh > train_refcocoplus.out &  # finetune for refcoco+
     nohup sh train_refcocog.sh > train_refcocog.out &  # finetune for refcocog
     ```
-3. Inference
+3. **Inference**
     ```bash
     cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refcoco/refcoco+/refcocog
     ```
