@@ -74,7 +74,7 @@ To release soon:)
 
 
 # Finetuning & Inference
-Below we provide methods for finetuning and inference on different downstream tasks.
+Below we provide methods for finetuning and inference on different downstream tasks. The following experiments are all tested on NVIDIA-V100 GPUs with 32GB memory.
 ## Image Captioning
 1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
 2. Train
