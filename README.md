@@ -163,8 +163,7 @@ Please cite our paper if you find it helpful :)
 @article{wang2022OFA,
   title={Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework},
   author={Wang, Peng and Yang, An and Men, Rui and Lin, Junyang and Bai, Shuai and Li, Zhikang and Ma, Jianxin and Zhou, Chang and Zhou, Jingren and Yang, Hongxia},
-  journal={arXiv e-prints},
-  pages={arXiv--2202},
+  journal={arXiv preprint arXiv:2202.03052},
   year={2022}
 }
 ```
