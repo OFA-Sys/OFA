@@ -77,7 +77,7 @@ To release soon:)
 # Finetuning & Inference
 Below we provide methods for finetuning and inference on different downstream tasks.
 ## Image Captioning
-1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. The dataset zipfile `caption_data.zip` contains caption_stage1_train.tsv, caption_stage2_train.tsv, caption_val.tsv and caption_test.tsv. Specifically, each image in caption_stage1_train.tsv corresponding to only 1 caption, each image in other TSV files corresponding to multiple captions (about 5 captions per image). Each line of the dataset represents a caption sample with the following format. The information of uniq-id, image-id, caption, predicted object labels (taken from [VinVL](https://github.com/pzzhang/VinVL), no use), image base64 string are separated by tabs.
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. The dataset zipfile `caption_data.zip` contains caption_stage1_train.tsv, caption_stage2_train.tsv, caption_val.tsv and caption_test.tsv. Each image corresponds to only 1 caption in `caption_stage1_train.tsv` and corresponds to multiple captions in other TSV files (about 5 captions per image). Each line of the dataset represents a caption sample with the following format. The information of uniq-id, image-id, caption, predicted object labels (taken from [VinVL](https://github.com/pzzhang/VinVL), not used), image base64 string are separated by tabs.
     ```
     162365  12455   the sun sets over the trees beyond some docks.  sky&&water&&dock&&pole  /9j/4AAQSkZJ....UCP/2Q==
     ```
