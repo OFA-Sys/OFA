@@ -81,13 +81,13 @@ Below we provide methods for finetuning and inference on different downstream ta
     ```
     162365  12455   the sun sets over the trees beyond some docks.  sky&&water&&dock&&pole  /9j/4AAQSkZJ....UCP/2Q==
     ```
-2. **Finetuning**: Following previous standard practice, we divide the finetuning process of image captioning into two stages. In stage1, we finetune OFA with cross-entropy loss on 4 NVIDIA-V100 GPUs with 32GB memory (expected to obtain ~139.5 CIDEr on the validation set at this stage). In stage2, we select the best checkpoint of stage1 and train with CIDEr optimization on 8 NVIDIA-V100 GPUs (expected to get ~149.4 CIDEr on the validation set at this stage).
+2. **Finetuning**: Following previous standard practice, we divide the finetuning process of image captioning into two stages. In stage 1, we finetune OFA with cross-entropy loss on 4 NVIDIA-V100 GPUs with 32GB memory (expected to obtain ~139.5 CIDEr on the validation set at this stage). In stage 2, we select the best checkpoint of stage 1 and train with CIDEr optimization on 8 NVIDIA-V100 GPUs (expected to get ~149.4 CIDEr on the validation set at this stage).
     ```bash
     cd run_scripts/caption
-    nohup sh train_caption_stage1.sh > train_stage1.out &  # stage1, train with cross-entropy loss
-    nohup sh train_caption_stage2.sh > train_stage2.out &  # stage2, load the best ckpt of stage1 and train with CIDEr optimization 
+    nohup sh train_caption_stage1.sh > train_stage1.out &  # stage 1, train with cross-entropy loss
+    nohup sh train_caption_stage2.sh > train_stage2.out &  # stage 2, load the best ckpt of stage1 and train with CIDEr optimization 
     ```
-3. Inference
+3. **Inference**
     ```bash
     cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
     ```
@@ -97,14 +97,14 @@ Below we provide methods for finetuning and inference on different downstream ta
     ```
     79_1    237367  A woman in a white blouse holding a glass of wine.  230.79,121.75,423.66,463.06 9j/4AAQ...1pAz/9k=
     ```
-2. **Finetuning**: Unlike the original paper, we finetune OFA with a droppath rate of 0.2, and found that training with this rate can achieve better results. We will update the reported results of the paper later.
+2. **Finetuning**: Unlike the original paper, we finetune OFA with a drop-path rate of 0.2, and found that training with this hyper-parameter achieves better results. We will update the reported results of the paper later.
     ```bash
     cd run_scripts/refcoco
     nohup sh train_refcoco.sh > train_refcoco.out &  # finetune for refcoco
     nohup sh train_refcocoplus.sh > train_refcocoplus.out &  # finetune for refcoco+
     nohup sh train_refcocog.sh > train_refcocog.out &  # finetune for refcocog
     ```
-3. Inference
+3. **Inference**
     ```bash
     cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refcoco/refcoco+/refcocog
     ```
