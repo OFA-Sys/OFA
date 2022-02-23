@@ -130,13 +130,13 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
     In our experiments, the finetuning costs around 36 hours (for 12 epochs). After each epoch, an evaluation on validation set is performed. The best validation accuracy during finetuning will be around 80.8. The log is saved in `${log_dir}`.
 4. **Inference**: We provide 2 types of inference, **beam-search** (much faster but gets sub-optimal accuracy) and **all-candidate evaluation** (slower but best accuracy).
     
-    For beam-search inference, use the script `evaluate_vqa_beam.sh`. Refer to the command below. The inference on test set costs around 16 GPU hours. After inference on test set, you can submit the result `test_predict.json` to [EvalAI](https://eval.ai/web/challenges/challenge-page/830/overview). Using our released finetuned checkpoint, beam-search inference will get 80.15 validation accuracy and 79.48 test-std accuracy (around 0.6 lower than all-candidate evaluation).
+    For beam-search inference, use the script `evaluate_vqa_beam.sh`. Refer to the command below. The inference on test set costs around 16 GPU hours. After inference on test set, you can submit the result `test_predict.json` to [EvalAI](https://eval.ai/web/challenges/challenge-page/830/overview). Using our released finetuned checkpoint, beam-search inference will get 80.15 validation accuracy, 79.36 test-dev accuracy and 79.48 test-std accuracy (around 0.6 lower than all-candidate evaluation).
     ```bash
     cd run_scripts/vqa
     bash evaluate_vqa_beam.sh val # specify 'val' or 'test'
     ```    
     
-    For all-candidate evaluation, we recommend to use the distributed scripts `evaluate_vqa_allcand_distributed.sh`. Please refer to the guide in the script to set the distributed configs. All-candidate evaluation computes scores on all the candidate answers in the VQA dataset, which achieves **80.82 validation accuracy and 80.02 test-std accuracy**, reproducing our reported results in the paper. However, the inference on test set costs around 1k GPU hours, which is much slower.
+    For all-candidate evaluation, we recommend to use the distributed scripts `evaluate_vqa_allcand_distributed.sh`. Please refer to the guide in the script to set the distributed configs. All-candidate evaluation computes scores on all the candidate answers in the VQA dataset, which achieves **80.82 validation accuracy, 79.87 test-dev accuracy and 80.02 test-std accuracy**, reproducing our reported results in the paper. However, the inference on test set costs around 1k GPU hours, which is much slower.
     ```bash
     # run on each worker after the distributed configs have been correctly set following the guide in evaluate_vqa_allcand_distributed.sh
     cd run_scripts/vqa
