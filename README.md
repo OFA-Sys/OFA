@@ -136,7 +136,7 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
     bash evaluate_vqa_beam.sh val # specify 'val' or 'test'
     ```    
     
-    For all-candidate evaluation, we recommend to use the distributed script `evaluate_vqa_allcand_distributed.sh`. Please refer to the guide in the script to set the distributed configs before running. The result JSON file will also be dumped in the `${result_path}` defined in the shell script. All-candidate evaluation computes scores on all the candidate answers in the VQA dataset, which achieves **80.82 validation accuracy, 79.87 test-dev accuracy and 80.02 test-std accuracy**, reproducing our reported results in the paper. However, the inference on test set costs around 1k GPU hours, which is much slower.
+    For all-candidate evaluation, we recommend to use the distributed script `evaluate_vqa_allcand_distributed.sh`. Please refer to the guide in the script to set the distributed configs before running. The result JSON file will be dumped in the `${result_path}` defined in the shell script of rank-0 server. All-candidate evaluation computes scores on all the candidate answers in the VQA dataset, which achieves **80.82 validation accuracy, 79.87 test-dev accuracy and 80.02 test-std accuracy**, reproducing our reported results in the paper. However, the inference on test set costs around 1k GPU hours, which is much slower.
     ```bash
     # run on each worker after the distributed configs have been correctly set following the guide in evaluate_vqa_allcand_distributed.sh
     cd run_scripts/vqa
