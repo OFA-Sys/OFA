@@ -1,4 +1,5 @@
 import logging
+import re
 import torch.utils.data
 from fairseq.data import FairseqDataset
 
@@ -35,3 +36,39 @@ class OFADataset(FairseqDataset):
         if append_eos:
             s = torch.cat([s, self.eos_item])
         return s
+
+    def pre_question(self, question, max_ques_words):
+        question = question.lower().lstrip(",.!?*#:;~").replace('-', ' ').replace('/', ' ')
+
+        question = re.sub(
+            r"\s{2,}",
+            ' ',
+            question,
+        )
+        question = question.rstrip('\n')
+        question = question.strip(' ')
+
+        # truncate question
+        question_words = question.split(' ')
+        if len(question_words) > max_ques_words:
+            question = ' '.join(question_words[:max_ques_words])
+
+        return question
+
+    def pre_caption(self, caption, max_words):
+        caption = caption.lower().lstrip(",.!?*#:;~").replace('-', ' ').replace('/', ' ').replace('<person>', 'person')
+
+        caption = re.sub(
+            r"\s{2,}",
+            ' ',
+            caption,
+        )
+        caption = caption.rstrip('\n')
+        caption = caption.strip(' ')
+
+        # truncate caption
+        caption_words = caption.split(' ')
+        if len(caption_words) > max_words:
+            caption = ' '.join(caption_words[:max_words])
+
+        return caption
