@@ -3,8 +3,8 @@
 user_dir=../../ofa_module
 bpe_dir=../../utils/BPE
 
-data=../../dataset/coco_text2image/coco_vqgan_dev.tsv
-path=../../checkpoints/image_gen.pt
+data=../../dataset/coco_image_gen_data/coco_vqgan_dev.tsv
+path=../../checkpoints/image_gen_large_best.pt
 selected_cols=0,2,1
 split='test'
 VQGAN_MODEL_PATH=../../checkpoints/vqgan/last.ckpt
@@ -36,6 +36,6 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 python ../../evaluate.py \
 cd ./eval_utils
 # compute IS
 python inception_score.py --gpu 4 --batch-size 128 --path1 ../${GEN_IMAGE_PATH}/top1
-# compute FID
-wget https://jirenmr.oss-cn-zhangjiakou.aliyuncs.com/ofa/gt_stat.npz
+# compute FID, download statistics for test dataset first.
+wget https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/coco_image_gen_data/gt_stat.npz
 python fid_score.py --gpu 4 --batch-size 128 --path1 ../${GEN_IMAGE_PATH}/top1 --path2 ./gt_stat.npz
