@@ -12,6 +12,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 <br></br>
 
 # News
+* 2022.2.23: Based on pretrained OFA, an interactive demo of **Visual Question Answering** is ready! Check it out in Huggingface Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering) !
 * 2022.2.22: Released the finetuning & inference code/checkpoints for VQA, which can reproduce **the reported VQA accuracy in OFA paper (80.02 on test-std)**. We believe much accuracy improvement can still be achieved based on this codebase. Recently we have used this codebase to achieve a better result **(80.45 on test-std)** on the [VQA Challenge](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278).
 * 2022.2.18: Interactive Demo of **Text-to-Image Generation** is ready! Check it out in Huggingface Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation) !
 * 2022.2.15: Released finetuning & inference code/checkpoints for referring expression comprehension, as well as a Colab notebook [![][colab]](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and a demo in Hugging Face Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
@@ -75,32 +76,38 @@ To release soon:)
 
 # Finetuning & Inference
 Below we provide methods for finetuning and inference on different downstream tasks.
-## Caption
-1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
-2. Train
-```bash
-cd run_scripts/caption
-nohup sh train_caption_stage1.sh > train_stage1.out &  # stage1, train with cross-entropy loss
-nohup sh train_caption_stage2.sh > train_stage2.out &  # stage2, load the best ckpt of stage1 and train with CIDEr optimization 
-```
-3. Inference
-```bash
-cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
-```
+## Image Captioning
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. The dataset zipfile `caption_data.zip` contains caption_stage1_train.tsv, caption_stage2_train.tsv, caption_val.tsv and caption_test.tsv. Each image corresponds to only 1 caption in `caption_stage1_train.tsv` and corresponds to multiple captions in other TSV files (about 5 captions per image). Each line of the dataset represents a caption sample with the following format. The information of uniq-id, image-id, caption, predicted object labels (taken from [VinVL](https://github.com/pzzhang/VinVL), not used), image base64 string are separated by tabs.
+    ```
+    162365  12455   the sun sets over the trees beyond some docks.  sky&&water&&dock&&pole  /9j/4AAQSkZJ....UCP/2Q==
+    ```
+2. **Finetuning**: Following previous standard practice, we divide the finetuning process of image captioning into two stages. In stage 1, we finetune OFA with cross-entropy loss on 4 NVIDIA-V100 GPUs with 32GB memory (expected to obtain ~139.5 CIDEr on the validation set at this stage). In stage 2, we select the best checkpoint of stage 1 and train with CIDEr optimization on 8 NVIDIA-V100 GPUs (expected to get ~149.4 CIDEr on the validation set at this stage).
+    ```bash
+    cd run_scripts/caption
+    nohup sh train_caption_stage1.sh > train_stage1.out &  # stage 1, train with cross-entropy loss
+    nohup sh train_caption_stage2.sh > train_stage2.out &  # stage 2, load the best ckpt of stage1 and train with CIDEr optimization 
+    ```
+3. **Inference**
+    ```bash
+    cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
+    ```
 
 ## Referring Expression Comprehension 
-1. Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory
-2. Train
-```bash
-cd run_scripts/refcoco
-nohup sh train_refcoco.sh > train_refcoco.out &  # finetune for refcoco
-nohup sh train_refcocoplus.sh > train_refcocoplus.out &  # finetune for refcoco+
-nohup sh train_refcocog.sh > train_refcocog.out &  # finetune for refcocog
-```
-3. Inference
-```bash
-cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refcoco/refcoco+/refcocog
-```
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. We provide RefCOCO (split by UNC), RefCOCO+ (split by UNC) and RefCOCOg (split by UMD) datasets. See (https://www.tensorflow.org/datasets/catalog/ref_coco) and (https://github.com/lichengunc/refer) for more details. Note that in the original dataset, each region-coord (or bounding box) may corresponds to multiple descriptive texts. We split these texts into multiple samples so that the region-coord in each sample corresponds to only one text. Each line of the processed dataset represents a sample with the following format. The information of uniq-id, image-id, text, region-coord (separated by commas), image base64 string are separated by tabs.
+    ```
+    79_1    237367  A woman in a white blouse holding a glass of wine.  230.79,121.75,423.66,463.06 9j/4AAQ...1pAz/9k=
+    ```
+2. **Finetuning**: Unlike the original paper, we finetune OFA with a drop-path rate of 0.2, and found that training with this hyper-parameter achieves better results. We will update the reported results of the paper later.
+    ```bash
+    cd run_scripts/refcoco
+    nohup sh train_refcoco.sh > train_refcoco.out &  # finetune for refcoco
+    nohup sh train_refcocoplus.sh > train_refcocoplus.out &  # finetune for refcoco+
+    nohup sh train_refcocog.sh > train_refcocog.out &  # finetune for refcocog
+    ```
+3. **Inference**
+    ```bash
+    cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refcoco/refcoco+/refcocog
+    ```
 
 ## Visual Question Answering
 Here we provide the finetuning and inference codes to reproduce the VQAv2 result reported in our paper (**test-std 80.02**). We believe much improvement on accuracy can still be achieved based on this codebase :)
@@ -123,13 +130,13 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
     In our experiments, the finetuning costs around 36 hours (for 12 epochs). After each epoch, an evaluation on validation set is performed. The best validation accuracy during finetuning will be around 80.8. The log is saved in `${log_dir}`.
 4. **Inference**: We provide 2 types of inference, **beam-search** (much faster but gets sub-optimal accuracy) and **all-candidate evaluation** (slower but best accuracy).
     
-    For beam-search inference, use the script `evaluate_vqa_beam.sh`. Refer to the command below. The inference on test set costs around 16 GPU hours. After inference on test set, you can submit the result `test_predict.json` to [EvalAI](https://eval.ai/web/challenges/challenge-page/830/overview). Using our released finetuned checkpoint, beam-search inference will get 80.15 validation accuracy and 79.48 test-std accuracy (around 0.6 lower than all-candidate evaluation).
+    For beam-search inference, use the script `evaluate_vqa_beam.sh`. Refer to the command below. The inference on test set costs around 16 GPU hours. After inference on test set, the result JSON file will be dumped in the `${result_path}` defined in the shell script. You can submit the result `test_predict.json` to [EvalAI](https://eval.ai/web/challenges/challenge-page/830/overview). Using our released finetuned checkpoint, beam-search inference will get 80.15 validation accuracy, 79.36 test-dev accuracy and 79.48 test-std accuracy (around 0.6 lower than all-candidate evaluation).
     ```bash
     cd run_scripts/vqa
     bash evaluate_vqa_beam.sh val # specify 'val' or 'test'
     ```    
     
-    For all-candidate evaluation, we recommend to use the distributed scripts `evaluate_vqa_allcand_distributed.sh`. Please refer to the guide in the script to set the distributed configs. All-candidate evaluation computes scores on all the candidate answers in the VQA dataset, which achieves **80.82 validation accuracy and 80.02 test-std accuracy**, reproducing our reported results in the paper. However, the inference on test set costs around 1k GPU hours, which is much slower.
+    For all-candidate evaluation, we recommend to use the distributed script `evaluate_vqa_allcand_distributed.sh`. Please refer to the guide in the script to set the distributed configs before running. The result JSON file will be dumped in the `${result_path}` defined in the shell script of rank-0 server. All-candidate evaluation computes scores on all the candidate answers in the VQA dataset, which achieves **80.82 validation accuracy, 79.87 test-dev accuracy and 80.02 test-std accuracy**, reproducing our reported results in the paper. However, the inference on test set costs around 1k GPU hours, which is much slower.
     ```bash
     # run on each worker after the distributed configs have been correctly set following the guide in evaluate_vqa_allcand_distributed.sh
     cd run_scripts/vqa
@@ -163,8 +170,7 @@ Please cite our paper if you find it helpful :)
 @article{wang2022OFA,
   title={Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework},
   author={Wang, Peng and Yang, An and Men, Rui and Lin, Junyang and Bai, Shuai and Li, Zhikang and Ma, Jianxin and Zhou, Chang and Zhou, Jingren and Yang, Hongxia},
-  journal={arXiv e-prints},
-  pages={arXiv--2202},
+  journal={arXiv preprint arXiv:2202.03052},
   year={2022}
 }
 ```
