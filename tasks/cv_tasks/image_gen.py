@@ -45,15 +45,6 @@ def custom_to_pil(x):
 
 @dataclass
 class ImageGenConfig(OFAConfig):
-    data: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "colon separated path to data directories list, will be iterated upon during epochs "
-                    "in round-robin manner; however, valid and test data are always in the first directory "
-                    "to avoid the need for repeating them in all directories"
-        },
-    )
-
     sampling_times: int = field(
         default=1, metadata={"help": "sample times"}
     )
