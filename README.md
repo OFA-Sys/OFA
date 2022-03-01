@@ -197,6 +197,18 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 ![vg](examples/viusal_grounding.png)
 <br></br>
 
+# Related Codebase
+* [Fairseq](https://github.com/pytorch/fairseq)
+<br></br>
+
+
+# Getting Involved
+Feel free to submit Github issues or pull requests. Welcome to contribute to our project!
+
+To contact us, never hestitate to send an email to `zheluo.wp@alibaba-inc.com` or `junyang.ljy@alibaba-inc.com`!
+<br></br>
+
+
 # Citation
 Please cite our paper if you find it helpful :)
 
@@ -209,16 +221,3 @@ Please cite our paper if you find it helpful :)
 }
 ```
 <br></br>
-
-# Getting Involved
-Feel free to submit Github issues or pull requests. Welcome to contribute to our project!
-
-To contact us, never hestitate to send an email to `zheluo.wp@alibaba-inc.com` or `junyang.ljy@alibaba-inc.com`!
-<br></br>
-
-# Related Codebase
-* [Fairseq](https://github.com/pytorch/fairseq)
-<br></br>
-
-# License
-Apache-2.0
