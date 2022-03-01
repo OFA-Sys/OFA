@@ -7,12 +7,9 @@
 import logging
 import os
 import sys
-import json
-from itertools import chain
 
 import numpy as np
 import torch
-import torch.distributed as dist
 from fairseq import distributed_utils, options, tasks, utils
 from fairseq.dataclass.utils import convert_namespace_to_omegaconf
 from fairseq.logging import progress_bar
@@ -20,7 +17,7 @@ from fairseq.utils import reset_logging
 from omegaconf import DictConfig
 
 from utils import checkpoint_utils
-from utils.eval_utils import eval_step
+from utils.eval_utils import eval_step, merge_results
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -44,7 +41,7 @@ def main(cfg: DictConfig, **kwargs):
     logger.info(cfg)
 
     assert (
-        cfg.dataset.max_tokens is not None or cfg.dataset.batch_size is not None
+            cfg.dataset.max_tokens is not None or cfg.dataset.batch_size is not None
     ), "Must specify batch size either with --max-tokens or --batch-size"
 
     # Fix seed for stochastic decoding
@@ -125,23 +122,7 @@ def main(cfg: DictConfig, **kwargs):
         score_cnt += len(scores) if scores is not None else 0
         progress.log({"sentences": sample["nsentences"]})
 
-    gather_results = None
-    if cfg.distributed_training.distributed_world_size > 1:
-        gather_results = [None for _ in range(dist.get_world_size())]
-        dist.all_gather_object(gather_results, results)
-        dist.all_reduce(score_sum.data)
-        dist.all_reduce(score_cnt.data)
-    if score_cnt.item() > 0:
-        logger.info("score_sum: {}, score_cnt: {}, score: {}".format(
-            score_sum, score_cnt, round(score_sum.item() / score_cnt.item(), 4)
-        ))
-
-    if cfg.distributed_training.distributed_world_size == 1 or dist.get_rank() == 0:
-        os.makedirs(cfg.common_eval.results_path, exist_ok=True)
-        output_path = os.path.join(cfg.common_eval.results_path, "{}_predict.json".format(cfg.dataset.gen_subset))
-        gather_results = list(chain(*gather_results)) if gather_results is not None else results
-        with open(output_path, 'w') as fw:
-            json.dump(gather_results, fw)
+    merge_results(task, cfg, logger, score_cnt, score_sum, results)
 
 
 def cli_main():
