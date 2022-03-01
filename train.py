@@ -164,7 +164,7 @@ def main(cfg: FairseqConfig) -> None:
         xm.rendezvous("load_checkpoint")  # wait for all workers
 
     max_epoch = cfg.optimization.max_epoch or math.inf
-    if max_epoch > 0:
+    if max_epoch > 0 and max_epoch != math.inf:
         total_num_updates = sum(
             math.ceil(len(epoch_itr) / cfg.optimization.update_freq[i])
             if i < len(cfg.optimization.update_freq) else
