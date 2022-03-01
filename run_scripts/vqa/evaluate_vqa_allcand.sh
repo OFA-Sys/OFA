@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# The port for communication. Note that if you want to run multiple tasks on the same machine,
+# you need to specify different port numbers.
+export MASTER_PORT=8081
+
 user_dir=../../ofa_module
 bpe_dir=../../utils/BPE
 
@@ -12,7 +16,7 @@ path=../../checkpoints/vqa_large_best.pt
 result_path=../../results/vqa_${split}_allcand
 selected_cols=0,5,2,3,4
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 python3 ../../evaluate.py \
+CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../evaluate.py \
     ${data} \
     --path=${path} \
     --user-dir=${user_dir} \

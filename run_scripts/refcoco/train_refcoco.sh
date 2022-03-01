@@ -1,5 +1,9 @@
 #!/usr/bin/env
 
+# The port for communication. Note that if you want to run multiple tasks on the same machine,
+# you need to specify different port numbers.
+export MASTER_PORT=6051
+
 log_dir=./refcoco_logs
 save_dir=./refcoco_checkpoints
 mkdir -p $log_dir $save_dir
@@ -42,7 +46,7 @@ for max_epoch in {10,}; do
       save_path=${save_dir}/${max_epoch}"_"${lr}"_"${patch_image_size}
       mkdir -p $save_path
 
-      CUDA_VISIBLE_DEVICES=0,1,2,3 python3 ../../train.py \
+      CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../train.py \
           $data \
           --selected-cols=${selected_cols} \
           --bpe-dir=${bpe_dir} \

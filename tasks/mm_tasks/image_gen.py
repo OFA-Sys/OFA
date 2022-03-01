@@ -7,12 +7,10 @@ from dataclasses import dataclass, field
 import json
 import logging
 import os
-import math
 import base64
 from typing import Optional
 from argparse import Namespace
-from omegaconf import DictConfig, OmegaConf
-from torchvision import transforms
+from omegaconf import OmegaConf
 from PIL import Image
 from io import BytesIO
 
@@ -23,7 +21,7 @@ from fairseq.tasks import register_task
 
 from models import search, clip
 from models.taming.models.vqgan import GumbelVQ
-from data.cv_data.image_gen_dataset import ImageGenDataset
+from data.mm_data.image_gen_dataset import ImageGenDataset
 from data.file_dataset import FileDataset
 
 from tasks.ofa_task import OFATask, OFAConfig

@@ -165,9 +165,13 @@ def main(cfg: FairseqConfig) -> None:
 
     max_epoch = cfg.optimization.max_epoch or math.inf
     if max_epoch > 0:
-        num_iter_per_epoch = (len(epoch_itr) + cfg.distributed_training.distributed_world_size - 1) \
-                             // cfg.distributed_training.distributed_world_size
-        trainer.lr_reinit(num_iter_per_epoch * max_epoch, trainer.get_num_updates())
+        total_num_updates = sum(
+            math.ceil(len(epoch_itr) / cfg.optimization.update_freq[i])
+            if i < len(cfg.optimization.update_freq) else
+            math.ceil(len(epoch_itr) / cfg.optimization.update_freq[-1])
+            for i in range(max_epoch)
+        )
+        trainer.lr_reinit(total_num_updates, trainer.get_num_updates())
     lr = trainer.get_lr()
 
     train_meter = meters.StopwatchMeter()
