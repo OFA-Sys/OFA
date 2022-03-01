@@ -1,5 +1,8 @@
 #!/usr/bin/env
 
+# The port for communication
+export MASTER_PORT=1051
+
 log_dir=./stage1_logs
 save_dir=./stage1_checkpoints
 mkdir -p $log_dir $save_dir
@@ -44,7 +47,7 @@ for max_epoch in {2,}; do
       save_path=${save_dir}/${max_epoch}"_"${warmup_ratio}"_"${drop_worst_after}
       mkdir -p $save_path
 
-      CUDA_VISIBLE_DEVICES=0,1,2,3 python3 ../../train.py \
+      CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../train.py \
           $data \
           --selected-cols=${selected_cols} \
           --bpe-dir=${bpe_dir} \

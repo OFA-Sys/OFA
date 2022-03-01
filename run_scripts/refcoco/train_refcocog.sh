@@ -1,5 +1,8 @@
 #!/usr/bin/env
 
+# The port for communication
+export MASTER_PORT=6052
+
 log_dir=./refcocog_logs
 save_dir=./refcocog_checkpoints
 mkdir -p $log_dir $save_dir
@@ -42,7 +45,7 @@ for max_epoch in {10,}; do
       save_path=${save_dir}/${max_epoch}"_"${lr}"_"${patch_image_size}
       mkdir -p $save_path
 
-      CUDA_VISIBLE_DEVICES=4,5,6,7 python3 ../../train.py \
+      CUDA_VISIBLE_DEVICES=4,5,6,7 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../train.py \
           $data \
           --selected-cols=${selected_cols} \
           --bpe-dir=${bpe_dir} \
