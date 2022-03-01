@@ -13,7 +13,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
     <a href="https://github.com/huggingface/transformers/blob/master/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/huggingface/transformers.svg?color=blue">
     </a>
-    <a href="https://huggingface.co/spaces/OFA-Sys">
+    <a href="https://huggingface.co/ofa-sys">
         <img alt="spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue">
     </a>
     <a href="colab.md"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="DOI"></a>
@@ -59,8 +59,10 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # TODO
-* To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. 
-* To release codes for pretraining soon.
+* [x] To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. 
+* [ ] To release finetuning and inference codes for unimodal downstream tasks soon. 
+* [ ] To release codes for pretraining soon.
+* [ ] To integrate more downstream tasks concerning more modalities to our OFA framework.
 <br></br>
 
 # Approach
