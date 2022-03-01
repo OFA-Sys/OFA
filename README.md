@@ -35,7 +35,7 @@ to a simple sequence-to-sequence learning framework. For more information, pleas
 <br></br>
 
 
-# Online Demo
+# Online Demos
 We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
 * [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
 * [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
