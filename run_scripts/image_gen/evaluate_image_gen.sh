@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# The port for communication. Note that if you want to run multiple tasks on the same machine,
+# you need to specify different port numbers.
+export MASTER_PORT=4081
+
 user_dir=../../ofa_module
 bpe_dir=../../utils/BPE
 
@@ -16,7 +20,7 @@ VQGAN_CONFIG_PATH=../../checkpoints/vqgan/model.yaml
 CLIP_MODEL_PATH=../../checkpoints/clip/ViT-B-16.pt
 GEN_IMAGE_PATH=../../results/image_gen
 
-CUDA_VISIBLE_DEVICES=4,5,6,7 python ../../evaluate.py \
+CUDA_VISIBLE_DEVICES=4,5,6,7 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../evaluate.py \
   ${data} \
   --path=${path} \
   --user-dir=${user_dir} \

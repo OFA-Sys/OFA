@@ -1,6 +1,7 @@
 #!/usr/bin/env
 
-# The port for communication
+# The port for communication. Note that if you want to run multiple tasks on the same machine,
+# you need to specify different port numbers.
 export MASTER_PORT=1052
 
 log_dir=./stage2_logs
