@@ -177,8 +177,7 @@ class ImageClassifyTask(OFATask):
                 ]
 
                 decoder_out = eval_model.decoder(valid_prev_output, encoder_out=new_encoder_out)
-                if not self.trie_ablation:
-                    decoder_out[0].masked_fill_(~valid_constraint_masks, -999)
+                decoder_out[0].masked_fill_(~valid_constraint_masks, -math.inf)
                 lprobs = eval_model.get_normalized_probs(decoder_out, log_probs=True)
                 scores = lprobs.gather(dim=-1, index=valid_tgt.unsqueeze(-1)).squeeze(-1)
                 scores = scores.masked_fill(valid_tgt.eq(self.tgt_dict.pad()), 0)
