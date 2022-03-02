@@ -27,7 +27,12 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 </h4>
 <br></br>
 
-![Overview](examples/overview.png)
+<p align="center">
+    <br>
+    <img src="examples/demo.gif" width="800" />
+    <br>
+<p>
+
 
 OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
