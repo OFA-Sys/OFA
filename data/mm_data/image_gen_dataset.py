@@ -125,15 +125,15 @@ class ImageGenDataset(OFADataset):
         data = self.dataset[index]
 
         if len(data) == 2:
-            uniq_id, text = self.dataset[index]
+            uniq_id, text = data
             image_code = [0] * 1024
             image = self.empty_image_base64
         elif len(data) == 3:
-            uniq_id, text, image_code = self.dataset[index]
+            uniq_id, text, image_code = data
             image_code = [int(num) for num in image_code.strip().split()]
             image = self.empty_image_base64
         elif len(data) == 4:
-            uniq_id, image, text, image_code = self.dataset[index]
+            uniq_id, image, text, image_code = data
             image_code = [int(num) for num in image_code.strip().split()]
         else:
             raise NotImplementedError

@@ -1,7 +1,30 @@
-# OFA
+<!---
+Copyright 2022 The OFA-Sys Team. 
+All rights reserved.
+This source code is licensed under the Apache 2.0 license found in the LICENSE file in the root directory.
+-->
 
+<p align="center">
+    <br>
+    <img src="examples/0001.jpg" width="150" />
+    <br>
+<p>
+<p align="center">
+    <a href="https://github.com/huggingface/transformers/blob/master/LICENSE">
+        <img alt="GitHub" src="https://img.shields.io/github/license/huggingface/transformers.svg?color=blue">
+    </a>
+    <a href="https://huggingface.co/ofa-sys">
+        <img alt="spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue">
+    </a>
+    <a href="colab.md"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="DOI"></a>
+</p>
 
-[[Paper]](http://arxiv.org/abs/2202.03052) [Blog] [[Colab](colab.md)] [[Spaces](spaces.md)]
+<h4 align="center">
+    <p>
+        <a href="http://arxiv.org/abs/2202.03052">Paper</a> |
+        <b>Blog</b>
+    <p>
+</h4>
 <br></br>
 
 ![Overview](examples/overview.png)
@@ -11,22 +34,35 @@ OFA is a unified multimodal pretrained model that unifies modalities (i.e., cros
 to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
 <br></br>
 
+
+# Online Demos
+We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
+* [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
+* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
+* [Visual Grounding](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)
+* [Visual Question Answering](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)
+
+Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
+<br></br>
+
 # News
-* 2022.2.23: Based on pretrained OFA, an interactive demo of **Visual Question Answering** is ready! Check it out in Huggingface Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering) !
+* 2022.2.23: Based on pretrained OFA, an interactive demo of **Visual Question Answering** is ready! Check it out in [Huggingface Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)!
 * 2022.2.22: Released the finetuning & inference code/checkpoints for VQA, which can reproduce **the reported VQA accuracy in OFA paper (80.02 on test-std)**. We believe much accuracy improvement can still be achieved based on this codebase. Recently we have used this codebase to achieve a better result **(80.45 on test-std)** on the [VQA Challenge](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278).
-* 2022.2.18: Interactive Demo of **Text-to-Image Generation** is ready! Check it out in Huggingface Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation) !
-* 2022.2.15: Released finetuning & inference code/checkpoints for referring expression comprehension, as well as a Colab notebook [![][colab]](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and a demo in Hugging Face Spaces [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
-* 2022.2.13: Released the demo of image captioning. Have fun! [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
-* 2022.2.11: Released the Colab notebook for image captioning [![][colab]](https://colab.research.google.com/drive/1Q4eNhhhLcgOP4hHqwZwU1ijOlabgve1W?usp=sharing). Enjoy! 
+* 2022.2.18: Interactive Demo of **Text-to-Image Generation** is ready! Check it out in [Huggingface Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)!
+* 2022.2.15: Released finetuning & inference code/checkpoints for referring expression comprehension, as well as a [Colab notebook](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and a demo in [Hugging Face Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
+* 2022.2.13: Released the demo of image captioning on [Hugging Face Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption). Have fun!
+* 2022.2.11: Released the [Colab notebook](https://colab.research.google.com/drive/1Q4eNhhhLcgOP4hHqwZwU1ijOlabgve1W?usp=sharing) for image captioning. Enjoy! 
 * 2022.2.11: Released the pretrained checkpoint of OFA-Large and the complete (2-stage) finetuning code for image captioning.
-* 2022.2.10: Released the inference code & finetuned checkpoint for image captioning, which can reproduce **the results on COCO Karparthy test split (149.6 CIDEr)**. OFA also achieves No.1 on the COCO image captioning online leaderboard [[Link](https://competitions.codalab.org/competitions/3221#results)] (marked as M6-Team)
+* 2022.2.10: Released the inference code & finetuned checkpoint for image captioning, which can reproduce **the results on COCO Karparthy test split (149.6 CIDEr)**. OFA also achieves No.1 on the COCO image captioning online leaderboard [[Link](https://competitions.codalab.org/competitions/3221#results)] (marked as M6-Team).
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 <br></br>
 
 # TODO
-* To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, Referring expression, comprehension, etc. 
-* To release codes for pretraining soon.
+* [x] To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, referring expression, comprehension, etc. 
+* [ ] To release finetuning and inference codes for unimodal downstream tasks soon. 
+* [ ] To release codes for pretraining soon.
+* [ ] To integrate more downstream tasks concerning more modalities to our OFA framework.
 <br></br>
 
 # Approach
@@ -72,7 +108,7 @@ See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
 
 # Pretraining
 To release soon:)
-
+<br></br>
 
 # Finetuning & Inference
 Below we provide methods for finetuning and inference on different downstream tasks.
@@ -163,6 +199,18 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 ![vg](examples/viusal_grounding.png)
 <br></br>
 
+# Related Codebase
+* [Fairseq](https://github.com/pytorch/fairseq)
+<br></br>
+
+
+# Getting Involved
+Feel free to submit Github issues or pull requests. Welcome to contribute to our project!
+
+To contact us, never hestitate to send an email to `zheluo.wp@alibaba-inc.com` or `junyang.ljy@alibaba-inc.com`!
+<br></br>
+
+
 # Citation
 Please cite our paper if you find it helpful :)
 
@@ -175,16 +223,3 @@ Please cite our paper if you find it helpful :)
 }
 ```
 <br></br>
-
-# Getting Involved
-Feel free to submit Github issues or pull requests. Welcome to contribute to our project!
-
-To contact us, never hestitate to send an email to `zheluo.wp@alibaba-inc.com` or `junyang.ljy@alibaba-inc.com`!
-<br></br>
-
-# Related Codebase
-* [Fairseq](https://github.com/pytorch/fairseq)
-<br></br>
-
-# License
-Apache-2.0
