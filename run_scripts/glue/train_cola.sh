@@ -15,7 +15,7 @@ user_dir=../../ofa_module
 data_dir=../../dataset/glue_data
 data=${data_dir}/cola_train.tsv,${data_dir}/cola_dev.tsv
 restore_file=../../checkpoints/ofa_large.pt
-selected_cols=3,1
+selected_cols=1,2
 
 arch=ofa_large
 criterion=adjust_label_smoothed_cross_entropy
@@ -35,7 +35,7 @@ max_tgt_length=30
 num_bins=1000
 prompt_type="src"
 
-for max_epoch in {7,10}; do
+for max_epoch in {5,7,10}; do
   echo "max_epoch "${max_epoch}
   for lr in {1e-4,7e-5,6e-5,5e-5,3e-5}; do
     echo "lr "${lr}
