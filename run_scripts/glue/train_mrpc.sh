@@ -15,7 +15,7 @@ user_dir=../../ofa_module
 data_dir=../../dataset/glue_data
 data=${data_dir}/mrpc_train.tsv,${data_dir}/mrpc_dev.tsv
 restore_file=../../checkpoints/ofa_large.pt
-selected_cols=1,2,0
+selected_cols=0,1,2
 
 arch=ofa_large
 criterion=adjust_label_smoothed_cross_entropy
