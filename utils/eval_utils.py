@@ -215,6 +215,18 @@ def eval_image_gen(task, generator, models, sample, **kwargs):
     return results, scores
 
 
+def eval_glue(task, generator, models, sample, **kwargs):
+    net_output = models[0](**sample["net_input"])
+    net_output[0].masked_fill_(~sample["constraint_masks"], -math.inf)
+    last_token_ids = sample["net_input"]["prev_output_tokens"].ne(task.src_dict.pad()).sum(1, keepdim=True) - 1
+    logits = net_output[0].gather(1, last_token_ids.unsqueeze(2).expand(-1, -1, net_output[0].size(2)))
+    logits = logits.squeeze(1)
+    predicts = logits.argmax(1).tolist()
+    hyps = [task.bpe.decode(task.src_dict[predict]).strip() for predict in predicts]
+    results = [{"hyp": hyp, "ref": ref_dict.keys()[0]} for hyp, ref_dict in zip(hyps, sample['ref_dict'])]
+    return results, None
+
+
 def eval_step(task, generator, models, sample, **kwargs):
     if task.cfg._name == 'caption':
         return eval_caption(task, generator, models, sample, **kwargs)
@@ -226,6 +238,8 @@ def eval_step(task, generator, models, sample, **kwargs):
         return eval_snli_ve(task, generator, models, sample, **kwargs)
     elif task.cfg._name == 'image_gen':
         return eval_image_gen(task, generator, models, sample, **kwargs)
+    elif task.cfg._name in {'cola', 'mnli', 'mrpc', 'qnli', 'qqp', 'rte', 'sst2'}:
+        return eval_glue(task, generator, models, sample, **kwargs)
     else:
         raise NotImplementedError
 
