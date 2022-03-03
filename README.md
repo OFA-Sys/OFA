@@ -51,6 +51,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # News
+* 2022.3.03: Released the finetuning & inference code/checkpoints for SNLI-VE and GLUE.
 * 2022.2.23: Based on pretrained OFA, an interactive demo of **Visual Question Answering** is ready! Check it out in [Huggingface Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)!
 * 2022.2.22: Released the finetuning & inference code/checkpoints for VQA, which can reproduce **the reported VQA accuracy in OFA paper (80.02 on test-std)**. We believe much accuracy improvement can still be achieved based on this codebase. Recently we have used this codebase to achieve a better result **(80.45 on test-std)** on the [VQA Challenge](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278).
 * 2022.2.18: Interactive Demo of **Text-to-Image Generation** is ready! Check it out in [Huggingface Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)!
