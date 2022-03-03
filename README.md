@@ -189,7 +189,7 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
     ```
     252244149.jpg#1r1n  252244149   /9j/4AAQ...MD/2Q==   a man in pink and gold is chewing on a wooden toothpick.   a man in pink is chewing a toothpick on the subway.   neutral 
     ```
-2. **Finetuning**: In our experiments, the SNLI-VE finetuning is performed on 8 NVIDIA-V100 GPUs with 32GB memory. In this task, we experimented with only a few sets of hyperparameters. We believe that proper hyperparameter tuning can bring further accuracy improvement.
+2. **Finetuning**: In our experiments, the SNLI-VE finetuning is performed on 8 NVIDIA-V100 GPUs with 32GB memory. In this task, we experimented with only a few sets of hyperparameters. We believe that proper hyperparameter tuning can lead to further accuracy improvement.
     ```bash
     cd run_scripts/snli_ve
     nohup sh train_snli_ve.sh > train_snli_ve.out &  # finetune for snli_ve
