@@ -182,7 +182,36 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
     # run on each worker after the distributed configs have been correctly set following the guide in evaluate_vqa_allcand_distributed.sh
     cd run_scripts/vqa
     bash evaluate_vqa_allcand_distributed.sh val # specify 'val' or 'test'
-    ```      
+    ```   
+
+## SNLI-VE
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. Each line of the processed dataset represents a sample with the following format. The information of uniq-id, image-id, image base64 string, hypothesis, caption, label are separated by tabs.
+    ```
+    252244149.jpg#1r1n  252244149   /9j/4AAQ...MD/2Q==   a man in pink and gold is chewing on a wooden toothpick.   a man in pink is chewing a toothpick on the subway.   neutral 
+    ```
+2. **Finetuning**: In our experiments, the SNLI-VE finetuning is performed on 8 NVIDIA-V100 GPUs with 32GB memory. In this task, we experimented with only a few sets of hyperparameters. We believe that proper hyperparameter tuning can lead to further accuracy improvement.
+    ```bash
+    cd run_scripts/snli_ve
+    nohup sh train_snli_ve.sh > train_snli_ve.out &  # finetune for snli_ve
+    ```
+3. **Inference**
+    ```bash
+    cd run_scripts/snli_ve ; sh evaluate_snli_ve.sh  # inference & evaluate for snli_ve
+    ```   
+   
+## GLUE
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. we provide 7 language understanding datasets from GLUE benchmark, including COLA, MNLI, MRPC, QNLI, QQP, RTE and SST2. More details about these datasets can be found in  (https://openreview.net/pdf?id=rJ4km2R5t7)
+2. **Finetuning**: For each task, we have tried multiple sets of hyperparameters (including learning rate, batch size, training epochs). The results under different sets of hyperparameters can be found in `${log_dir}`.
+    ```bash
+    cd run_scripts/glue
+    nohup sh train_cola.sh > train_cola.out &  # finetune for cola
+    nohup sh train_mnli.sh > train_mnli.out &  # finetune for mnli
+    nohup sh train_mrpc.sh > train_mrpc.out &  # finetune for mrpc
+    nohup sh train_qnli.sh > train_qnli.out &  # finetune for qnli
+    nohup sh train_qqp.sh > train_qqp.out &  # finetune for qqp
+    nohup sh train_rte.sh > train_rte.out &  # finetune for rte
+    nohup sh train_sst2.sh > train_sst2.out &  # finetune for sst2
+    ```
 <br></br>
 
 # Gallery
