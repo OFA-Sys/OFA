@@ -6,7 +6,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 <p align="center">
     <br>
-    <img src="examples/OFA_logo.svg" width="150" />
+    <img src="examples/OFA_logo_tp.svg" width="150" />
     <br>
 <p>
 <p align="center">
