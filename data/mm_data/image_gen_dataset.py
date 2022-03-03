@@ -121,9 +121,8 @@ class ImageGenDataset(OFADataset):
         self.empty_image_base64 = base64.urlsafe_b64encode(byte_data)
 
     def __getitem__(self, index):
-        # uniq_id, image, text, image_code = self.dataset[index]
-        data = self.dataset[index]
 
+        data = self.dataset[index]
         if len(data) == 2:
             uniq_id, text = data
             image_code = [0] * 1024

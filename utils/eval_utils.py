@@ -210,8 +210,16 @@ def eval_image_gen(task, generator, models, sample, **kwargs):
     results = []
     for i, indice in enumerate(indices):
         results.append({"sample_id": str(sample["id"][0]), "score": text_similarity_score[i], "image": hypos[indice]})
-
     scores = [max(text_similarity_score).item()]
+    sorted_hyps = [hypos[indice] for indice in indices]
+    # dump results
+    if task.cfg.gen_images_path:
+        caption_tokens = sample['net_input']['src_tokens'][0].view(-1).tolist()
+        caption = task.bpe.decode(task.tgt_dict.string([token for token in caption_tokens if token >= 4]))[
+                  38:].replace('/', '')
+        task.dump_images(sorted_hyps, text=caption, path=os.path.join(task.cfg.gen_images_path, 'all_results'))
+        task.dump_images(sorted_hyps, text=caption, path=os.path.join(task.cfg.gen_images_path, 'top1'), topk=1)
+
     return results, scores
 
 
