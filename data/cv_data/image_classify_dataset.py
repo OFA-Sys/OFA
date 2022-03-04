@@ -129,7 +129,7 @@ class ImageClassifyDataset(OFADataset):
                 transforms.ToTensor(),
                 transforms.Normalize(mean=mean, std=std),
             ])
-            print("val split, do not use random augmentation: {}".format(self.patch_resize_transform.transforms))
+            logger.info("val split, do not use random augmentation.")
         else:
             self.patch_resize_transform = create_transform(
                 input_size=patch_image_size,
@@ -150,7 +150,7 @@ class ImageClassifyDataset(OFADataset):
                 [RandomAugment(2, 7, isPIL=True, augs=['Identity', 'AutoContrast', 'Equalize', 'Brightness', 'Sharpness', 'ShearX', 'ShearY', 'TranslateX', 'TranslateY', 'Rotate']), ],
                 self.patch_resize_transform.transforms[3:],
             ]))
-            print("train split, use random augmentation: {}".format(self.patch_resize_transform.transforms))
+            logger.info("train split, use random augmentation.")
 
     def __getitem__(self, index):
         image, label_name = self.dataset[index]
