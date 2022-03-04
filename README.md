@@ -231,9 +231,10 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
    
 3. **Finetuning**: Following previous practice, we divide the finetuning process of image generating into two stages. 
     In stage 1, we finetune OFA with cross-entropy loss on 4 8-V100-32G-GPU servers (expected to obtain ~32.5+ CLIP Score on the validation set at this stage).
-    In stage 2, we select the best checkpoint of stage 1 and train with CLIP Score optimization on 4 8-V100-32G-GPU servers (expected to obtain ~34.0+ CLIP Score on the validation set at this stage).
+    In stage 2, we select the last checkpoint of stage 1 and train with CLIP Score optimization on 4 8-V100-32G-GPU servers (expected to obtain ~34.0+ CLIP Score on the validation set at this stage).
     During the validation, the generated image will be dumped into _GEN_IMAGE_PATH_.
     ```bash
+    # run on each worker after the distributed and data configs have been correctly set following the guide in train_image_gen_stage1_distributed.sh 
     cd run_scripts/image_gen
     nohup sh train_image_gen_stage1_distributed.sh # stage 1, train with cross-entropy loss
     nohup sh train_image_gen_stage2_distributed.sh # stage 2, load the last ckpt of stage1 and train with CLIP Score optimization 
