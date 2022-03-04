@@ -6,7 +6,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 <p align="center">
     <br>
-    <img src="examples/OFA_logo.svg" width="150" />
+    <img src="examples/OFA_logo_tp.svg" width="150" />
     <br>
 <p>
 <p align="center">
@@ -27,7 +27,12 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 </h4>
 <br></br>
 
-![Overview](examples/overview.png)
+<p align="center">
+    <br>
+    <img src="examples/demo.gif" width="800" />
+    <br>
+<p>
+
 
 OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
@@ -46,6 +51,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # News
+* 2022.3.03: Released the finetuning & inference code/checkpoints for SNLI-VE and GLUE.
 * 2022.2.23: Based on pretrained OFA, an interactive demo of **Visual Question Answering** is ready! Check it out in [Huggingface Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)!
 * 2022.2.22: Released the finetuning & inference code/checkpoints for VQA, which can reproduce **the reported VQA accuracy in OFA paper (80.02 on test-std)**. We believe much accuracy improvement can still be achieved based on this codebase. Recently we have used this codebase to achieve a better result **(80.45 on test-std)** on the [VQA Challenge](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278).
 * 2022.2.18: Interactive Demo of **Text-to-Image Generation** is ready! Check it out in [Huggingface Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)!
@@ -177,7 +183,66 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
     # run on each worker after the distributed configs have been correctly set following the guide in evaluate_vqa_allcand_distributed.sh
     cd run_scripts/vqa
     bash evaluate_vqa_allcand_distributed.sh val # specify 'val' or 'test'
-    ```      
+    ```   
+
+## Visual Entailment
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. Each line of the processed dataset represents a sample with the following format. The information of uniq-id, image-id, image base64 string, hypothesis, caption (or text premise), label are separated by tabs.
+    ```
+    252244149.jpg#1r1n  252244149   /9j/4AAQ...MD/2Q==   a man in pink and gold is chewing on a wooden toothpick.   a man in pink is chewing a toothpick on the subway.   neutral 
+    ```
+2. **Finetuning**: In our experiments, the SNLI-VE finetuning is performed on 8 NVIDIA-V100 GPUs with 32GB memory. In this task, we experimented with only a few sets of hyperparameters. We believe that proper hyperparameter tuning can lead to further accuracy improvement.
+    ```bash
+    cd run_scripts/snli_ve
+    nohup sh train_snli_ve.sh > train_snli_ve.out &  # finetune for snli_ve
+    ```
+3. **Inference**
+    ```bash
+    cd run_scripts/snli_ve ; sh evaluate_snli_ve.sh  # inference & evaluate for snli_ve
+    ```   
+   
+## GLUE
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. we provide 7 language understanding datasets from GLUE benchmark, including COLA, MNLI, MRPC, QNLI, QQP, RTE and SST2. More details about these datasets can be found in  (https://openreview.net/pdf?id=rJ4km2R5t7)
+2. **Finetuning**: For each task, we have tried multiple sets of hyperparameters (including learning rate, batch size, training epochs). The results under different sets of hyperparameters can be found in `${log_dir}`.
+    ```bash
+    cd run_scripts/glue
+    nohup sh train_cola.sh > train_cola.out &  # finetune for cola
+    nohup sh train_mnli.sh > train_mnli.out &  # finetune for mnli
+    nohup sh train_mrpc.sh > train_mrpc.out &  # finetune for mrpc
+    nohup sh train_qnli.sh > train_qnli.out &  # finetune for qnli
+    nohup sh train_qqp.sh > train_qqp.out &  # finetune for qqp
+    nohup sh train_rte.sh > train_rte.out &  # finetune for rte
+    nohup sh train_sst2.sh > train_sst2.out &  # finetune for sst2
+    ```
+
+## Text-to-Image Generation 
+1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. 
+   The dataset zipfile `coco_image_gen.zip` contains `coco_vqgan_train.tsv`, `coco_vqgan_dev.tsv` and `coco_vqgan_full_test.tsv`. 
+   Each line of the dataset represents a sample with the following format. The information of uniq-id, image-code (produced by [vqgan](https://github.com/CompVis/taming-transformers), a list of integers separated by single-whitespaces), lowercased caption are separated by tabs.
+    ```
+    1	6674 4336 4532 5334 3251 5461 3615 2469 ...4965 4190 1846	the people are posing for a group photo.
+    ```
+   The checkpoint zipfile `image_gen_large_best.zip` contains `image_gen_large_best.pt`,`vqgan/last.ckpt`, `vqgan/model.yaml` and `clip/Vit-B-16.pt`. 
+2. **Shuffle the Training Data** (optional, but achieves better result): If the disk storage is sufficient, we recommend to prepare the shuffled training data for each epoch in advance. 
+    ```bash
+    cd dataset/image_gen
+    ln coco_vqgan_train.tsv coco_vqgan_train_1.tsv
+    for idx in `seq 1 9`;do shuf coco_vqgan_train_${idx}.tsv > coco_vqgan_train_$[${idx}+1].tsv;done # each file is used for an epoch
+    ```
+   
+3. **Finetuning**: Following previous practice, we divide the finetuning process of image generating into two stages. 
+    In stage 1, we finetune OFA with cross-entropy loss on 4 8-V100-32G-GPU servers (expected to obtain ~32.5+ CLIP Score on the validation set at this stage).
+    In stage 2, we select the last checkpoint of stage 1 and train with CLIP Score optimization on 4 8-V100-32G-GPU servers (expected to obtain ~34.0+ CLIP Score on the validation set at this stage).
+    During the validation, the generated image will be dumped into _GEN_IMAGE_PATH_.
+    ```bash
+    # run on each worker after the distributed and data configs have been correctly set following the guide in train_image_gen_stage1_distributed.sh 
+    cd run_scripts/image_gen
+    nohup sh train_image_gen_stage1_distributed.sh # stage 1, train with cross-entropy loss
+    nohup sh train_image_gen_stage2_distributed.sh # stage 2, load the last ckpt of stage1 and train with CLIP Score optimization 
+    ```
+4. **Inference**
+    ```bash
+    cd run_scripts/image_gen ; sh evaluate_image_gen.sh  # inference & evaluate (FID, IS and CLIP Score)
+    ```
 <br></br>
 
 # Gallery
@@ -201,6 +266,7 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 
 # Related Codebase
 * [Fairseq](https://github.com/pytorch/fairseq)
+* [taming-transformers](https://github.com/CompVis/taming-transformers)
 <br></br>
 
 

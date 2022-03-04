@@ -7,10 +7,12 @@ from dataclasses import dataclass, field
 import json
 import logging
 import os
+import math
 import base64
 from typing import Optional
 from argparse import Namespace
-from omegaconf import OmegaConf
+from omegaconf import DictConfig, OmegaConf
+from torchvision import transforms
 from PIL import Image
 from io import BytesIO
 
@@ -18,6 +20,7 @@ import torch
 import numpy as np
 from fairseq import metrics
 from fairseq.tasks import register_task
+from fairseq.dataclass import ChoiceEnum
 
 from models import search, clip
 from models.taming.models.vqgan import GumbelVQ
@@ -41,6 +44,8 @@ def custom_to_pil(x):
     return x
 
 
+EVAL_CLIP_METHOD = ChoiceEnum(["ii_sim", "ti_sim"])
+
 @dataclass
 class ImageGenConfig(OFAConfig):
     sampling_times: int = field(
@@ -52,13 +57,16 @@ class ImageGenConfig(OFAConfig):
     )
 
     # options for reporting CLIP score during validation
-    eval_clip: bool = field(
-        default=False, metadata={"help": "evaluation with CLIP scores"}
+    eval_clip_method: EVAL_CLIP_METHOD = field(
+        default='ti_sim',
+        metadata={
+            "help": "evaluation with CLIP scores. ii_sim means Similarity between generated Images and ref Images, ti_sim means Similarity between generated Images and input Text"}
     )
+
     eval_args: Optional[str] = field(
         default='{}',
         metadata={
-            "help": 'generation args for BLUE or CIDEr scoring, e.g., \'{"beam": 4, "lenpen": 0.6}\', as JSON string'
+            "help": 'generation args for clip scoring, e.g., \'{"beam": 4, "lenpen": 0.6}\', as JSON string'
         },
     )
 
@@ -245,25 +253,32 @@ class ImageGenTask(OFATask):
 
         model.eval()
         device = sample['target'].device
-        if self.cfg.eval_clip:
-            hyps, refs = self.inference_image(self.sequence_generator, sample, [model])
-            hyps = [hyps]
-            scores = []
-            ti_scores = []
-            for i, (hyp, ref) in enumerate(zip(hyps, refs)):
-                tokens = sample['net_input']['src_tokens'][i].view(-1).tolist()
-                caption = self.bpe.decode(self.tgt_dict.string([token for token in tokens if token >= 4]))[
-                          38:].replace('/', '')
 
-                ref_image_similarity_score, _ = self.compute_ref_image_similarity(hyp, ref, device)
-                text_similarity_score, indices = self.compute_text_similarity(hyp, caption, device)
-                scores.append(ref_image_similarity_score.max().item())
-                ti_scores.append(text_similarity_score.max().item())
+        hyps, ref = self.inference_image(self.sequence_generator, sample, [model])
+        scores = []
 
-            logging_output["_score_sum"] = sum(scores)
-            logging_output["_score_cnt"] = len(scores)
-            logging_output["_ti_score_sum"] = sum(ti_scores)
-            logging_output["_ti_score_cnt"] = len(ti_scores)
+        tokens = sample['net_input']['src_tokens'][0].view(-1).tolist()
+        caption = self.bpe.decode(self.tgt_dict.string([token for token in tokens if token >= 4]))[
+                  38:].replace('/', '')
+        if self.cfg.eval_clip_method == 'ii_sim':
+            similarity_score, indices = self.compute_ref_image_similarity(hyps, ref, device)
+        elif self.cfg.eval_clip_method == 'ti_sim':
+            similarity_score, indices = self.compute_text_similarity(hyps, caption, device)
+        else:
+            raise ValueError("unsupported eval method.")
+
+        scores.append(similarity_score.max().item())
+        sorted_hyps = [hyps[indice] for indice in indices]
+
+        if self.cfg.gen_images_path:
+            caption_tokens = sample['net_input']['src_tokens'][0].view(-1).tolist()
+            caption = self.bpe.decode(self.tgt_dict.string([token for token in caption_tokens if token >= 4]))[
+                      38:].replace('/', '')
+            self.dump_images(sorted_hyps, text=caption, path=os.path.join(self.cfg.gen_images_path, 'all_results'))
+            self.dump_images(sorted_hyps, text=caption, path=os.path.join(self.cfg.gen_images_path, 'top1'), topk=1)
+
+        logging_output["_score_sum"] = sum(scores)
+        logging_output["_score_cnt"] = len(scores)
 
         return loss, sample_size, logging_output
 
@@ -282,21 +297,13 @@ class ImageGenTask(OFATask):
             score = score if isinstance(score, float) else score.item()
             return round(score, 3)
 
-        def compute_ti_score(meters):
-            score = meters["_ti_score_sum"].sum / meters["_ti_score_cnt"].sum
-            score = score if isinstance(score, float) else score.item()
-            return round(score, 3)
-
         if sum_logs("_score_cnt") > 0:
             metrics.log_scalar("_score_sum", sum_logs("_score_sum"))
             metrics.log_scalar("_score_cnt", sum_logs("_score_cnt"))
             metrics.log_derived("score", compute_score)
-            metrics.log_scalar("_ti_score_sum", sum_logs("_ti_score_sum"))
-            metrics.log_scalar("_ti_score_cnt", sum_logs("_ti_score_cnt"))
-            metrics.log_derived("ti_score", compute_ti_score)
 
     def inference_image(self, generator, sample, models):
-        hyps, refs = [], []
+        hyps, ref = [], None
         for j in range(self.sampling_times):
             gen_out = self.inference_step(generator, models, sample)
             for i in range(len(gen_out)):
@@ -309,15 +316,9 @@ class ImageGenTask(OFATask):
                     images = [custom_to_pil(image) for image in images]
                 hyps += images
         if 'code_images' in sample:
-            refs.append(Image.open(BytesIO(base64.urlsafe_b64decode(sample['code_images'][0]))).convert('RGB'))
-        if self.cfg.gen_images_path:
-            caption_tokens = sample['net_input']['src_tokens'][0].view(-1).tolist()
-            caption = self.bpe.decode(self.tgt_dict.string([token for token in caption_tokens if token >= 4]))[
-                      38:].replace('/', '')
-            self.dump_images(hyps, text=caption, path=os.path.join(self.cfg.gen_images_path, 'all_results'))
-            self.dump_images(hyps, text=caption, path=os.path.join(self.cfg.gen_images_path, 'top1'), topk=1)
+            ref = Image.open(BytesIO(base64.urlsafe_b64decode(sample['code_images'][0]))).convert('RGB')
 
-        return hyps, refs
+        return hyps, ref
 
     def dump_images(self, images, text, path, topk=None):
         os.makedirs(path, exist_ok=True)

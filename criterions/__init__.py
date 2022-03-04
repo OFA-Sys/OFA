@@ -1,2 +1,3 @@
 from .scst_loss import ScstRewardCriterion
 from .label_smoothed_cross_entropy import AdjustLabelSmoothedCrossEntropyCriterion
+from .clip_scst_loss import ClipScstRewardCriterion
