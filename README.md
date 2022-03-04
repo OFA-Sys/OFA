@@ -217,7 +217,7 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
 ## Text-to-Image Generation 
 1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. 
    The dataset zipfile `coco_image_gen.zip` contains `coco_vqgan_train.tsv`, `coco_vqgan_dev.tsv` and `coco_vqgan_full_test.tsv`. 
-   Each line of the dataset represents a sample with the following format. The information of uniq-id, image-code (produced by [vqgan](https://github.com/CompVis/taming-transformers), a list of int separated by spaces), caption are separated by tabs.
+   Each line of the dataset represents a sample with the following format. The information of uniq-id, image-code (produced by [vqgan](https://github.com/CompVis/taming-transformers), a list of integers separated by single-whitespaces), lowercased caption are separated by tabs.
     ```
     1	6674 4336 4532 5334 3251 5461 3615 2469 ...4965 4190 1846	the people are posing for a group photo.
     ```
