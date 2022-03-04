@@ -265,6 +265,7 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 
 # Related Codebase
 * [Fairseq](https://github.com/pytorch/fairseq)
+* [taming-transformers](https://github.com/CompVis/taming-transformers)
 <br></br>
 
 
