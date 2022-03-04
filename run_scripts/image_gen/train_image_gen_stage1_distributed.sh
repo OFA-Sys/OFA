@@ -5,7 +5,7 @@
 # Please set the options below according to the comments. 
 # For multi-gpu workers training, these options should be manually set for each worker. 
 # After setting the options, please run the script on each worker.
-# To use the shuffled data (if exists), please uncomment the Line 24.
+# To use the shuffled data (if exists), please uncomment the Line 23.
 
 # Number of GPUs per GPU worker
 GPUS_PER_NODE=8 
@@ -20,7 +20,7 @@ export RANK=0
 data_dir=../../dataset/coco_image_gen_data
 data=${data_dir}/coco_vqgan_train.tsv,${data_dir}/coco_vqgan_dev.tsv
 # Note: If you have shuffled the data in advance, please uncomment the line below.
-# data=${data_dir}/vqa_train_1.tsv,${data_dir}/vqa_train_2.tsv,${data_dir}/vqa_train_3.tsv,${data_dir}/vqa_train_4.tsv,${data_dir}/vqa_train_5.tsv,${data_dir}/vqa_train_6.tsv,${data_dir}/vqa_train_7.tsv,${data_dir}/vqa_train_8.tsv,${data_dir}/vqa_train_9.tsv,${data_dir}/vqa_train_10.tsv,${data_dir}/vqa_val.tsv
+# data=${data_dir}/coco_vqgan_train_1.tsv,${data_dir}/coco_vqgan_train_2.tsv,${data_dir}/coco_vqgan_train_3.tsv,${data_dir}/coco_vqgan_train_4.tsv,${data_dir}/coco_vqgan_train_5.tsv,${data_dir}/coco_vqgan_train_6.tsv,${data_dir}/coco_vqgan_train_7.tsv,${data_dir}/coco_vqgan_train_8.tsv,${data_dir}/coco_vqgan_train_9.tsv,${data_dir}/coco_vqgan_train_10.tsv,${data_dir}/coco_vqgan_dev.tsv
 restore_file=../../checkpoints/ofa_large.pt
 selected_cols=0,2,1
 
