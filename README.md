@@ -213,7 +213,6 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
     nohup sh train_rte.sh > train_rte.out &  # finetune for rte
     nohup sh train_sst2.sh > train_sst2.out &  # finetune for sst2
     ```
-<br></br>
 
 ## Text-to-Image Generation 
 1. **Prepare the Dataset & Checkpoints**: Download data (see [datasets.md](datasets.md)) and models (see [checkpoints.md](checkpoints.md)) and put them in the correct directory. 
@@ -243,6 +242,7 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
     ```bash
     cd run_scripts/image_gen ; sh evaluate_image_gen.sh  # inference & evaluate (FID, IS and CLIP Score)
     ```
+<br></br>
 
 # Gallery
 Below we provide examples of OFA in text-to-image generation and open-ended VQA. Also, we demonstrate its performance in unseen task (Grounded QA) as well as unseen domain (Visual Grounding on images from unseen domains). 
