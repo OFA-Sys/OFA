@@ -112,18 +112,18 @@ class ImageGenDataset(OFADataset):
         self.num_codes = (code_image_size // 8) ** 2
         self.num_bins = num_bins
 
+        slice_id = self.dataset.slice_id
         empty_img = Image.new('RGB', (code_image_size, code_image_size))
-        empty_img.save('temp.png')
-        img = Image.open('temp.png')
+        empty_img.save(f'temp_{slice_id}.png')
+        img = Image.open(f'temp_{slice_id}.png')
         img_buffer = BytesIO()
         img.save(img_buffer, format=img.format)
         byte_data = img_buffer.getvalue()
         self.empty_image_base64 = base64.urlsafe_b64encode(byte_data)
 
     def __getitem__(self, index):
-        # uniq_id, image, text, image_code = self.dataset[index]
-        data = self.dataset[index]
 
+        data = self.dataset[index]
         if len(data) == 2:
             uniq_id, text = data
             image_code = [0] * 1024
