@@ -314,7 +314,7 @@ nohup sh train_snli_ve.sh > train_snli_ve.out &  # finetune for snli_ve
 <pre>
 cd run_scripts/snli_ve ; sh evaluate_snli_ve.sh  # inference & evaluate for snli_ve
 </pre>
-</details> 
+</details>
    
 ## GLUE
 Here we provide steps for you to finetune and evaluate our model on language understanding tasks. We demonstrate our practice for the GLUE benchmark. 
