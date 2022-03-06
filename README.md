@@ -128,7 +128,7 @@ We provide procedures to reproduce our results of image captioning on our paper 
 <details>
     <summary><b>2. Finetuning</b></summary>
     <p>
-        Following previous standard practice, we divide the finetuning process of image captioning into two stages. In stage 1, we finetune OFA with cross-entropy loss on 4 NVIDIA-V100 GPUs with 32GB memory (expected to obtain ~139.5 CIDEr on the validation set at this stage). In stage 2, we select the best checkpoint of stage 1 and train with CIDEr optimization on 8 NVIDIA-V100 GPUs (expected to get ~149.4 CIDEr on the validation set at this stage). ** Note that CIDEr optimization is very unstable and requires careful hyperparameter tuning. If you encounter training errors in the stage2 finetuing, you can increase the batch size or reduce the learning rate. If neither of these works, you can directly set --freeze-resnet to freeze the inner states of batch normalization. **
+        Following previous standard practice, we divide the finetuning process of image captioning into two stages. In stage 1, we finetune OFA with cross-entropy loss on 4 NVIDIA-V100 GPUs with 32GB memory (expected to obtain ~139.5 CIDEr on the validation set at this stage). In stage 2, we select the best checkpoint of stage 1 and train with CIDEr optimization on 8 NVIDIA-V100 GPUs (expected to get ~149.4 CIDEr on the validation set at this stage). **Note that CIDEr optimization is very unstable and requires careful hyperparameter tuning. If you encounter training errors in the stage2 finetuing, you can increase the batch size or reduce the learning rate. If neither of these works, you can directly set --freeze-resnet to freeze the inner states of batch normalization**.
     </p>
 <pre>
 cd run_scripts/caption
