@@ -51,6 +51,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # News
+* 2022.3.07: Released the finetuning & inference code/checkpoints for **Image Classification**, which achieves **85.0 accuracy on ImageNet-1K, slightly better than reported in OFA paper**.
 * 2022.3.04: Released the finetuning & inference code/checkpoints for **Text-to-Image Generation**.
 * 2022.3.03: Released the finetuning & inference code/checkpoints for **SNLI-VE** and **GLUE**.
 * 2022.2.22: Released the finetuning & inference code/checkpoints for **Visual Question Answering**, which can reproduce **the reported VQA accuracy in OFA paper (80.02 on test-std)**. We believe much accuracy improvement can still be achieved based on this codebase. Recently we have used this codebase to achieve a better result **(80.45 on test-std)** on the [VQA Challenge](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278).
@@ -283,8 +284,6 @@ cd run_scripts/refcoco ; sh evaluate_refcoco.sh  # inference & evaluate for refc
 </pre>
 </details>
 
-
-
 ## Visual Entailment
 We provide steps for you to reproduce our results in visual entailment. See the details below.
 
@@ -315,8 +314,7 @@ nohup sh train_snli_ve.sh > train_snli_ve.out &  # finetune for snli_ve
 <pre>
 cd run_scripts/snli_ve ; sh evaluate_snli_ve.sh  # inference & evaluate for snli_ve
 </pre>
-</details>
- 
+</details> 
    
 ## GLUE
 Here we provide steps for you to finetune and evaluate our model on language understanding tasks. We demonstrate our practice for the GLUE benchmark. 
@@ -343,6 +341,53 @@ nohup sh train_rte.sh > train_rte.out &  # finetune for rte
 nohup sh train_sst2.sh > train_sst2.out &  # finetune for sst2
 </pre>
 </details>
+
+## Image Classification on ImageNet-1K
+We provide the finetuning and inference codes which reproduce **85.0 ImageNet-1K accuracy**, slightly better than reported in our paper. 
+
+<details>
+    <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
+    <p>
+        Download data (see <a href src="datasets.md">datasets.md</a>) and models (see <a href src="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. Our provided data is derived from the original <a href src="http://image-net.org/">ImageNet-1K</a> (ILSVRC2012 train & validation) dataset and shares the same data split with it. To formulate the classification task into seq2seq paradigm, we use the <a href src="https://github.com/HoldenCaulfieldRye/caffe/blob/master/data/ilsvrc12/synset_words.txt">synset words</a> provided by Caffe as the generation target for each image class. Each line of the processed dataset represents a sample with the following format. The information of image base64 string, classification label (1-indexed, conform to the order in <code>synset_words.txt</code>), synset words of the label are separated by tabs.
+    </p>
+<pre>
+_9j_4AAQS...fzX__Z  769 rugby ball
+</pre>
+</details>
+<details>
+    <summary><b>2. Shuffle the Training Data</b></summary>
+    <p>
+        (Optional, but achieves better finetuning accuracy): If the disk storage is sufficient, we recommend to prepare the shuffled training data for each epoch in advance. In our experiments, we use shuffling which brings around <b>+0.2</b> improvement on ImageNet-1K accuracy.
+    </p>
+<pre>
+cd dataset/imagenet_1k_data
+ln imagenet_1k_train.tsv imagenet_1k_train_1.tsv
+for idx in `seq 1 9`;do shuf imagenet_1k_train_${idx}.tsv > imagenet_1k_train_$[${idx}+1].tsv;done # each file is used for an epoch one by one
+</pre>
+</details>
+<details>
+    <summary><b>3. Finetuning</b></summary>
+    <p>
+        In our experiments, the ImageNet-1K finetuning is performed on 2 8-A100-GPU servers (<i>with RDMA</i>). Here provides the finetuning script <code>train_imagenet_distributed.sh</code>, which supports multi-server distributed training (as well as single-server training). Please refer to the comments in the beginning of the script and set the configs correctly according to your distribution environment. If you have shuffled the training data in the previous step, please correctly specify the training data path following the guide in the script comments. <b>The command should be run on each worker.</b> For quick evaluation during finetuning, by default we sample 20% of the original validation split and report accuracy on this subset after each epoch. The accuracy on the validation subset is generally ±0.1 relative to accuracy on the whole validation split.
+    </p>
+<pre>
+# run on each worker after the distributed and data configs have been correctly set following the guide in train_imagenet_distributed.sh
+cd run_scripts/image_classify
+bash train_imagenet_distributed.sh
+</pre>
+    <p>
+        In our experiments, the finetuning costs around 80 hours (for 32 epochs). The best accuracy on validation subset during finetuning will be around 85.0. The log is saved in <code>${log_dir}</code>.
+    </p>
+</details>
+<details>
+    <summary><b>4. Inference</b></summary>
+    <p>
+        To get the validation accuracy on the whole ImageNet-1K validation set, run the following command. The evaluation costs around 10 GPU hours. The accuracy will be reported in the stdout (expected to be around <b>85.0</b>).
+    </p>
+<pre>
+cd run_scripts/image_classify ; sh evaluate_imagenet.sh  # inference & evaluate for imagenet-1k
+</pre>
+</details> 
 
 <br></br>
 
