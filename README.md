@@ -128,7 +128,7 @@ We provide procedures to reproduce our results of image captioning on our paper 
 <details>
     <summary><b>2. Finetuning</b></summary>
     <p>
-        Following previous standard practice, we divide the finetuning process of image captioning into two stages. In stage 1, we finetune OFA with cross-entropy loss on 4 NVIDIA-V100 GPUs with 32GB memory (expected to obtain ~139.5 CIDEr on the validation set at this stage). In stage 2, we select the best checkpoint of stage 1 and train with CIDEr optimization on 8 NVIDIA-V100 GPUs (expected to get ~149.4 CIDEr on the validation set at this stage). **Note that CIDEr optimization is very unstable and requires careful hyperparameter tuning. If you encounter training errors in the stage2 finetuning, you can increase the batch size or reduce the learning rate. If neither of these works, you can directly set `--freeze-resnet` to freeze the inner states of batch normalization.**
+        Following previous standard practice, we divide the finetuning process of image captioning into two stages. In stage 1, we finetune OFA with cross-entropy loss on 4 NVIDIA-V100 GPUs with 32GB memory (expected to obtain ~139.5 CIDEr on the validation set at this stage). In stage 2, we select the best checkpoint of stage 1 and train with CIDEr optimization on 8 NVIDIA-V100 GPUs (expected to get ~149.4 CIDEr on the validation set at this stage). <b>Note that CIDEr optimization is very unstable and requires careful hyperparameter tuning. If you encounter training errors in the stage2 finetuning, you can increase the batch size or reduce the learning rate. If neither of these works, you can directly set </b><code>--freeze-resnet</code><b> to freeze the inner states of batch normalization.</b>
     </p>
 <pre>
 cd run_scripts/caption
@@ -219,7 +219,7 @@ for idx in `seq 1 9`;do shuf vqa_train_${idx}.tsv > vqa_train_$[${idx}+1].tsv;do
 <details>
     <summary><b>3. Finetuning</b></summary>
     <p>
-        In our experiments, the VQA finetuning is performed on 4 8-A100-GPU servers (_with RDMA_). Here provides the finetuning script <code>train_vqa_distributed.sh</code>, which supports multi-server distributed training (as well as single-server training). Please refer to the comments in the beginning of the script and set the configs correctly according to your distribution environment. If you have shuffled the training data in the previous step, please correctly specify the training data path following the guide in the script comments. <b>The command should be run on each worker.</b> 
+        In our experiments, the VQA finetuning is performed on 4 8-A100-GPU servers (<i>with RDMA</i>). Here provides the finetuning script <code>train_vqa_distributed.sh</code>, which supports multi-server distributed training (as well as single-server training). Please refer to the comments in the beginning of the script and set the configs correctly according to your distribution environment. If you have shuffled the training data in the previous step, please correctly specify the training data path following the guide in the script comments. <b>The command should be run on each worker.</b> 
     </p>
 <pre>
 # run on each worker after the distributed and data configs have been correctly set following the guide in train_vqa_distributed.sh 
