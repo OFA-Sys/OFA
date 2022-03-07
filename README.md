@@ -120,7 +120,7 @@ We provide procedures to reproduce our results of image captioning on our paper 
 <details>
     <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
     <p>
-        Download data (see <a href src='datasets.md'>datasets.md</a>) and models (see <a href src='checkpoints.md'>checkpoints.md</a>) and put them in the correct directory. The dataset zipfile <code>caption_data.zip</code> contains caption_stage1_train.tsv, caption_stage2_train.tsv, caption_val.tsv and caption_test.tsv. Each image corresponds to only 1 caption in <code>caption_stage1_train.tsv</code> and corresponds to multiple captions in other TSV files (about 5 captions per image). Each line of the dataset represents a caption sample with the following format. The information of uniq-id, image-id, caption, predicted object labels (taken from <a href src='https://github.com/pzzhang/VinVL'>VinVL</a>, not used), image base64 string are separated by tabs.
+        Download data (see <a href='datasets.md'>datasets.md</a>) and models (see <a href='checkpoints.md'>checkpoints.md</a>) and put them in the correct directory. The dataset zipfile <code>caption_data.zip</code> contains caption_stage1_train.tsv, caption_stage2_train.tsv, caption_val.tsv and caption_test.tsv. Each image corresponds to only 1 caption in <code>caption_stage1_train.tsv</code> and corresponds to multiple captions in other TSV files (about 5 captions per image). Each line of the dataset represents a caption sample with the following format. The information of uniq-id, image-id, caption, predicted object labels (taken from <a href='https://github.com/pzzhang/VinVL'>VinVL</a>, not used), image base64 string are separated by tabs.
     </p>
 <pre>
 162365  12455   the sun sets over the trees beyond some docks.  sky&&water&&dock&&pole  /9j/4AAQSkZJ....UCP/2Q==
@@ -153,7 +153,7 @@ This part provides procedures for the finetuning and inference of text-to-image 
 <details>
     <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
     <p>
-        Download data (see <a href src="datasets.md">datasets.md</a>) and models (see <a href src="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. The dataset zipfile <code>coco_image_gen.zip</code> contains <code>coco_vqgan_train.tsv</code>, <code>coco_vqgan_dev.tsv</code> and <code>coco_vqgan_full_test.tsv</code>. Each line of the dataset represents a sample with the following format. The information of uniq-id, image-code (produced by <a href src="https://github.com/CompVis/taming-transformers">vqgan</a>, a list of integers separated by single-whitespaces), lowercased caption are separated by tabs.
+        Download data (see <a href="datasets.md">datasets.md</a>) and models (see <a href="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. The dataset zipfile <code>coco_image_gen.zip</code> contains <code>coco_vqgan_train.tsv</code>, <code>coco_vqgan_dev.tsv</code> and <code>coco_vqgan_full_test.tsv</code>. Each line of the dataset represents a sample with the following format. The information of uniq-id, image-code (produced by <a href="https://github.com/CompVis/taming-transformers">vqgan</a>, a list of integers separated by single-whitespaces), lowercased caption are separated by tabs.
     </p>
 <pre>
 1	6674 4336 4532 5334 3251 5461 3615 2469 ...4965 4190 1846	the people are posing for a group photo.
@@ -200,7 +200,7 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
 <details>
     <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
     <p>
-        Download data (see <a href src="datasets.md">datasets.md</a>) and models (see <a href src="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. The dataset zipfile <code>vqa_data.zip</code> is around 100G and the decompressed data costs around 135G disk storage, which contains the training, validation and testing samples together with other necessary data resources. Following common practice, VG-QA samples are also included in the training data. To adapt to the seq2seq paradigm of OFA, we transform original VQA training questions with multiple golden answers into multiple training samples. For the original VQA validation set, we keep around 10k samples for our validation and utilize the other samples for training. Each line of the dataset represents a VQA sample with the following format. The information of question-id, image-id, question, answer (with confidence), predicted object labels (taken from <a href src="https://github.com/pzzhang/VinVL">VinVL</a>, slightly brings around +0.1 accuracy improvement), image base64 string are separated by tabs.
+        Download data (see <a href="datasets.md">datasets.md</a>) and models (see <a href="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. The dataset zipfile <code>vqa_data.zip</code> is around 100G and the decompressed data costs around 135G disk storage, which contains the training, validation and testing samples together with other necessary data resources. Following common practice, VG-QA samples are also included in the training data. To adapt to the seq2seq paradigm of OFA, we transform original VQA training questions with multiple golden answers into multiple training samples. For the original VQA validation set, we keep around 10k samples for our validation and utilize the other samples for training. Each line of the dataset represents a VQA sample with the following format. The information of question-id, image-id, question, answer (with confidence), predicted object labels (taken from <a href="https://github.com/pzzhang/VinVL">VinVL</a>, slightly brings around +0.1 accuracy improvement), image base64 string are separated by tabs.
     </p>
 <pre>
 79459   79459   is this person wearing shorts?  0.6|!+no    house&&short&&...&&sky  /9j/4AAQS...tigZ/9k=
@@ -235,7 +235,7 @@ bash train_vqa_distributed.sh
     <summary><b>4. Inference</b></summary>
     <p>
         We provide 2 types of inference, <b>beam-search</b> (much faster but gets sub-optimal accuracy) and <b>all-candidate evaluation</b> (slower but best accuracy). <br></br>
-        For beam-search inference, use the script <code>evaluate_vqa_beam.sh</code>. Refer to the command below. The inference on test set costs around 16 GPU hours. After inference on test set, the result JSON file will be dumped in the <code>${result_path}</code> defined in the shell script. You can submit the result <code>test_predict.json</code> to <a href src="https://eval.ai/web/challenges/challenge-page/830/overview">EvalAI</a>. Using our released finetuned checkpoint, beam-search inference will get 80.15 validation accuracy, 79.36 test-dev accuracy and 79.48 test-std accuracy (around 0.6 lower than all-candidate evaluation).
+        For beam-search inference, use the script <code>evaluate_vqa_beam.sh</code>. Refer to the command below. The inference on test set costs around 16 GPU hours. After inference on test set, the result JSON file will be dumped in the <code>${result_path}</code> defined in the shell script. You can submit the result <code>test_predict.json</code> to <a href="https://eval.ai/web/challenges/challenge-page/830/overview">EvalAI</a>. Using our released finetuned checkpoint, beam-search inference will get 80.15 validation accuracy, 79.36 test-dev accuracy and 79.48 test-std accuracy (around 0.6 lower than all-candidate evaluation).
     </p>
 <pre>
 cd run_scripts/vqa
@@ -256,7 +256,7 @@ Here provides procedures for you to prepare data, train, and evaluate your model
 <details>
     <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
     <p>
-        Download data (see [datasets.md](datasets.md)) and models (see <a href src='checkpoints.md'>checkpoints.md</a>) and put them in the correct directory. We provide RefCOCO (split by UNC), RefCOCO+ (split by UNC) and RefCOCOg (split by UMD) datasets. See <a href src='https://www.tensorflow.org/datasets/catalog/ref_coco'>RefCOCO</a> and <a href src="https://github.com/lichengunc/refer">Refer</a> for more details. Note that in the original dataset, each region-coord (or bounding box) may corresponds to multiple descriptive texts. We split these texts into multiple samples so that the region-coord in each sample corresponds to only one text. Each line of the processed dataset represents a sample with the following format. The information of uniq-id, image-id, text, region-coord (separated by commas), image base64 string are separated by tabs.
+        Download data (see <a href='datasets.md'>datasets.md</a>) and models (see <a href='checkpoints.md'>checkpoints.md</a>) and put them in the correct directory. We provide RefCOCO (split by UNC), RefCOCO+ (split by UNC) and RefCOCOg (split by UMD) datasets. See <a href='https://www.tensorflow.org/datasets/catalog/ref_coco'>RefCOCO</a> and <a href="https://github.com/lichengunc/refer">Refer</a> for more details. Note that in the original dataset, each region-coord (or bounding box) may corresponds to multiple descriptive texts. We split these texts into multiple samples so that the region-coord in each sample corresponds to only one text. Each line of the processed dataset represents a sample with the following format. The information of uniq-id, image-id, text, region-coord (separated by commas), image base64 string are separated by tabs.
     </p>
 <pre>
 79_1    237367  A woman in a white blouse holding a glass of wine.  230.79,121.75,423.66,463.06 9j/4AAQ...1pAz/9k=
@@ -290,7 +290,7 @@ We provide steps for you to reproduce our results in visual entailment. See the 
 <details>
     <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
     <p>
-        Download data (see <a href src="datasets.md">datasets.md</a>) and models (see <a href src="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. Each line of the processed dataset represents a sample with the following format. The information of uniq-id, image-id, image base64 string, hypothesis, caption (or text premise), label are separated by tabs.
+        Download data (see <a href="datasets.md">datasets.md</a>) and models (see <a href="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. Each line of the processed dataset represents a sample with the following format. The information of uniq-id, image-id, image base64 string, hypothesis, caption (or text premise), label are separated by tabs.
     </p>
 <pre>
 252244149.jpg#1r1n  252244149   /9j/4AAQ...MD/2Q==   a man in pink and gold is chewing on a wooden toothpick.   a man in pink is chewing a toothpick on the subway.   neutral 
@@ -322,7 +322,7 @@ Here we provide steps for you to finetune and evaluate our model on language und
 <details>
     <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
     <p>
-        Download data (see [datasets.md](datasets.md)) and models (see <a href src="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. we provide 7 language understanding datasets from GLUE benchmark, including COLA, MNLI, MRPC, QNLI, QQP, RTE and SST2. More details about these datasets can be found in this <a href src="https://openreview.net/pdf?id=rJ4km2R5t7">link</a>.
+        Download data (see <a href="datasets.md">datasets.md</a>) and models (see <a href="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. we provide 7 language understanding datasets from GLUE benchmark, including COLA, MNLI, MRPC, QNLI, QQP, RTE and SST2. More details about these datasets can be found in this <a href="https://openreview.net/pdf?id=rJ4km2R5t7">link</a>.
     </p>
 </details>
 <details>
@@ -348,7 +348,7 @@ We provide the finetuning and inference codes which reproduce **85.0 ImageNet-1K
 <details>
     <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
     <p>
-        Download data (see <a href src="datasets.md">datasets.md</a>) and models (see <a href src="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. Our provided data is derived from the original <a href src="http://image-net.org/">ImageNet-1K</a> (ILSVRC2012 train & validation) dataset and shares the same data split with it. To formulate the classification task into seq2seq paradigm, we use the <a href src="https://github.com/HoldenCaulfieldRye/caffe/blob/master/data/ilsvrc12/synset_words.txt">synset words</a> provided by Caffe as the generation target for each image class. Each line of the processed dataset represents a sample with the following format. The information of image base64 string, classification label (1-indexed, conform to the order in <code>synset_words.txt</code>), synset words of the label are separated by tabs.
+        Download data (see <a href="datasets.md">datasets.md</a>) and models (see <a href="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. Our provided data is derived from the original <a href src="http://image-net.org/">ImageNet-1K</a> (ILSVRC2012 train & validation) dataset and shares the same data split with it. To formulate the classification task into seq2seq paradigm, we use the <a href="https://github.com/HoldenCaulfieldRye/caffe/blob/master/data/ilsvrc12/synset_words.txt">synset words</a> provided by Caffe as the generation target for each image class. Each line of the processed dataset represents a sample with the following format. The information of image base64 string, classification label (1-indexed, conform to the order in <code>synset_words.txt</code>), synset words of the label are separated by tabs.
     </p>
 <pre>
 _9j_4AAQS...fzX__Z  769 rugby ball
