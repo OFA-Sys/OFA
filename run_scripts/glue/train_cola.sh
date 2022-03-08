@@ -46,7 +46,7 @@ for max_epoch in {5,7,10}; do
       save_path=${save_dir}/${max_epoch}"_"${lr}"_"${update_freq}
       mkdir -p $save_path
 
-      CUDA_VISIBLE_DEVICES=0,1 python3 -m torch.distributed.launch --nproc_per_node=2 --master_port=${MASTER_PORT} ../../train.py \
+      CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../train.py \
           $data \
           --selected-cols=${selected_cols} \
           --bpe-dir=${bpe_dir} \
@@ -78,8 +78,8 @@ for max_epoch in {5,7,10}; do
           --log-format=simple --log-interval=10 \
           --fixed-validation-seed=7 \
           --keep-best-checkpoints=1 \
-          --save-interval=100000 --validate-interval=1 \
-          --save-interval-updates=100000 --validate-interval-updates=10 \
+          --save-interval=10 --validate-interval=1 \
+          --save-interval-updates=100 --validate-interval-updates=10 \
           --best-checkpoint-metric=mcc --maximize-best-checkpoint-metric \
           --max-src-length=${max_src_length} \
           --max-tgt-length=${max_tgt_length} \

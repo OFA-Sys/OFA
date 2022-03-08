@@ -1,2 +1,10 @@
 .idea/*
 .DS_Store
+dataset/
+checkpoints/
+run_scripts/caption/stage1_checkpoints
+run_scripts/caption/stage2_checkpoints
+run_scripts/caption/stage1_logs
+run_scripts/caption/stage2_logs
+run_scripts/glue/checkpoints
+run_scripts/glue/logs

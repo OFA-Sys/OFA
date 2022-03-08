@@ -1,0 +1,3 @@
+max_epoch 2
+warmup_ratio 0.06
+drop_worst_after 2500
