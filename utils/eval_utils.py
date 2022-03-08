@@ -293,7 +293,7 @@ def eval_step(task, generator, models, sample, **kwargs):
     elif task.cfg._name in {'cola', 'mnli', 'mrpc', 'qnli', 'qqp', 'rte', 'sst2'}:
         return eval_glue(task, generator, models, sample, **kwargs)
     elif task.cfg._name == 'image_classify':
-        return eval_image_classify(task, generator, models, sample, **kwargs)        
+        return eval_image_classify(task, generator, models, sample, **kwargs)
     else:
         raise NotImplementedError
 
