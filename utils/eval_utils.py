@@ -8,7 +8,7 @@ import torch
 import torch.distributed as dist
 
 from data import data_utils
-from tasks.nlg_tasks.gigaword import fix_tokenization
+# from tasks.nlg_tasks.gigaword import fix_tokenization
 
 
 def get_symbols_to_strip_from_output(generator):
@@ -236,19 +236,63 @@ def eval_glue(task, generator, models, sample, **kwargs):
     return results, None
 
 
-def eval_gigaword(task, generator, models, sample, **kwargs):
-    gen_out = task.inference_step(generator, models, sample)
-    hyps, refs = [], []
-    results = []
-    for i in range(len(gen_out)):
-        hyp = decode_fn(gen_out[i][0]["tokens"], task.tgt_dict, task.bpe, generator).lower().strip()
-        hyp = fix_tokenization(hyp).replace('1', '#')
-        ref = sample['target_strs'][i]
-        hyps.append(hyp)
-        refs.append(ref)
-        results.append({"hyp": hyp, "ref": ref})
-    rouge_scores = task.metric.compute(predictions=hyps, references=refs, use_agregator=False, use_stemmer=True)
-    scores = [item.fmeasure * 100 for item in rouge_scores['rougeL']]
+# def eval_gigaword(task, generator, models, sample, **kwargs):
+#     gen_out = task.inference_step(generator, models, sample)
+#     hyps, refs = [], []
+#     results = []
+#     for i in range(len(gen_out)):
+#         hyp = decode_fn(gen_out[i][0]["tokens"], task.tgt_dict, task.bpe, generator).lower().strip()
+#         hyp = fix_tokenization(hyp).replace('1', '#')
+#         ref = sample['target_strs'][i]
+#         hyps.append(hyp)
+#         refs.append(ref)
+#         results.append({"hyp": hyp, "ref": ref})
+#     rouge_scores = task.metric.compute(predictions=hyps, references=refs, use_agregator=False, use_stemmer=True)
+#     scores = [item.fmeasure * 100 for item in rouge_scores['rougeL']]
+#     return results, scores
+
+
+def eval_image_classify(task, generator, models, sample, **kwargs):
+    batch_size = sample["net_input"]["src_tokens"].size(0)
+    encoder_out = models[0].encoder(
+        sample["net_input"]["src_tokens"],
+        src_lengths=sample["net_input"]["src_lengths"],
+        patch_images=sample["net_input"]["patch_images"],
+        patch_masks=sample["net_input"]["patch_masks"]
+    )
+    device = sample["net_input"]["src_tokens"].device
+    valid_result = []
+    for valid_tgt, valid_prev_output, valid_constraint_masks in zip(task.valid_tgt_list,
+                                                                    task.valid_prev_output_list,
+                                                                    task.valid_constraint_masks_list):
+        valid_tgt_size = valid_tgt.size(0)
+        valid_tgt = valid_tgt.repeat(batch_size, 1).to(device)
+        valid_prev_output = valid_prev_output.repeat(batch_size, 1).to(device)
+        valid_constraint_masks = valid_constraint_masks.repeat(batch_size, 1, 1).to(device)
+        new_encoder_out = {}
+        new_encoder_out["encoder_out"] = [
+            encoder_out["encoder_out"][0].repeat_interleave(valid_tgt_size, dim=1)
+        ]
+        new_encoder_out["encoder_padding_mask"] = [
+            encoder_out["encoder_padding_mask"][0].repeat_interleave(valid_tgt_size, dim=0)
+        ]
+        new_encoder_out["position_embeddings"] = [
+            encoder_out["position_embeddings"][0].repeat_interleave(valid_tgt_size, dim=0)
+        ]
+
+        decoder_out = models[0].decoder(valid_prev_output, encoder_out=new_encoder_out)
+        decoder_out[0].masked_fill_(~valid_constraint_masks, -math.inf)
+        lprobs = models[0].get_normalized_probs(decoder_out, log_probs=True)
+        scores = lprobs.gather(dim=-1, index=valid_tgt.unsqueeze(-1)).squeeze(-1)
+        scores = scores.masked_fill(valid_tgt.eq(task.tgt_dict.pad()), 0)
+        scores = scores.sum(1)
+        scores = scores.view(-1, valid_tgt_size)
+        valid_result.append(scores)
+    valid_result = torch.cat(valid_result, dim=-1)
+    predicts = valid_result.argmax(1).tolist()
+    hyps = [task.index2ans[predict_index] for predict_index in predicts]
+    scores = [ref_dict.get(hyp, 0) for ref_dict, hyp in zip(sample['ref_dict'], hyps)]
+    results = [{"uniq_id": id, "answer": hyp} for id, hyp in zip(sample["id"].tolist(), hyps)]
     return results, scores
 
 
@@ -265,8 +309,10 @@ def eval_step(task, generator, models, sample, **kwargs):
         return eval_image_gen(task, generator, models, sample, **kwargs)
     elif task.cfg._name in {'cola', 'mnli', 'mrpc', 'qnli', 'qqp', 'rte', 'sst2'}:
         return eval_glue(task, generator, models, sample, **kwargs)
-    elif task.cfg._name == 'gigaword':
-        return eval_gigaword(task, generator, models, sample, **kwargs)
+    # elif task.cfg._name == 'gigaword':
+    #     return eval_gigaword(task, generator, models, sample, **kwargs)
+    elif task.cfg._name == 'image_classify':
+        return eval_image_classify(task, generator, models, sample, **kwargs)
     else:
         raise NotImplementedError
 
