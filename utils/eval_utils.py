@@ -8,6 +8,7 @@ import torch
 import torch.distributed as dist
 
 from data import data_utils
+from tasks.nlg_tasks.gigaword import fix_tokenization
 
 
 def get_symbols_to_strip_from_output(generator):
@@ -235,6 +236,22 @@ def eval_glue(task, generator, models, sample, **kwargs):
     return results, None
 
 
+def eval_gigaword(task, generator, models, sample, **kwargs):
+    gen_out = task.inference_step(generator, models, sample)
+    hyps, refs = [], []
+    results = []
+    for i in range(len(gen_out)):
+        hyp = decode_fn(gen_out[i][0]["tokens"], task.tgt_dict, task.bpe, generator).lower().strip()
+        hyp = fix_tokenization(hyp).replace('1', '#')
+        ref = sample['target_strs'][i]
+        hyps.append(hyp)
+        refs.append(ref)
+        results.append({"hyp": hyp, "ref": ref})
+    rouge_scores = task.metric.compute(predictions=hyps, references=refs, use_agregator=False, use_stemmer=True)
+    scores = [item.fmeasure * 100 for item in rouge_scores['rougeL']]
+    return results, scores
+
+
 def eval_step(task, generator, models, sample, **kwargs):
     if task.cfg._name == 'caption':
         return eval_caption(task, generator, models, sample, **kwargs)
@@ -248,6 +265,8 @@ def eval_step(task, generator, models, sample, **kwargs):
         return eval_image_gen(task, generator, models, sample, **kwargs)
     elif task.cfg._name in {'cola', 'mnli', 'mrpc', 'qnli', 'qqp', 'rte', 'sst2'}:
         return eval_glue(task, generator, models, sample, **kwargs)
+    elif task.cfg._name == 'gigaword':
+        return eval_gigaword(task, generator, models, sample, **kwargs)
     else:
         raise NotImplementedError
 
