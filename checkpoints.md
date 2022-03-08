@@ -4,6 +4,7 @@ We provide links for you to download our checkpoints. We will release all the ch
 
 ## Pretraining
 * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_large.pt"> Pre-trained checkpoint (OFA-Large) </a>
+* <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_base.pt"> Pre-trained checkpoint (OFA-Base) </a>
 
 ## Finetuning
 
