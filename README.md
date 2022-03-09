@@ -67,6 +67,8 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 * [x] To release finetuning and inference codes for unimodal downstream tasks soon. 
 * [ ] To release codes for pretraining soon.
 * [ ] To integrate more downstream tasks concerning more modalities to our OFA framework.
+* [ ] To release smaller models, including OFA-medium, OFA-tiny, as well as OFA-edge. 
+* [ ] To release OFA for Chinese.
 <br></br>
 
 # Approach
