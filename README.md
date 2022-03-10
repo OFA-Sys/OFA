@@ -64,9 +64,11 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 
 # TODO
 * [x] To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, referring expression, comprehension, etc. 
-* [ ] To release finetuning and inference codes for unimodal downstream tasks soon. 
+* [x] To release finetuning and inference codes for unimodal downstream tasks soon. 
 * [ ] To release codes for pretraining soon.
 * [ ] To integrate more downstream tasks concerning more modalities to our OFA framework.
+* [ ] To release smaller models, including OFA-medium, OFA-tiny, as well as OFA-edge. 
+* [ ] To release OFA for Chinese.
 <br></br>
 
 # Approach
