@@ -17,7 +17,7 @@ from omegaconf import II
 
 
 @dataclass
-class AjustLabelSmoothedEncouragingLossConfig(FairseqDataclass):
+class AdjustLabelSmoothedEncouragingLossConfig(FairseqDataclass):
     label_smoothing: float = field(
         default=0.0,
         metadata={"help": "epsilon for label smoothing, 0 means no label smoothing"},
@@ -149,9 +149,9 @@ def label_smoothed_nll_loss(
 
 
 @register_criterion(
-    "ajust_label_smoothed_encouraging_loss", dataclass=AjustLabelSmoothedEncouragingLossConfig
+    "adjust_label_smoothed_encouraging_loss", dataclass=AdjustLabelSmoothedEncouragingLossConfig
 )
-class AjustLabelSmoothedEncouragingLossCriterion(FairseqCriterion):
+class AdjustLabelSmoothedEncouragingLossCriterion(FairseqCriterion):
     def __init__(
         self,
         task,
