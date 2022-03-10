@@ -1,10 +1,10 @@
 # Finetuning with Encouraging Loss
 Below we provide methods for finetuning with label smoothed encouraging loss on different downstream tasks. 
-The implementation is in  [label_smoothed_encouraging_loss.py](criterions/label_smoothed_encouraging_loss.py).
-You can set the `criterion` to `ajust_label_smoothed_encouraging_loss` to use it. This criterion has a hyper-parameter `log-end`. 
-`log-end < 1` results in a approximated and conservative version of the full encouraging loss. 
+The implementation is in [label_smoothed_encouraging_loss.py](criterions/label_smoothed_encouraging_loss.py).
+You can set the `--criterion` to `adjust_label_smoothed_encouraging_loss` to use it. This criterion has a hyper-parameter `--log-end`. 
+`--log-end < 1` results in a approximated and conservative version of the full encouraging loss. 
 A high log_end will more strongly weaken the gradient vanishing, enhance the modeling of the data, and increase the growth rate of the margin, but it will also bring a larger gradient norm, which will bring challenges to the existing optimization system.
-We recommend higher log_end for cases with higher performance, and  0.75 or 0.5 as your first try.
+We recommend higher log_end for cases with higher performance, and 0.75 or 0.5 as your first try.
 ## Image Captioning
 We provide procedures for image captioning with EL below. The preprocessing is identical to default setting.
 
