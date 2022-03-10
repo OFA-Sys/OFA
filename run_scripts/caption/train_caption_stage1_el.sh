@@ -18,7 +18,7 @@ selected_cols=0,4,2
 
 task=caption
 arch=ofa_large
-criterion=ajust_label_smoothed_encouraging_loss # for el
+criterion=adjust_label_smoothed_encouraging_loss # for el
 label_smoothing=0.1
 lr=1e-5
 max_epoch=5
