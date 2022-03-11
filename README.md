@@ -394,6 +394,38 @@ cd run_scripts/image_classify ; sh evaluate_imagenet.sh  # inference & evaluate 
 </pre>
 </details> 
 
+## Gigaword
+We provide steps for you to reproduce our results in Gigaword. See the details below.
+
+<details>
+    <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
+    <p>
+        Download data (see <a href="datasets.md">datasets.md</a>) and models (see <a href="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. The original dataset is taken from <a href="https://github.com/microsoft/unilm/">UniLM</a> and we organized the data into the tsv format. Each line of the processed dataset represents a sample with the following format. The information of source and target texts are separated by tabs.
+    </p>
+<pre>
+factory orders for manufactured goods rose #.# percent in september...  us september factory orders up #.# percent
+</pre>
+</details>
+<details>
+    <summary><b>2. Finetuning</b></summary>
+    <p>
+        Run the following command to train the model.
+    </p>
+<pre>
+cd run_scripts/gigaword
+nohup sh train_gigaword.sh > train_gigaword.out &  # finetune for gigaword
+</pre>
+</details>
+<details>
+    <summary><b>3. Inference</b></summary>
+    <p>
+        Run the following command to obtain the results (~36.43 rougeL).
+    </p>
+<pre>
+cd run_scripts/gigaword ; sh evaluate_gigaword.sh  # inference & evaluate for gigaword
+</pre>
+</details> 
+
 <br></br>
 
 # Gallery
