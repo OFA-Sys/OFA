@@ -53,7 +53,8 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # News
-* 2022.3.08: Released the pretrained checkpoint of OFA-Base in [checkpoints.md](checkpoints.md). To use OFA-Base, you just need to load `ofa_base.pt` and change `--arch=ofa_large` to `--arch=ofa_base` in the training scripts.
+* 2022.3.11: Released the finetuning & inference code/checkpoints for **Gigaword**.
+* 2022.3.08: Released the pretrained checkpoint of **OFA-Base** in [checkpoints.md](checkpoints.md). To use OFA-Base, you just need to load `ofa_base.pt` and change `--arch=ofa_large` to `--arch=ofa_base` in the training scripts.
 * 2022.3.07: Released the finetuning & inference code/checkpoints for **Image Classification**, which achieves **85.0 accuracy on ImageNet-1K, slightly better than reported in OFA paper**.
 * 2022.3.04: Released the finetuning & inference code/checkpoints for **Text-to-Image Generation**.
 * 2022.3.03: Released the finetuning & inference code/checkpoints for **SNLI-VE** and **GLUE**.
