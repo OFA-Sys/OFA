@@ -37,6 +37,8 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
 to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
+    
+We welcome contributions to our project. Feel free to contact us or send us issues/PRs!
 <br></br>
 
 
@@ -51,7 +53,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # News
-* 2022.3.08: Realease the pretrained checkpoint of OFA-Base in [checkpoints.md](checkpoints.md). To use OFA-Base, you just need to load `ofa_base.pt` and change `arch=ofa_large` to `arch=ofa_base` in the training scripts.
+* 2022.3.08: Released the pretrained checkpoint of OFA-Base in [checkpoints.md](checkpoints.md). To use OFA-Base, you just need to load `ofa_base.pt` and change `--arch=ofa_large` to `--arch=ofa_base` in the training scripts.
 * 2022.3.07: Released the finetuning & inference code/checkpoints for **Image Classification**, which achieves **85.0 accuracy on ImageNet-1K, slightly better than reported in OFA paper**.
 * 2022.3.04: Released the finetuning & inference code/checkpoints for **Text-to-Image Generation**.
 * 2022.3.03: Released the finetuning & inference code/checkpoints for **SNLI-VE** and **GLUE**.
@@ -64,9 +66,11 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 
 # TODO
 * [x] To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, referring expression, comprehension, etc. 
-* [ ] To release finetuning and inference codes for unimodal downstream tasks soon. 
+* [x] To release finetuning and inference codes for unimodal downstream tasks soon. 
 * [ ] To release codes for pretraining soon.
 * [ ] To integrate more downstream tasks concerning more modalities to our OFA framework.
+* [ ] To release smaller models, including OFA-medium, OFA-tiny, as well as OFA-edge. 
+* [ ] To release OFA for Chinese.
 <br></br>
 
 # Approach
@@ -115,7 +119,7 @@ To release soon:)
 <br></br>
 
 # Finetuning & Inference
-Below we provide methods for finetuning and inference on different downstream tasks. We provide both the pretrained checkpoint of OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md), the following scripts is running for OFA-Large. If you want to use OFA-Base, just change the `restore_file` to the path where ofa_base.pt is located, and change `arch=ofa_large` to `arch=ofa_base`. **Note that the optimal hyperparameters for the Base model may be different from the Large model and requires proper hyperparameter tuning.
+Below we provide methods for finetuning and inference on different downstream tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts in this section are prepared for OFA-Large. If you want to use OFA-Base, just modify `--restore-file` to the path where `ofa_base.pt` is located and change `--arch=ofa_large` to `--arch=ofa_base`. **Note that the optimal hyperparameters for the Base model may be different from the Large model and requires proper hyperparameter tuning.**
 ## Image Captioning
 We provide procedures to reproduce our results of image captioning on our paper below.
 <details>
