@@ -5,3 +5,5 @@ pycocotools==2.0.4
 pycocoevalcap==1.2
 pytorch_lightning
 einops
+datasets
+rouge_score
