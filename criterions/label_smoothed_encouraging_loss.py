@@ -1,7 +1,7 @@
-# Copyright 2022 The OFA-Sys Team. 
-# All rights reserved.
-# This source code is licensed under the Apache 2.0 license 
-# found in the LICENSE file in the root directory.
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
 
 import math
 from dataclasses import dataclass, field
@@ -17,7 +17,7 @@ from omegaconf import II
 
 
 @dataclass
-class AdjustLabelSmoothedCrossEntropyCriterionConfig(FairseqDataclass):
+class AdjustLabelSmoothedEncouragingLossConfig(FairseqDataclass):
     label_smoothing: float = field(
         default=0.0,
         metadata={"help": "epsilon for label smoothing, 0 means no label smoothing"},
@@ -50,12 +50,26 @@ class AdjustLabelSmoothedCrossEntropyCriterionConfig(FairseqDataclass):
         default=1.0, metadata={"help": "weight for R-Drop"}
     )
     sample_patch_num: int = field(
-        default=196, metadata={"help": "sample patches for v1"}
+        default=196, metadata={"help": "sample patchs for v1"}
     )
     constraint_range: Optional[str] = field(
         default=None,
         metadata={"help": "constraint range"}
     )
+    log_end: float = field(
+        default=0.75,
+        metadata={"help": "higher log_end is for cases with higher performance,"
+                          " we recommend 0.75 or 0.5 as your first try."}
+    )
+    drop_best_ratio: float = field(
+        default=0.0,
+        metadata={"help": "ratio for discarding best samples"},
+    )
+    drop_best_after: int = field(
+        default=0,
+        metadata={"help": "steps for discarding best samples"},
+    )
+
 
 
 def construct_rdrop_sample(x):
@@ -83,7 +97,8 @@ def kl_loss(p, q):
 def label_smoothed_nll_loss(
         lprobs, target, epsilon, update_num, reduce=True,
         drop_worst_ratio=0.0, drop_worst_after=0, use_rdrop=False, reg_alpha=1.0,
-        constraint_masks=None, constraint_start=None, constraint_end=None
+        constraint_masks=None, constraint_start=None, constraint_end=None,        drop_best_ratio=0.0,
+        drop_best_after=0,
 ):
     if target.dim() == lprobs.dim() - 1:
         target = target.unsqueeze(-1)
@@ -110,6 +125,12 @@ def label_smoothed_nll_loss(
             loss, indices = torch.topk(loss, k=int(loss.shape[0] * (1 - drop_worst_ratio)), largest=False)
             nll_loss = nll_loss[indices]
             lprobs = lprobs[indices]
+            target = target[indices]
+    if update_num > drop_best_after:
+        loss, indices = torch.topk(loss, k=int(loss.shape[0] * (1 - drop_best_ratio)), largest=True)
+        nll_loss = nll_loss[indices]
+        lprobs = lprobs[indices]
+        target = target[indices]
 
     ntokens = loss.numel()
     nll_loss = nll_loss.sum()
@@ -124,13 +145,13 @@ def label_smoothed_nll_loss(
             q = q[:, constraint_range]
         loss += kl_loss(p, q) * reg_alpha
 
-    return loss, nll_loss, ntokens
+    return loss, nll_loss, ntokens,lprobs,target
 
 
 @register_criterion(
-    "adjust_label_smoothed_cross_entropy", dataclass=AdjustLabelSmoothedCrossEntropyCriterionConfig
+    "adjust_label_smoothed_encouraging_loss", dataclass=AdjustLabelSmoothedEncouragingLossConfig
 )
-class AdjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
+class AdjustLabelSmoothedEncouragingLossCriterion(FairseqCriterion):
     def __init__(
         self,
         task,
@@ -144,7 +165,10 @@ class AdjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
         use_rdrop=False,
         reg_alpha=1.0,
         sample_patch_num=196,
-        constraint_range=None
+        constraint_range=None,
+        log_end=0.75,
+        drop_best_ratio=0.0,
+        drop_best_after=0,
     ):
         super().__init__(task)
         self.sentence_avg = sentence_avg
@@ -164,6 +188,15 @@ class AdjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
             constraint_start, constraint_end = constraint_range.split(',')
             self.constraint_start = int(constraint_start)
             self.constraint_end = int(constraint_end)
+        self.log_end = log_end
+        self.drop_best_ratio = drop_best_ratio
+        self.drop_best_after = drop_best_after
+        print('el, self.log_end=', self.log_end)
+    # @staticmethod
+    # def add_args(parser):
+    #     """Add criterion-specific arguments to the parser."""
+    #     # fmt: off
+    #     parser.add_argument('--log_end', type=float, default=1.0)
 
     def forward(self, model, sample, update_num=0, reduce=True):
         """Compute the loss for the given sample.
@@ -219,8 +252,7 @@ class AdjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
         constraint_masks = None
         if "constraint_masks" in sample and sample["constraint_masks"] is not None:
             constraint_masks = sample["constraint_masks"]
-            net_output = list(net_output)
-            net_output[0] = net_output[0].masked_fill_(~constraint_masks, -math.inf)
+            net_output[0].masked_fill_(~constraint_masks, -math.inf)
         if self.constraint_start is not None and self.constraint_end is not None:
             net_output[0][:, :, 4:self.constraint_start] = -math.inf
             net_output[0][:, :, self.constraint_end:] = -math.inf
@@ -248,7 +280,7 @@ class AdjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
             constraint_masks = constraint_masks[target != self.padding_idx]
         lprobs = lprobs[target != self.padding_idx]
         target = target[target != self.padding_idx]
-        loss, nll_loss, ntokens = label_smoothed_nll_loss(
+        loss, nll_loss, ntokens, lprobs, target = label_smoothed_nll_loss(
             lprobs,
             target,
             self.eps,
@@ -262,6 +294,25 @@ class AdjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
             constraint_start=self.constraint_start,
             constraint_end=self.constraint_end
         )
+        # for encouraging loss
+        probs = torch.exp(lprobs)
+        bonus = torch.log(torch.clamp((torch.ones_like(probs) - probs), min=1e-5))  # likelihood bonus
+        log_end = self.log_end
+        if log_end != 1.0:  # e.g. 0.9
+            y_log_end = torch.log(torch.ones_like(probs) - log_end)
+            bonus_after_log_end = 1 / (log_end - torch.ones_like(probs)) * (probs - log_end) + y_log_end
+            # x:log_end, y  torch.log(torch.clamp((torch.ones_like(probs) - probs), min=self.cl_eps))
+            bonus = torch.where(probs > log_end, bonus_after_log_end, bonus)
+        c_loss = F.nll_loss(
+            -bonus,
+            target.view(-1),
+            reduction='sum',
+        )
+        smoothing_c_loss = bonus.sum(dim=-1)
+        smoothing_c_loss = smoothing_c_loss.sum()
+        c_loss = c_loss * (1 - self.eps) + (self.eps / lprobs.size(-1)) * smoothing_c_loss
+        loss = loss + c_loss
+        # end for encouraging loss
         return loss, nll_loss, ntokens
 
     def compute_accuracy(self, model, net_output, sample):

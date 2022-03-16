@@ -37,6 +37,8 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
 to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
+    
+We welcome contributions to our project. Feel free to contact us or send us issues/PRs!
 <br></br>
 
 
@@ -51,7 +53,8 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # News
-* 2022.3.08: Released the pretrained checkpoint of OFA-Base in [checkpoints.md](checkpoints.md). To use OFA-Base, you just need to load `ofa_base.pt` and change `--arch=ofa_large` to `--arch=ofa_base` in the training scripts.
+* 2022.3.11: Released the finetuning & inference code/checkpoints for **Gigaword**.
+* 2022.3.08: Released the pretrained checkpoint of **OFA-Base** in [checkpoints.md](checkpoints.md). To use OFA-Base, you just need to load `ofa_base.pt` and change `--arch=ofa_large` to `--arch=ofa_base` in the training scripts.
 * 2022.3.07: Released the finetuning & inference code/checkpoints for **Image Classification**, which achieves **85.0 accuracy on ImageNet-1K, slightly better than reported in OFA paper**.
 * 2022.3.04: Released the finetuning & inference code/checkpoints for **Text-to-Image Generation**.
 * 2022.3.03: Released the finetuning & inference code/checkpoints for **SNLI-VE** and **GLUE**.
@@ -66,9 +69,6 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 * [x] To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, referring expression, comprehension, etc. 
 * [x] To release finetuning and inference codes for unimodal downstream tasks soon. 
 * [ ] To release codes for pretraining soon.
-* [ ] To integrate more downstream tasks concerning more modalities to our OFA framework.
-* [ ] To release smaller models, including OFA-medium, OFA-tiny, as well as OFA-edge. 
-* [ ] To release OFA for Chinese.
 <br></br>
 
 # Approach
@@ -89,7 +89,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
         <td>Metric</td><td>CIDEr</td><td>FID</td><td>CLIPSIM</td><td>IS</td><td colspan="2">Acc.</td><td colspan="2">Acc.</td><td colspan="8">Acc.</td>
     </tr>
     <tr align="center">
-        <td>Score</td><td>150.2</td><td>10.5</td><td>34.4</td><td>31.1</td><td>80.34</td><td>80.45</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>84.49</td><td>90.10</td><td>77.77</td><td>85.54</td><td>85.20</td>
+        <td>Score</td><td>150.2</td><td>10.5</td><td>34.4</td><td>31.1</td><td>80.34</td><td>80.45</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>85.80</td><td>89.87</td><td>79.22</td><td>85.89</td><td>86.55</td>
     </tr>
 </table>
 <br></br>
@@ -389,6 +389,38 @@ bash train_imagenet_distributed.sh
     </p>
 <pre>
 cd run_scripts/image_classify ; sh evaluate_imagenet.sh  # inference & evaluate for imagenet-1k
+</pre>
+</details> 
+
+## Gigaword
+We provide steps for you to reproduce our results in Gigaword. See the details below.
+
+<details>
+    <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
+    <p>
+        Download data (see <a href="datasets.md">datasets.md</a>) and models (see <a href="checkpoints.md">checkpoints.md</a>) and put them in the correct directory. The original dataset is taken from <a href="https://github.com/microsoft/unilm/">UniLM</a> and we organized the data into the tsv format. Each line of the processed dataset represents a sample with the following format. The information of source and target texts are separated by tabs.
+    </p>
+<pre>
+factory orders for manufactured goods rose #.# percent in september...  us september factory orders up #.# percent
+</pre>
+</details>
+<details>
+    <summary><b>2. Finetuning</b></summary>
+    <p>
+        Run the following command to train the model.
+    </p>
+<pre>
+cd run_scripts/gigaword
+nohup sh train_gigaword.sh > train_gigaword.out &  # finetune for gigaword
+</pre>
+</details>
+<details>
+    <summary><b>3. Inference</b></summary>
+    <p>
+        Run the following command to obtain the results (~36.43 rougeL).
+    </p>
+<pre>
+cd run_scripts/gigaword ; sh evaluate_gigaword.sh  # inference & evaluate for gigaword
 </pre>
 </details> 
 
