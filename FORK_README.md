@@ -1,6 +1,6 @@
 ## Fork repo readme
 
-1. dense(pre-trained) model to sparse: Resmo Tuning  
+### 1. Dense model to Sparse: **Resmo Tuning**  
 create a residual combination of mixture-of-experts block and dense-ffn  
 Progress:  
 #### Done  
