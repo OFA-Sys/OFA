@@ -1,8 +1,8 @@
-## Fork repo readme
+# Fork repo readme
 
-### 1. Dense model to Sparse: **Resmo Tuning**  
-create a residual combination of mixture-of-experts block and dense-ffn  
-Progress:  
+## 1. Dense model to Sparse: **Resmo Tuning**  
+create a residual combination of mixture-of-experts block and dense-ffn.  
+### Progress:  
 #### Done  
 - OFA local tests on snli, glue: modified -> `run_scripts/*some.sh, dataset/*, checkpoints/*`.  
 #### Currently  
