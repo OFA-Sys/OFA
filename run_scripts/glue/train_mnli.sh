@@ -5,8 +5,8 @@
 export MASTER_PORT=3052
 
 task=mnli
-log_dir=./logs/${task}
-save_dir=./checkpoints/${task}
+log_dir=./base_logs/${task}
+save_dir=./base_checkpoints/${task}
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE
@@ -14,16 +14,16 @@ user_dir=../../ofa_module
 
 data_dir=../../dataset/glue_data
 data=${data_dir}/mnli_train.tsv,${data_dir}/mnli_dev.tsv
-restore_file=../../checkpoints/ofa_large.pt
+restore_file=../../checkpoints/ofa_base.pt
 selected_cols=0,1,2
 
-arch=ofa_large
+arch=ofa_base
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.0
 lr=3e-5
 max_epoch=5
 warmup_ratio=0.06
-batch_size=8
+batch_size=16
 update_freq=1
 resnet_drop_path_rate=0.0
 encoder_drop_path_rate=0.1

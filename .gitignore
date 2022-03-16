@@ -8,3 +8,9 @@ run_scripts/caption/stage1_logs
 run_scripts/caption/stage2_logs
 run_scripts/glue/checkpoints
 run_scripts/glue/logs
+run_scripts/snli_ve/base_checkpoints
+run_scripts/snli_ve/base_logs
+run_scripts/snli_ve/checkpoints
+run_scripts/snli_ve/logs
+run_scripts/glue/base_checkpoints
+run_scripts/glue/base_logs

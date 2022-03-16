@@ -12,9 +12,30 @@ from fairseq.modules import LayerNorm
 from fairseq.modules.fairseq_dropout import FairseqDropout
 from fairseq.modules.quant_noise import quant_noise
 from torch import Tensor
-
+from tutel import moe as tutel_moe
 from .unify_multihead_attention import MultiheadAttention
 
+class MoE_layer(nn.Module):
+
+    def __init__(self, args):
+        super().__init__()
+        self.topK = getattr(args, 'resmoe_topk', 1)
+        self.double_expert = getattr(args, 'resmoe_double_expert', False)
+        # 0: X, 1: X + FFN(X), 2: FFN(X)
+        self.moe_input = getattr(args, 'resmoe_input', 0)
+        # 1: MoE(X) + FFN(X), 2: MoE(FFN(X)) + FFN(X), 3: MoE(FFN(X))
+        self.moe_output = getattr(args, 'resmoe_output', 1)
+        self.num_expert = getattr(args, 'resmoe_num_expert', 4)
+        self.freeze_tuning = getattr(args, 'resmoe_freeze_tuning', False)
+        self.moe_layer = tutel_moe.moe_layer(
+            gate_type = {'type': 'top', 'k': self.topK},
+            experts = {'type': 'ffn', 'count_per_node': self.num_expert, 'hidden_size_per_expert': args.encoder_embed_dim * 4, 'activation_fn': lambda x: F.relu(x)},
+            model_dim = args.encoder_embed_dim
+            scan_expert_func = lambda name, param: setattr(param, 'skip_allreduce', True),
+        )
+    
+    def forward(self, x):
+        return self.moe_layer(x)
 
 def drop_path(x, drop_prob: float = 0.0, training: bool = False):
     """
@@ -105,6 +126,8 @@ class TransformerEncoderLayer(nn.Module):
 
         self.ffn_layernorm = LayerNorm(args.encoder_ffn_embed_dim) if getattr(args, 'scale_fc', False) else None
         self.w_resid = nn.Parameter(torch.ones(self.embed_dim, ), requires_grad=True) if getattr(args, 'scale_resids', False) else None
+
+        self.moe = MoE_layer(args)
 
         self.final_layer_norm = LayerNorm(self.embed_dim)
 
@@ -221,6 +244,8 @@ class TransformerEncoderLayer(nn.Module):
         x = self.dropout_module(x)
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
+        moe_x = self.moe(x)
+        x += moe_x
         x = self.residual_connection(x, residual)
         if not self.normalize_before:
             x = self.final_layer_norm(x)
@@ -310,7 +335,7 @@ class TransformerDecoderLayer(nn.Module):
             self.quant_noise,
             self.quant_noise_block_size,
         )
-
+        self.moe = MoE_layer(args)
         self.final_layer_norm = LayerNorm(self.embed_dim, export=export)
         self.need_attn = True
 
@@ -491,6 +516,7 @@ class TransformerDecoderLayer(nn.Module):
         x = self.dropout_module(x)
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
+        x += self.moe(x)
         x = self.residual_connection(x, residual)
         if not self.normalize_before:
             x = self.final_layer_norm(x)

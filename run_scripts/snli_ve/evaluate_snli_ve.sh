@@ -8,19 +8,20 @@ user_dir=../../ofa_module
 bpe_dir=../../utils/BPE
 
 # dev or test
-split=$1
+split=dev
 
 data=../../dataset/snli_ve_data/snli_ve_${split}.tsv
-path=../../checkpoints/snli_ve_large_best.pt
+path=../../checkpoints/snli_ve_base_best.pt
+
 result_path=../../results/snli_ve
 selected_cols=0,2,3,4,5
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python3 -m torch.distributed.launch --nproc_per_node=8 --master_port=${MASTER_PORT} ../../evaluate.py \
+CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../evaluate.py \
     ${data} \
     --path=${path} \
     --user-dir=${user_dir} \
     --task=snli_ve \
-    --batch-size=8 \
+    --batch-size=6 \
     --log-format=simple --log-interval=10 \
     --seed=7 \
     --gen-subset=${split} \
