@@ -53,6 +53,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # News
+* 2022.3.18: Released the fintuning & inference code/checkpoints for vision&language tasks, include: Caption (~146.4 CIDEr), VQA (~78.07 on test-std), SNLI-VE (~89.3 on dev), RefCOCO (~90.67 on testA), RefCOCO+ (~87.15 on testA), RefCOCOg (~82.31 on test-u)
 * 2022.3.11: Released the finetuning & inference code/checkpoints for **Gigaword**.
 * 2022.3.08: Released the pretrained checkpoint of **OFA-Base** in [checkpoints.md](checkpoints.md). To use OFA-Base, you just need to load `ofa_base.pt` and change `--arch=ofa_large` to `--arch=ofa_base` in the training scripts.
 * 2022.3.07: Released the finetuning & inference code/checkpoints for **Image Classification**, which achieves **85.0 accuracy on ImageNet-1K, slightly better than reported in OFA paper**.
@@ -89,7 +90,10 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
         <td>Metric</td><td>CIDEr</td><td>FID</td><td>CLIPSIM</td><td>IS</td><td colspan="2">Acc.</td><td colspan="2">Acc.</td><td colspan="8">Acc.</td>
     </tr>
     <tr align="center">
-        <td>Score</td><td>150.2</td><td>10.5</td><td>34.4</td><td>31.1</td><td>80.34</td><td>80.45</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>85.80</td><td>89.87</td><td>79.22</td><td>85.89</td><td>86.55</td>
+        <td>OFA-Large</td><td>150.2</td><td>10.5</td><td>34.4</td><td>31.1</td><td>80.34</td><td>80.45</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>85.80</td><td>89.87</td><td>79.22</td><td>85.89</td><td>86.55</td>
+    </tr>
+    <tr align="center">
+        <td>OFA-Base</td><td>146.4</td><td>-</td><td>-</td><td>-</td><td>77.98</td><td>78.07</td><td>89.3</td><td>89.2</td><td>88.48</td><td>90.67</td><td>83.30</td><td>81.39</td><td>87.15</td><td>74.29</td><td>82.29</td><td>82.31</td>
     </tr>
 </table>
 <br></br>
