@@ -24,9 +24,6 @@ nohup sh train_caption_stage1_el_db.sh > train_stage1_el.out &  # stage 1, train
 We provide procedures for image captioning with EL below. The preprocessing is identical to default setting.
 <details>
     <summary><b>Finetuning</b></summary>
-    <p>
-        
-    </p>
 <pre>
 cd run_scripts/refcoco
 nohup sh train_refcoco_el.sh > train_refcoco_el.out &  # finetune for refcoco
