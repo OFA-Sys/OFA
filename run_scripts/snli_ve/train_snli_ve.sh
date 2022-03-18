@@ -4,8 +4,8 @@
 # you need to specify different port numbers.
 export MASTER_PORT=7051
 
-log_dir=./base_logs
-save_dir=./base_checkpoints
+log_dir=./resmo_logs
+save_dir=./resmo_checkpoints
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE
@@ -17,7 +17,7 @@ restore_file=../../checkpoints/ofa_base.pt
 selected_cols=0,2,3,4,5
 
 task=snli_ve
-arch=ofa_base
+arch=ofa_resmo
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.0
 lr=3e-5

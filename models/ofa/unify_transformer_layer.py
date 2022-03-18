@@ -4,7 +4,8 @@
 # found in the LICENSE file in the root directory.
 
 from typing import Dict, List, Optional
-
+import torch.distributed as dist
+import torch.nn.functional as F
 import torch
 import torch.nn as nn
 from fairseq import utils
@@ -17,20 +18,28 @@ from .unify_multihead_attention import MultiheadAttention
 
 class MoE_layer(nn.Module):
 
-    def __init__(self, args):
+    def __init__(self, d_model, d_inner, resmoe_topk=1, resmoe_double_expert=False, resmoe_input=0, resmoe_output=1, resmoe_num_expert=4, resmoe_freeze_tuning=False):
         super().__init__()
-        self.topK = getattr(args, 'resmoe_topk', 1)
-        self.double_expert = getattr(args, 'resmoe_double_expert', False)
+        self.topK = resmoe_topk
+        self.d_model = d_model
+        self.d_inner = d_inner
+        self.double_expert = resmoe_double_expert
         # 0: X, 1: X + FFN(X), 2: FFN(X)
-        self.moe_input = getattr(args, 'resmoe_input', 0)
+        self.moe_input = resmoe_input
         # 1: MoE(X) + FFN(X), 2: MoE(FFN(X)) + FFN(X), 3: MoE(FFN(X))
-        self.moe_output = getattr(args, 'resmoe_output', 1)
-        self.num_expert = getattr(args, 'resmoe_num_expert', 4)
-        self.freeze_tuning = getattr(args, 'resmoe_freeze_tuning', False)
+        self.moe_output = resmoe_input
+        self.num_expert = resmoe_num_expert
+        self.freeze_tuning = resmoe_freeze_tuning
         self.moe_layer = tutel_moe.moe_layer(
             gate_type = {'type': 'top', 'k': self.topK},
-            experts = {'type': 'ffn', 'count_per_node': self.num_expert, 'hidden_size_per_expert': args.encoder_embed_dim * 4, 'activation_fn': lambda x: F.relu(x)},
-            model_dim = args.encoder_embed_dim
+            experts = {
+                'type': 'ffn', 
+                'count_per_node': self.num_expert, 
+                'hidden_size_per_expert': self.d_inner, 
+                'activation_fn': lambda x: F.relu(x)},
+            model_dim = self.d_model,
+            a2a_ffn_overlap_degree=1,
+            seeds = (1, dist.get_rank() + 1, 1),
             scan_expert_func = lambda name, param: setattr(param, 'skip_allreduce', True),
         )
     
@@ -89,6 +98,7 @@ class TransformerEncoderLayer(nn.Module):
         super().__init__()
         self.args = args
         self.embed_dim = args.encoder_embed_dim
+        self.inner_dim = args.encoder_ffn_embed_dim
         self.quant_noise = getattr(args, 'quant_noise_pq', 0)
         self.quant_noise_block_size = getattr(args, 'quant_noise_pq_block_size', 8) or 8
         self.self_attn = self.build_self_attention(self.embed_dim, args)
@@ -127,7 +137,7 @@ class TransformerEncoderLayer(nn.Module):
         self.ffn_layernorm = LayerNorm(args.encoder_ffn_embed_dim) if getattr(args, 'scale_fc', False) else None
         self.w_resid = nn.Parameter(torch.ones(self.embed_dim, ), requires_grad=True) if getattr(args, 'scale_resids', False) else None
 
-        self.moe = MoE_layer(args)
+        self.moe = MoE_layer(self.embed_dim, args.encoder_ffn_embed_dim)
 
         self.final_layer_norm = LayerNorm(self.embed_dim)
 
@@ -158,6 +168,26 @@ class TransformerEncoderLayer(nn.Module):
     def residual_connection(self, x, residual):
         return residual + self.drop_path(x)
 
+    def moe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=0.1):
+
+        # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
+        fc1_weights = state_dict["{}.fc1.weight".format(name)]
+        fc2_weights = state_dict["{}.fc2.weight".format(name)]
+        fc1_bias = state_dict["{}.fc1.bias".format(name)]
+        fc2_bias = state_dict["{}.fc2.bias".format(name)]
+
+        # copy fc1, fc2 + noise
+        state_dict["{}.moe.moe_layer.experts.0.fc1_weight".format(name)] = torch.zeros((n_experts, self.inner_dim, self.embed_dim))
+        state_dict["{}.moe.moe_layer.experts.0.fc1_weight".format(name)] += fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
+        state_dict["{}.moe.moe_layer.experts.0.fc2_weight".format(name)] = torch.zeros((n_experts, self.inner_dim, self.embed_dim))
+        state_dict["{}.moe.moe_layer.experts.0.fc2_weight".format(name)] += fc2_weights.t() + torch.randn(fc2_weights.t().size()) * noise_coef
+        state_dict["{}.moe.moe_layer.experts.0.fc1_bias".format(name)] = torch.zeros((n_experts, 1, self.inner_dim))
+        state_dict["{}.moe.moe_layer.experts.0.fc1_bias".format(name)] += fc1_bias
+        state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] = torch.zeros((n_experts, 1, self.embed_dim))
+        state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] += fc2_bias
+        state_dict["{}.moe.moe_layer.gates.0.wg.weight".format(name)] = nn.init.kaiming_uniform_(torch.empty(n_experts*4, self.embed_dim))
+
+
     def upgrade_state_dict_named(self, state_dict, name):
         """
         Rename layer norm states from `...layer_norms.0.weight` to
@@ -176,10 +206,17 @@ class TransformerEncoderLayer(nn.Module):
                         "{}.{}.{}".format(name, new, m)
                     ] = self.state_dict()["{}.{}".format(new, m)]
 
+        moe_checker = "{}.moe.moe_layer.gates.0.wg.weight".format(name)
+        if moe_checker not in state_dict and "moe.moe_layer.gates.0.wg.weight" in self.state_dict():
+            self.moe_checkpoint_loader(name, state_dict)
+        elif "moe.moe_layer.gates.0.wg.weight" not in self.state_dict():
+            assert False
+
         prefix = name + "." if name != "" else ""
         for param_name, param_tensor in self.state_dict().items():
             if (prefix + param_name) not in state_dict and param_name in self.state_dict():
                 state_dict[prefix + param_name] = self.state_dict()[param_name]
+        
 
     def forward(
         self,
@@ -234,6 +271,9 @@ class TransformerEncoderLayer(nn.Module):
             x = self.self_attn_layer_norm(x)
 
         residual = x
+
+        moe_x = self.moe(residual)
+
         if self.normalize_before:
             x = self.final_layer_norm(x)
         x = self.activation_fn(self.fc1(x))
@@ -244,8 +284,9 @@ class TransformerEncoderLayer(nn.Module):
         x = self.dropout_module(x)
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
-        moe_x = self.moe(x)
-        x += moe_x
+
+        x = self.residual_connection(x, moe_x)
+
         x = self.residual_connection(x, residual)
         if not self.normalize_before:
             x = self.final_layer_norm(x)
@@ -274,6 +315,7 @@ class TransformerDecoderLayer(nn.Module):
     ):
         super().__init__()
         self.embed_dim = args.decoder_embed_dim
+        self.inner_dim = args.decoder_ffn_embed_dim
         self.dropout_module = FairseqDropout(
             args.dropout, module_name=self.__class__.__name__
         )
@@ -335,7 +377,7 @@ class TransformerDecoderLayer(nn.Module):
             self.quant_noise,
             self.quant_noise_block_size,
         )
-        self.moe = MoE_layer(args)
+        self.moe = MoE_layer(self.embed_dim, args.decoder_ffn_embed_dim)
         self.final_layer_norm = LayerNorm(self.embed_dim, export=export)
         self.need_attn = True
 
@@ -505,6 +547,8 @@ class TransformerDecoderLayer(nn.Module):
                 x = self.encoder_attn_layer_norm(x)
 
         residual = x
+        moe_x = self.moe(x)
+
         if self.normalize_before:
             x = self.final_layer_norm(x)
 
@@ -516,7 +560,8 @@ class TransformerDecoderLayer(nn.Module):
         x = self.dropout_module(x)
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
-        x += self.moe(x)
+        
+        x = self.residual_connection(x, moe_x)
         x = self.residual_connection(x, residual)
         if not self.normalize_before:
             x = self.final_layer_norm(x)
@@ -536,6 +581,28 @@ class TransformerDecoderLayer(nn.Module):
 
     def make_generation_fast_(self, need_attn: bool = False, **kwargs):
         self.need_attn = need_attn
+
+    def moe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=0.1):
+
+        if "{}.fc1.weight".format(name) not in state_dict:
+            assert False
+
+        # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
+        fc1_weights = state_dict["{}.fc1.weight".format(name)]
+        fc2_weights = state_dict["{}.fc2.weight".format(name)]
+        fc1_bias = state_dict["{}.fc1.bias".format(name)]
+        fc2_bias = state_dict["{}.fc2.bias".format(name)]
+
+        # copy fc1, fc2 + noise
+        state_dict["{}.moe.moe_layer.experts.0.fc1_weight".format(name)] = torch.zeros((n_experts, self.inner_dim, self.embed_dim))
+        state_dict["{}.moe.moe_layer.experts.0.fc1_weight".format(name)] += fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
+        state_dict["{}.moe.moe_layer.experts.0.fc2_weight".format(name)] = torch.zeros((n_experts, self.inner_dim, self.embed_dim))
+        state_dict["{}.moe.moe_layer.experts.0.fc2_weight".format(name)] += fc2_weights.t() + torch.randn(fc2_weights.t().size()) * noise_coef
+        state_dict["{}.moe.moe_layer.experts.0.fc1_bias".format(name)] = torch.zeros((n_experts, 1, self.inner_dim))
+        state_dict["{}.moe.moe_layer.experts.0.fc1_bias".format(name)] += fc1_bias
+        state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] = torch.zeros((n_experts, 1, self.embed_dim))
+        state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] += fc2_bias
+        state_dict["{}.moe.moe_layer.gates.0.wg.weight".format(name)] = nn.init.kaiming_uniform_(torch.empty(n_experts*4, self.embed_dim))
 
     def upgrade_state_dict_named(self, state_dict, name):
         """
@@ -561,6 +628,12 @@ class TransformerDecoderLayer(nn.Module):
                     state_dict[
                         "{}.{}.{}".format(name, new, m)
                     ] = self.state_dict()["{}.{}".format(new, m)]
+
+        moe_checker = "{}.moe.moe_layer.gates.0.wg.weight".format(name)
+        if moe_checker not in state_dict and "moe.moe_layer.gates.0.wg.weight" in self.state_dict():
+            self.moe_checkpoint_loader(name, state_dict)
+        elif "moe.moe_layer.gates.0.wg.weight" not in self.state_dict():
+            assert False
 
         prefix = name + "." if name != "" else ""
         for param_name, param_tensor in self.state_dict().items():

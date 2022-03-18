@@ -5,8 +5,8 @@
 export MASTER_PORT=3051
 
 task=cola
-log_dir=./logs/${task}
-save_dir=./checkpoints/${task}
+log_dir=./resmo_logs/${task}
+save_dir=./resmo_checkpoints/${task}
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE
@@ -14,10 +14,10 @@ user_dir=../../ofa_module
 
 data_dir=../../dataset/glue_data
 data=${data_dir}/cola_train.tsv,${data_dir}/cola_dev.tsv
-restore_file=../../checkpoints/ofa_large.pt
+restore_file=../../checkpoints/ofa_base.pt
 selected_cols=1,2
 
-arch=ofa_large
+arch=ofa_resmo
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.0
 lr=3e-5
