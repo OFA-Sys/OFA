@@ -121,7 +121,29 @@ To release soon:)
 <br></br>
 
 # Finetuning & Inference
-Below we provide methods for finetuning and inference on different downstream tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts mentioned in this section are prepared for OFA-Large. If you want to use OFA-Base, please modify `--restore-file` to the path where `ofa_base.pt` is located and change `--arch=ofa_large` to `--arch=ofa_base` in the scripts. For reproducing the downstreaming results of OFA-Base, we have also provided the corresponding finetuning and inference scripts for OFA-Base in the `run_scripts/` folder.
+Below we provide methods for finetuning and inference on different downstream tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts mentioned in this section are prepared for OFA-Large. For reproducing the downstreaming results of OFA-Base, we have also provided the corresponding finetuning and inference scripts for OFA-Base in the `run_scripts/` folder.
+
+We recommend that your directory should be organized like this: 
+```
+OFA/
+    checkpoints/
+        ofa_base.pt
+        ofa_large.pt
+        caption_large_best_clean.pt
+        ...
+    criterions/
+    data/
+    dataset/
+        caption_data/
+        gigaword_data/
+        glue_data/
+        ...
+    examples/
+    fairseq/
+    models/
+    ...
+```
+
 ## Image Captioning
 We provide procedures to reproduce our results of image captioning on our paper below.
 <details>
