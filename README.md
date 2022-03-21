@@ -130,11 +130,11 @@ uniq_id, image(base64 string), caption, question, answer, gt_objects(objects tha
 <details>
     <summary><b>2. Pretraining</b></summary>
     <p>
-        We recommend loading the checkpoints of ``ofa_large`` or ``ofa_base`` to continue pre-training for better results.
+        By default, these scripts restore the released pretrained checkpoints of OFA-Base or OFA-Large and perform continuous pre-training. Continuous pretraining is more recommended, which achieves much better results compared with pretraining from scratch.
     </p>
 <pre>
 cd run_scripts/pretraining
-bash pretrain_ofa_large.sh
+bash pretrain_ofa_large.sh # Pretrain OFA-Large. For OFA-Base, use pretrain_ofa_base.sh
 </pre>
 </details>
 
