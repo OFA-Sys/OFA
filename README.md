@@ -130,7 +130,7 @@ uniq_id, image(base64 string), caption, question, answer, gt_objects(objects tha
 <details>
     <summary><b>2. Pretraining</b></summary>
     <p>
-        By default, these scripts restore the released pretrained checkpoints of OFA-Base or OFA-Large and perform continuous pre-training. Continuous pretraining is more recommended, which achieves much better results compared with pretraining from scratch.
+        By default, these scripts restore the released pretrained checkpoints of OFA-Base or OFA-Large and perform continuous pretraining. Continuous pretraining is more recommended, which achieves much better results compared with pretraining from scratch. Please download the pretrained weights in advance (see <a href='checkpoints.md'>checkpoints.md</a>) and put them in the correct directory <code>OFA/checkpoints/</code>.
     </p>
 <pre>
 cd run_scripts/pretraining
@@ -143,7 +143,7 @@ bash pretrain_ofa_large.sh # Pretrain OFA-Large. For OFA-Base, use pretrain_ofa_
 # Finetuning & Inference
 Below we provide methods for finetuning and inference on different downstream tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts mentioned in this section are prepared for OFA-Large. For reproducing the downstreaming results of OFA-Base, we have also provided the corresponding finetuning and inference scripts for OFA-Base in the `run_scripts/` folder.
 
-We recommend that your directory should be organized like this: 
+We recommend that your workspace directory should be organized like this: 
 ```
 OFA/
 ├── checkpoints/
