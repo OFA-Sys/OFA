@@ -164,6 +164,6 @@ class RefcocoDataset(OFADataset):
         Args:
             samples (List[dict]): samples to collate
         Returns:
-            dict: a mini-batch containing the data required for the task
+            dict: a mini-batch containing the data of the task
         """
         return collate(samples, pad_idx=self.pad, eos_idx=self.eos)
