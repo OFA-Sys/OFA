@@ -146,22 +146,24 @@ Below we provide methods for finetuning and inference on different downstream ta
 We recommend that your directory should be organized like this: 
 ```
 OFA/
-    checkpoints/
-        ofa_base.pt
-        ofa_large.pt
-        caption_large_best_clean.pt
-        ...
-    criterions/
-    data/
-    dataset/
-        caption_data/
-        gigaword_data/
-        glue_data/
-        ...
-    examples/
-    fairseq/
-    models/
-    ...
+├── checkpoints/
+│   ├── ofa_base.pt
+│   ├── ofa_large.pt
+│   ├── caption_large_best_clean.pt
+│   └── ...
+├── criterions/
+├── data/
+├── dataset/
+│   ├── caption_data/
+│   ├── gigaword_data/
+│   └── ...
+├── fairseq/
+├── models/
+├── run_scripts/
+├── tasks/
+├── train.py
+├── trainer.py
+└── utils/
 ```
 
 ## Image Captioning
