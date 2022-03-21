@@ -145,7 +145,7 @@ cd run_scripts/pretraining
 bash pretrain_ofa_large.sh # Pretrain OFA-Large. For OFA-Base, use pretrain_ofa_base.sh
 </pre>
     <p>
-        If the pretrained OFA checkpoint is restored successfully, you will encounter the following information in the log:
+        If the pretrained OFA checkpoint is restored successfully, you will see the following information in the log:
     </p>
 <pre>
 INFO: Loaded checkpoint ../../checkpoints/ofa_large.pt
