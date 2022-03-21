@@ -53,7 +53,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # News
-* 2022.3.18: Released the fintuning & inference code/checkpoints for vision&language tasks, include: Caption (~146.4 CIDEr), VQA (~78.07 on test-std), SNLI-VE (~89.3 on dev), RefCOCO (~90.67 on testA), RefCOCO+ (~87.15 on testA), RefCOCOg (~82.31 on test-u)
+* 2022.3.18: Released the finetuned **OFA-Base** (~180M parameters) checkpoints and running scripts for vision & language tasks, including: **Caption (146.4 CIDEr), VQA (78.07 on test-std), SNLI-VE (89.3 on dev), RefCOCO (90.67 on testA), RefCOCO+ (87.15 on testA) and RefCOCOg (82.31 on test-u)** .
 * 2022.3.11: Released the finetuning & inference code/checkpoints for **Gigaword**.
 * 2022.3.08: Released the pretrained checkpoint of **OFA-Base** in [checkpoints.md](checkpoints.md). To use OFA-Base, you just need to load `ofa_base.pt` and change `--arch=ofa_large` to `--arch=ofa_base` in the training scripts.
 * 2022.3.07: Released the finetuning & inference code/checkpoints for **Image Classification**, which achieves **85.0 accuracy on ImageNet-1K, slightly better than reported in OFA paper**.
@@ -121,7 +121,29 @@ To release soon:)
 <br></br>
 
 # Finetuning & Inference
-Below we provide methods for finetuning and inference on different downstream tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts in this section are prepared for OFA-Large. If you want to use OFA-Base, just modify `--restore-file` to the path where `ofa_base.pt` is located and change `--arch=ofa_large` to `--arch=ofa_base`. **Note that the optimal hyperparameters for the Base model may be different from the Large model and requires proper hyperparameter tuning.**
+Below we provide methods for finetuning and inference on different downstream tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts mentioned in this section are prepared for OFA-Large. For reproducing the downstreaming results of OFA-Base, we have also provided the corresponding finetuning and inference scripts for OFA-Base in the `run_scripts/` folder.
+
+We recommend that your directory should be organized like this: 
+```
+OFA/
+    checkpoints/
+        ofa_base.pt
+        ofa_large.pt
+        caption_large_best_clean.pt
+        ...
+    criterions/
+    data/
+    dataset/
+        caption_data/
+        gigaword_data/
+        glue_data/
+        ...
+    examples/
+    fairseq/
+    models/
+    ...
+```
+
 ## Image Captioning
 We provide procedures to reproduce our results of image captioning on our paper below.
 <details>
@@ -136,7 +158,7 @@ We provide procedures to reproduce our results of image captioning on our paper 
 <details>
     <summary><b>2. Finetuning</b></summary>
     <p>
-        Following previous standard practice, we divide the finetuning process of image captioning into two stages. In stage 1, we finetune OFA with cross-entropy loss on 4 NVIDIA-V100 GPUs with 32GB memory (expected to obtain ~139.5 CIDEr on the validation set at this stage). In stage 2, we select the best checkpoint of stage 1 and train with CIDEr optimization on 8 NVIDIA-V100 GPUs (expected to get ~149.4 CIDEr on the validation set at this stage). <b>Note that CIDEr optimization is very unstable and requires careful hyperparameter tuning. If you encounter training errors in the stage2 finetuning, you can increase the batch size or reduce the learning rate. If neither of these works, you can directly set </b><code>--freeze-resnet</code><b> to freeze the inner states of batch normalization.</b>
+        Following previous standard practice, we divide the finetuning process of image captioning into two stages. In stage 1, we finetune OFA with cross-entropy loss on 4 NVIDIA-V100 GPUs with 32GB memory (expected to obtain ~139.5 CIDEr on the validation set at this stage). In stage 2, we select the best checkpoint of stage 1 and train with CIDEr optimization on 8 NVIDIA-V100 GPUs. <b>Note that CIDEr optimization is very unstable and requires careful hyperparameter tuning. If you encounter training errors in the stage2 finetuning, you can increase the batch size or reduce the learning rate. If neither of these works, you can directly set </b><code>--freeze-resnet</code><b> to freeze the inner states of batch normalization.</b>
     </p>
 <pre>
 cd run_scripts/caption

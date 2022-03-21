@@ -1,4 +1,4 @@
-# Finetuning with Encouraging Loss
+# Finetuning with Encouraging Loss (EL)
 Below we provide methods for finetuning with label smoothed encouraging loss on different downstream tasks. 
 The implementation is in [label_smoothed_encouraging_loss.py](criterions/label_smoothed_encouraging_loss.py).
 You can set the `--criterion` to `adjust_label_smoothed_encouraging_loss` to use it. This criterion has a hyper-parameter `--log-end`. 
@@ -24,9 +24,6 @@ nohup sh train_caption_stage1_el_db.sh > train_stage1_el.out &  # stage 1, train
 We provide procedures for image captioning with EL below. The preprocessing is identical to default setting.
 <details>
     <summary><b>Finetuning</b></summary>
-    <p>
-        
-    </p>
 <pre>
 cd run_scripts/refcoco
 nohup sh train_refcoco_el.sh > train_refcoco_el.out &  # finetune for refcoco
