@@ -3,6 +3,8 @@
 # The port for communication. Note that if you want to run multiple tasks on the same machine,
 # you need to specify different port numbers.
 export MASTER_PORT=1081
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+export GPUS_PER_NODE=8
 
 user_dir=../../ofa_module
 bpe_dir=../../utils/BPE
@@ -13,7 +15,7 @@ result_path=../../results/caption
 selected_cols=1,4,2
 split='test'
 
-CUDA_VISIBLE_DEVICES=4,5,6,7 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../evaluate.py \
+python3 -m torch.distributed.launch --nproc_per_node=${GPUS_PER_NODE} --master_port=${MASTER_PORT} ../../evaluate.py \
     ${data} \
     --path=${path} \
     --user-dir=${user_dir} \
