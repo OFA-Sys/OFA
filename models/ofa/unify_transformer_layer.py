@@ -155,7 +155,7 @@ class TransformerEncoderLayer(nn.Module):
 
         prefix = name + "." if name != "" else ""
         for param_name, param_tensor in self.state_dict().items():
-            if (prefix + param_name) not in state_dict and param_name in self.state_dict():
+            if (prefix + param_name) not in state_dict or state_dict[prefix + param_name].size() != param_tensor.size():
                 state_dict[prefix + param_name] = self.state_dict()[param_name]
 
     def forward(
@@ -538,5 +538,5 @@ class TransformerDecoderLayer(nn.Module):
 
         prefix = name + "." if name != "" else ""
         for param_name, param_tensor in self.state_dict().items():
-            if (prefix + param_name) not in state_dict and param_name in self.state_dict():
+            if (prefix + param_name) not in state_dict or state_dict[prefix + param_name].size() != param_tensor.size():
                 state_dict[prefix + param_name] = self.state_dict()[param_name]

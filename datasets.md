@@ -2,6 +2,9 @@
 
 We provide links to download our preprocessed dataset. If you would like to process the data on your own, we will soon provide scripts for you to do so. 
 
+## Pretraining
+ * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/pretrain_data/pretrain_data_examples.zip"> A small subset of the pretraining data </a>
+
 ## Vision & Language Tasks
  * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/caption_data/caption_data.zip"> Dataset for Caption </a>
  * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/refcoco_data/refcoco_data.zip"> Dataset for RefCOCO </a>
