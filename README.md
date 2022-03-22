@@ -67,11 +67,6 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 <br></br>
 
-# TODO
-* [x] To release finetuning and inference codes for multimodal downstream tasks soon, including image captioning, VQA, text-to-image generation, SNLI-VE, referring expression, comprehension, etc. 
-* [x] To release finetuning and inference codes for unimodal downstream tasks soon. 
-* [x] To release codes for pretraining soon.
-<br></br>
 
 # Approach
 ![approach](examples/approach.jpg)
