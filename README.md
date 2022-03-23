@@ -52,18 +52,26 @@ We provide online demo via Hugging Face Spaces for you to interact with our pret
 Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
 <br></br>
 
+
 # News 
 * 2022.3.23: Added [Encouraging Loss](https://arxiv.org/pdf/2110.06537.pdf) as a feature. See [README_EncouragingLoss.md](README_EncouragingLoss.md). Leveraging this feature, OFA-Large has achieved improved results in both VQA (**test-std acc: 80.67**) and Image Classification (**test acc: 85.6**) recently.
 * 2022.3.21: Released codes for pretraining OFA.
 * 2022.3.18: Released the finetuned **OFA-Base** (~180M parameters) checkpoints and running scripts for vision & language tasks, including: **Caption (146.4 CIDEr), VQA (78.07 on test-std), SNLI-VE (89.3 on dev), RefCOCO (90.67 on testA), RefCOCO+ (87.15 on testA) and RefCOCOg (82.31 on test-u)** .
 * 2022.3.11: Released the finetuning & inference code/checkpoints for **Gigaword**.
 * 2022.3.08: Released the pretrained checkpoint of **OFA-Base** in [checkpoints.md](checkpoints.md). To use OFA-Base, you just need to load `ofa_base.pt` and change `--arch=ofa_large` to `--arch=ofa_base` in the training scripts.
-* 2022.3.07: Released the finetuning & inference code/checkpoints for **Image Classification**, which achieves **85.0 accuracy on ImageNet-1K, slightly better than reported in OFA paper**.
-* 2022.3.04: Released the finetuning & inference code/checkpoints for **Text-to-Image Generation**.
-* 2022.3.03: Released the finetuning & inference code/checkpoints for **SNLI-VE** and **GLUE**.
-* 2022.2.22: Released the finetuning & inference code/checkpoints for **Visual Question Answering**, which can reproduce **the reported VQA accuracy in OFA paper (80.02 on test-std)**. We believe much accuracy improvement can still be achieved based on this codebase. Recently we have used this codebase to achieve a better result **(80.45 on test-std)** on the [VQA Challenge](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278).
-* 2022.2.15: Released finetuning & inference code/checkpoints for **Referring Expression Comprehension**, as well as a [Colab notebook](https://colab.research.google.com/drive/1AHQNRdaUpRTgr3XySHSlba8aXwBAjwPB?usp=sharing) and a demo in [Hugging Face Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding).
-* 2022.2.10: Released the inference code & finetuned checkpoint for **Image captioning**, which can reproduce **the results on COCO Karparthy test split (149.6 CIDEr)**. OFA also achieves No.1 on the COCO image captioning online leaderboard [[Link](https://competitions.codalab.org/competitions/3221#results)] (marked as M6-Team).
+<details>
+    <summary><b>More News</b></summary>
+    <p>
+        <ul>
+            <li>2022.3.07: Released the finetuning & inference code/checkpoints for <b>Image Classification</b>, which achieves <b>85.0</b> accuracy on ImageNet-1K, slightly better than reported in OFA paper.</li>
+            <li>2022.3.04: Released the finetuning & inference code/checkpoints for <b>Text-to-Image Generation</b>.</li>
+            <li>2022.3.03: Released the finetuning & inference code/checkpoints for <b>SNLI-VE</b> and <b>GLUE</b>.</li>
+            <li>2022.2.22: Released the finetuning & inference code/checkpoints for <b>Visual Question Answering</b>, which can reproduce <b>the reported VQA accuracy in OFA paper (80.02 on test-std)</b>. Check our results on the <a href="https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278">VQA Challenge</a>.</li>
+            <li>2022.2.15: Released finetuning & inference code/checkpoints for <b>Referring Expression Comprehension</b></li>
+            <li>2022.2.10: Released the inference code & finetuned checkpoint for <b>Image captioning</b>, which can reproduce <b>the results on COCO Karparthy test split (149.6 CIDEr)</b>. OFA also achieves No.1 on the COCO image captioning online leaderboard <a href='https://competitions.codalab.org/competitions/3221#results'>Link</a> (marked as M6-Team).</li>
+        </ul>
+    </p>
+</details>
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 <br></br>
