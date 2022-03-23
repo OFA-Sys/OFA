@@ -53,7 +53,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # News 
-* 2022.3.23: Added Encouraging loss as a feature. See [README_EncouragingLoss.md](README_EncouragingLoss.md). OFA-Large achieved improved results in both VQA (**test-std acc: 80.67**) and Image Classification (**test acc: 85.6**).
+* 2022.3.23: Added [Encouraging Loss](https://arxiv.org/pdf/2110.06537.pdf) as a feature. See [README_EncouragingLoss.md](README_EncouragingLoss.md). OFA-Large achieved improved results in both VQA (**test-std acc: 80.67**) and Image Classification (**test acc: 85.6**).
 * 2022.3.21: Released codes for pretraining OFA.
 * 2022.3.18: Released the finetuned **OFA-Base** (~180M parameters) checkpoints and running scripts for vision & language tasks, including: **Caption (146.4 CIDEr), VQA (78.07 on test-std), SNLI-VE (89.3 on dev), RefCOCO (90.67 on testA), RefCOCO+ (87.15 on testA) and RefCOCOg (82.31 on test-u)** .
 * 2022.3.11: Released the finetuning & inference code/checkpoints for **Gigaword**.
