@@ -33,6 +33,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
     <br>
 <p>
 
+[colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 
 OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
@@ -72,8 +73,6 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
         </ul>
     </p>
 </details>
-
-[colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 <br></br>
 
 
