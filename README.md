@@ -97,7 +97,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
         <td>OFA-Large</td><td>150.2</td><td>10.5</td><td>34.4</td><td>31.1</td><td>80.43</td><td>80.67</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>85.80</td><td>89.87</td><td>79.22</td><td>85.89</td><td>86.55</td>
     </tr>
     <tr align="center">
-        <td>OFA-Base</td><td>146.4</td><td>-</td><td>-</td><td>-</td><td>77.98</td><td>78.07</td><td>89.3</td><td>89.2</td><td>88.48</td><td>90.67</td><td>83.30</td><td>81.39</td><td>87.15</td><td>74.29</td><td>82.29</td><td>82.31</td>
+        <td>OFA-Base</td><td>146.4</td><td>20.8</td><td>31.6</td><td>21.8</td><td>77.98</td><td>78.07</td><td>89.3</td><td>89.2</td><td>88.48</td><td>90.67</td><td>83.30</td><td>81.39</td><td>87.15</td><td>74.29</td><td>82.29</td><td>82.31</td>
     </tr>
 </table>
 <br></br>
