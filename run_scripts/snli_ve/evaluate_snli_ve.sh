@@ -11,7 +11,7 @@ bpe_dir=../../utils/BPE
 split=dev
 
 data=../../dataset/snli_ve_data/snli_ve_${split}.tsv
-path=../../checkpoints/snli_ve_base_best.pt
+path=dummy_checkpoints/6_2e-6/checkpoint_best.pt
 
 result_path=../../results/snli_ve
 selected_cols=0,2,3,4,5

@@ -203,6 +203,10 @@ class TransformerEncoderLayer(nn.Module):
 
         self.drop_path = DropPath(drop_path_rate) if drop_path_rate > 0.0 else nn.Identity()
 
+        self.training_times = 0
+
+        self.learned_res_coef = nn.Parameter(torch.ones(1, 1))
+
     def build_fc1(self, input_dim, output_dim, q_noise, qn_block_size):
         return quant_noise(
             nn.Linear(input_dim, output_dim), p=q_noise, block_size=qn_block_size
@@ -231,7 +235,97 @@ class TransformerEncoderLayer(nn.Module):
     def residual_scale_combination(self, x, residual):
         return (residual + self.drop_path(x)) / 2
 
-    def doe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=0.05, boise_coef=0.05, ln_coef=0.05):
+    def residual_dynamic_scale_combination(self, x, residual):
+        if self.training_times < 5000:
+            return residual * (1 - self.training_times / 5000) + self.drop_path(x) * self.training_times / 5000
+
+    def residual_learned_scale_combination(self, x, residual):
+        if self.learned_res_coef >= 1:
+            self.learned_res_coef = 1 - 1e-7
+        elif self.learned_res_coef <= 0:
+            self.learned_res_coef = 1e-7
+        return residual * (self.learned_res_coef) + self.drop_path(x) * (1 - self.learned_res_coef)
+    
+            
+    def forward(
+        self,
+        x,
+        encoder_padding_mask: Optional[Tensor],
+        attn_mask: Optional[Tensor] = None,
+        self_attn_bias: Optional[Tensor] = None
+    ):
+        """
+        Args:
+            x (Tensor): input to the layer of shape `(seq_len, batch, embed_dim)`
+            encoder_padding_mask (ByteTensor): binary ByteTensor of shape
+                `(batch, seq_len)` where padding elements are indicated by ``1``.
+            attn_mask (ByteTensor): binary tensor of shape `(tgt_len, src_len)`,
+                where `tgt_len` is the length of output and `src_len` is the
+                length of input, though here both are equal to `seq_len`.
+                `attn_mask[tgt_i, src_j] = 1` means that when calculating the
+                embedding for `tgt_i`, we exclude (mask out) `src_j`. This is
+                useful for strided self-attention.
+
+        Returns:
+            encoded output of shape `(seq_len, batch, embed_dim)`
+        """
+        # anything in original attn_mask = 1, becomes -1e8
+        # anything in original attn_mask = 0, becomes 0
+        # Note that we cannot use -inf here, because at some edge cases,
+        # the attention weight (before softmax) for some padded element in query
+        # will become -inf, which results in NaN in model parameters
+        if attn_mask is not None:
+            attn_mask = attn_mask.masked_fill(
+                attn_mask.to(torch.bool),
+                -1e8 if x.dtype == torch.float32 else -1e4
+            )
+
+        self.training_times += 1
+        residual = x
+        if self.normalize_before:
+            x = self.self_attn_layer_norm(x)
+        x, _ = self.self_attn(
+            query=x,
+            key=x,
+            value=x,
+            key_padding_mask=encoder_padding_mask,
+            need_weights=False,
+            attn_mask=attn_mask,
+            attn_bias=self_attn_bias
+        )
+        if self.attn_ln is not None:
+            x = self.attn_ln(x)
+        x = self.dropout_module(x)
+        x = self.residual_connection(x, residual)
+        if not self.normalize_before:
+            x = self.self_attn_layer_norm(x)
+
+        residual = x
+        if self.normalize_before:
+            x = self.final_layer_norm(x)
+
+        moe_x = self.doe(x)
+        # self.aux_loss += self.moe.aux_loss
+
+        x = self.activation_fn(self.fc1(x))
+        x = self.activation_dropout_module(x)
+        if self.ffn_layernorm is not None:
+            x = self.ffn_layernorm(x)
+        x = self.fc2(x)
+        x = self.dropout_module(x)
+
+        x = self.residual_dynamic_scale_combination(x, moe_x)
+        # x = moe_x
+
+        if self.w_resid is not None:
+            residual = torch.mul(self.w_resid, residual)
+
+        x = self.residual_connection(x, residual)
+        if not self.normalize_before:
+            x = self.final_layer_norm(x)
+        return x
+
+    def doe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=5e-5, boise_coef=0.05, ln_coef=0.05):
 
         # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
         fc1_weights = state_dict["{}.fc1.weight".format(name)]
@@ -302,83 +396,6 @@ class TransformerEncoderLayer(nn.Module):
         for param_name, param_tensor in self.state_dict().items():
             if (prefix + param_name) not in state_dict and param_name in self.state_dict():
                 state_dict[prefix + param_name] = self.state_dict()[param_name]
-        
-    def forward(
-        self,
-        x,
-        encoder_padding_mask: Optional[Tensor],
-        attn_mask: Optional[Tensor] = None,
-        self_attn_bias: Optional[Tensor] = None
-    ):
-        """
-        Args:
-            x (Tensor): input to the layer of shape `(seq_len, batch, embed_dim)`
-            encoder_padding_mask (ByteTensor): binary ByteTensor of shape
-                `(batch, seq_len)` where padding elements are indicated by ``1``.
-            attn_mask (ByteTensor): binary tensor of shape `(tgt_len, src_len)`,
-                where `tgt_len` is the length of output and `src_len` is the
-                length of input, though here both are equal to `seq_len`.
-                `attn_mask[tgt_i, src_j] = 1` means that when calculating the
-                embedding for `tgt_i`, we exclude (mask out) `src_j`. This is
-                useful for strided self-attention.
-
-        Returns:
-            encoded output of shape `(seq_len, batch, embed_dim)`
-        """
-        # anything in original attn_mask = 1, becomes -1e8
-        # anything in original attn_mask = 0, becomes 0
-        # Note that we cannot use -inf here, because at some edge cases,
-        # the attention weight (before softmax) for some padded element in query
-        # will become -inf, which results in NaN in model parameters
-        if attn_mask is not None:
-            attn_mask = attn_mask.masked_fill(
-                attn_mask.to(torch.bool),
-                -1e8 if x.dtype == torch.float32 else -1e4
-            )
-
-        residual = x
-        if self.normalize_before:
-            x = self.self_attn_layer_norm(x)
-        x, _ = self.self_attn(
-            query=x,
-            key=x,
-            value=x,
-            key_padding_mask=encoder_padding_mask,
-            need_weights=False,
-            attn_mask=attn_mask,
-            attn_bias=self_attn_bias
-        )
-        if self.attn_ln is not None:
-            x = self.attn_ln(x)
-        x = self.dropout_module(x)
-        x = self.residual_connection(x, residual)
-        if not self.normalize_before:
-            x = self.self_attn_layer_norm(x)
-
-        residual = x
-        if self.normalize_before:
-            x = self.final_layer_norm(x)
-
-        moe_x = self.doe(x)
-        # self.aux_loss += self.moe.aux_loss
-
-        x = self.activation_fn(self.fc1(x))
-        x = self.activation_dropout_module(x)
-        if self.ffn_layernorm is not None:
-            x = self.ffn_layernorm(x)
-        x = self.fc2(x)
-        x = self.dropout_module(x)
-
-        x = self.residual_scale_combination(x, moe_x)
-        # x = moe_x
-
-        if self.w_resid is not None:
-            residual = torch.mul(self.w_resid, residual)
-
-        x = self.residual_connection(x, residual)
-        if not self.normalize_before:
-            x = self.final_layer_norm(x)
-        return x
 
 
 class TransformerDecoderLayer(nn.Module):
@@ -478,6 +495,8 @@ class TransformerDecoderLayer(nn.Module):
 
         self.drop_path = DropPath(drop_path_rate) if drop_path_rate > 0.0 else nn.Identity()
 
+        self.training_times = 0
+
     def build_fc1(self, input_dim, output_dim, q_noise, qn_block_size):
         return quant_noise(nn.Linear(input_dim, output_dim), q_noise, qn_block_size)
 
@@ -522,6 +541,18 @@ class TransformerDecoderLayer(nn.Module):
 
     def residual_scale_combination(self, x, residual):
         return (residual + self.drop_path(x)) / 2
+    
+    def residual_dynamic_scale_combination(self, x, residual):
+        if self.training_times < 5000:
+            return residual * (1 - self.training_times / 5000) + self.drop_path(x) * self.training_times / 5000
+
+    def residual_learned_scale_combination(self, x, residual):
+        if self.learned_res_coef >= 1:
+            self.learned_res_coef = 1 - 1e-7
+        elif self.learned_res_coef <= 0:
+            self.learned_res_coef = 1e-7
+        return residual * (self.learned_res_coef) + self.drop_path(x) * (1 - self.learned_res_coef)
+
 
     def forward(
         self,
@@ -551,6 +582,8 @@ class TransformerDecoderLayer(nn.Module):
         Returns:
             encoded output of shape `(seq_len, batch, embed_dim)`
         """
+        self.training_times += 1
+
         if need_head_weights:
             need_attn = True
 
@@ -657,7 +690,7 @@ class TransformerDecoderLayer(nn.Module):
         x = self.fc2(x)
         x = self.dropout_module(x)
 
-        x = self.residual_scale_combination(x, moe_x)
+        x = self.residual_dynamic_scale_combination(x, moe_x)
         # x = moe_x
 
         if self.w_resid is not None:
@@ -683,7 +716,7 @@ class TransformerDecoderLayer(nn.Module):
     def make_generation_fast_(self, need_attn: bool = False, **kwargs):
         self.need_attn = need_attn
 
-    def doe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=0.05, boise_coef=0.05, ln_coef=0.05):
+    def doe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=5e-5, boise_coef=0.05, ln_coef=0.05):
 
         # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
         fc1_weights = state_dict["{}.fc1.weight".format(name)]
