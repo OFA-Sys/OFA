@@ -5,8 +5,8 @@
 export MASTER_PORT=3052
 
 task=mnli
-log_dir=./base_logs/${task}
-save_dir=./base_checkpoints/${task}
+log_dir=./tutel_logs/${task}
+save_dir=./tutel_checkpoints/${task}
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE
@@ -20,11 +20,11 @@ selected_cols=0,1,2
 arch=ofa_base
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.0
-lr=3e-5
+lr=1e-5
 max_epoch=5
 warmup_ratio=0.06
-batch_size=16
-update_freq=1
+batch_size=1
+update_freq=8
 resnet_drop_path_rate=0.0
 encoder_drop_path_rate=0.1
 decoder_drop_path_rate=0.1
@@ -35,18 +35,18 @@ max_tgt_length=30
 num_bins=1000
 prompt_type="src"
 
-for max_epoch in {5,7,10}; do
+for max_epoch in {5,}; do
   echo "max_epoch "${max_epoch}
-  for lr in {1e-4,7e-5,6e-5,5e-5,3e-5}; do
+  for lr in {1e-5,}; do
     echo "lr "${lr}
-    for update_freq in {4,2}; do
+    for update_freq in {4,}; do
       echo "update_freq "${update_freq}
 
       log_file=${log_dir}/${max_epoch}"_"${lr}"_"${update_freq}".log"
       save_path=${save_dir}/${max_epoch}"_"${lr}"_"${update_freq}
       mkdir -p $save_path
 
-      CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../train.py \
+      CUDA_VISIBLE_DEVICES=0 python3 -m torch.distributed.launch --nproc_per_node=1 --master_port=${MASTER_PORT} ../../train.py \
           $data \
           --selected-cols=${selected_cols} \
           --bpe-dir=${bpe_dir} \
@@ -78,8 +78,8 @@ for max_epoch in {5,7,10}; do
           --log-format=simple --log-interval=10 \
           --fixed-validation-seed=7 \
           --keep-best-checkpoints=1 \
-          --save-interval=100000 --validate-interval=1 \
-          --save-interval-updates=100000 --validate-interval-updates=1000 \
+          --save-interval=1000 --validate-interval=1 \
+          --save-interval-updates=1000 --validate-interval-updates=1000 \
           --best-checkpoint-metric=acc --maximize-best-checkpoint-metric \
           --max-src-length=${max_src_length} \
           --max-tgt-length=${max_tgt_length} \

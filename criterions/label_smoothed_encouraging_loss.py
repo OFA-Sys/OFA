@@ -312,6 +312,7 @@ class AdjustLabelSmoothedEncouragingLossCriterion(FairseqCriterion):
         smoothing_c_loss = smoothing_c_loss.sum()
         c_loss = c_loss * (1 - self.eps) + (self.eps / lprobs.size(-1)) * smoothing_c_loss
         loss = loss + c_loss
+        # loss += net_output[1]["aux_loss"]
         # end for encouraging loss
         return loss, nll_loss, ntokens
 

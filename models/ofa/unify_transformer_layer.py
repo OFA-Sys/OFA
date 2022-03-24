@@ -3,11 +3,11 @@
 # This source code is licensed under the Apache 2.0 license 
 # found in the LICENSE file in the root directory.
 
-from typing import Dict, List, Optional
 import torch.distributed as dist
-import torch.nn.functional as F
+from typing import Dict, List, Optional
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from fairseq import utils
 from fairseq.modules import LayerNorm
 from fairseq.modules.fairseq_dropout import FairseqDropout
@@ -16,9 +16,62 @@ from torch import Tensor
 from tutel import moe as tutel_moe
 from .unify_multihead_attention import MultiheadAttention
 
+class Dummy_layer(nn.Module):
+
+    def __init__(self, d_model, d_inner, activation_fn, ffn_layernorm, activation_dropout_module, dropout_module, quant_noise, quant_noise_block_size, resmoe_topk=1, resmoe_double_expert=False, resmoe_input=0, resmoe_output=1, resmoe_num_expert=4, resmoe_freeze_tuning=False):
+        super().__init__()
+        self.topK = resmoe_topk
+        self.d_model = d_model
+        self.d_inner = d_inner
+        self.double_expert = resmoe_double_expert
+        # 0: X, 1: X + FFN(X), 2: FFN(X)
+        self.moe_input = resmoe_input
+        # 1: MoE(X) + FFN(X), 2: MoE(FFN(X)) + FFN(X), 3: MoE(FFN(X))
+        self.moe_output = resmoe_input
+        self.num_expert = resmoe_num_expert
+        self.freeze_tuning = resmoe_freeze_tuning
+        self.activation_fn = activation_fn
+        self.ffn_layernorm = ffn_layernorm
+        self.activation_dropout_module = activation_dropout_module
+        self.dropout_module = dropout_module
+        self.quant_noise = quant_noise
+        self.quant_noise_block_size = quant_noise_block_size
+
+        self.fc1 = self.build_fc1(
+            self.d_model,
+            self.d_inner,
+            self.quant_noise,
+            self.quant_noise_block_size,
+        )
+        self.fc2 = self.build_fc2(
+            self.d_inner,
+            self.d_model,
+            self.quant_noise,
+            self.quant_noise_block_size,
+        )
+    
+    def forward(self, x):
+        x = self.activation_fn(self.fc1(x))
+        x = self.activation_dropout_module(x)
+        if self.ffn_layernorm is not None:
+            x = self.ffn_layernorm(x)
+        x = self.fc2(x)
+        x = self.dropout_module(x)
+        return x
+
+    def build_fc1(self, input_dim, output_dim, q_noise, qn_block_size):
+        return quant_noise(
+            nn.Linear(input_dim, output_dim), p=q_noise, block_size=qn_block_size
+        )
+
+    def build_fc2(self, input_dim, output_dim, q_noise, qn_block_size):
+        return quant_noise(
+            nn.Linear(input_dim, output_dim), p=q_noise, block_size=qn_block_size
+        )
+
 class MoE_layer(nn.Module):
 
-    def __init__(self, d_model, d_inner, resmoe_topk=1, resmoe_double_expert=False, resmoe_input=0, resmoe_output=1, resmoe_num_expert=4, resmoe_freeze_tuning=False):
+    def __init__(self, d_model, d_inner, ffn_layernorm, resmoe_topk=1, resmoe_double_expert=False, resmoe_input=0, resmoe_output=1, resmoe_num_expert=2, resmoe_freeze_tuning=False):
         super().__init__()
         self.topK = resmoe_topk
         self.d_model = d_model
@@ -32,6 +85,7 @@ class MoE_layer(nn.Module):
         self.freeze_tuning = resmoe_freeze_tuning
         self.moe_layer = tutel_moe.moe_layer(
             gate_type = {'type': 'top', 'k': self.topK},
+            ffn_layernorm = ffn_layernorm,
             experts = {
                 'type': 'ffn', 
                 'count_per_node': self.num_expert, 
@@ -41,10 +95,13 @@ class MoE_layer(nn.Module):
             a2a_ffn_overlap_degree=1,
             seeds = (1, dist.get_rank() + 1, 1),
             scan_expert_func = lambda name, param: setattr(param, 'skip_allreduce', True),
+            result_func = lambda output: (output, output.l_aux),
         )
+        self.aux_loss = None
     
     def forward(self, x):
-        return self.moe_layer(x)
+        out, self.aux_loss = self.moe_layer(x)
+        return out
 
 def drop_path(x, drop_prob: float = 0.0, training: bool = False):
     """
@@ -137,7 +194,10 @@ class TransformerEncoderLayer(nn.Module):
         self.ffn_layernorm = LayerNorm(args.encoder_ffn_embed_dim) if getattr(args, 'scale_fc', False) else None
         self.w_resid = nn.Parameter(torch.ones(self.embed_dim, ), requires_grad=True) if getattr(args, 'scale_resids', False) else None
 
-        self.moe = MoE_layer(self.embed_dim, args.encoder_ffn_embed_dim)
+        # self.moe = MoE_layer(self.embed_dim, args.encoder_ffn_embed_dim, None) 
+        self.doe = Dummy_layer(self.embed_dim, args.encoder_ffn_embed_dim, self.activation_fn, self.ffn_layernorm, self.activation_dropout_module, self.dropout_module, self.quant_noise, self.quant_noise_block_size)        
+       
+        self.aux_loss = 0
 
         self.final_layer_norm = LayerNorm(self.embed_dim)
 
@@ -168,13 +228,37 @@ class TransformerEncoderLayer(nn.Module):
     def residual_connection(self, x, residual):
         return residual + self.drop_path(x)
 
-    def moe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=0.1):
+    def residual_scale_combination(self, x, residual):
+        return (residual + self.drop_path(x)) / 2
+
+    def doe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=0.05, boise_coef=0.05, ln_coef=0.05):
 
         # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
         fc1_weights = state_dict["{}.fc1.weight".format(name)]
         fc2_weights = state_dict["{}.fc2.weight".format(name)]
         fc1_bias = state_dict["{}.fc1.bias".format(name)]
         fc2_bias = state_dict["{}.fc2.bias".format(name)]
+        ffn_weights = state_dict["{}.ffn_layernorm.weight".format(name)]
+        ffn_bias = state_dict["{}.ffn_layernorm.bias".format(name)]
+
+        # copy fc1, fc2 + noise
+        state_dict["{}.doe.fc1.weight".format(name)] = fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
+        state_dict["{}.doe.fc2.weight".format(name)] = fc2_weights + torch.randn(fc2_weights.size()) * noise_coef
+        state_dict["{}.doe.fc1.bias".format(name)] = fc1_bias * boise_coef
+        state_dict["{}.doe.fc2.bias".format(name)] = fc2_bias * boise_coef        
+        state_dict["{}.doe.ffn_layernorm.weight".format(name)] = ffn_weights     
+        state_dict["{}.doe.ffn_layernorm.bias".format(name)] = ffn_bias
+
+
+    def moe_checkpoint_loader(self, name, state_dict, n_gpu, n_experts=2, noise_coef=0):
+
+        # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
+        fc1_weights = state_dict["{}.fc1.weight".format(name)]
+        fc2_weights = state_dict["{}.fc2.weight".format(name)]
+        fc1_bias = state_dict["{}.fc1.bias".format(name)]
+        fc2_bias = state_dict["{}.fc2.bias".format(name)]
+        ffn_weights = state_dict["{}.ffn_layernorm.weight".format(name)]
+        ffn_bias = state_dict["{}.ffn_layernorm.bias".format(name)]
 
         # copy fc1, fc2 + noise
         state_dict["{}.moe.moe_layer.experts.0.fc1_weight".format(name)] = torch.zeros((n_experts, self.inner_dim, self.embed_dim))
@@ -185,7 +269,9 @@ class TransformerEncoderLayer(nn.Module):
         state_dict["{}.moe.moe_layer.experts.0.fc1_bias".format(name)] += fc1_bias
         state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] = torch.zeros((n_experts, 1, self.embed_dim))
         state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] += fc2_bias
-        state_dict["{}.moe.moe_layer.gates.0.wg.weight".format(name)] = nn.init.kaiming_uniform_(torch.empty(n_experts*4, self.embed_dim))
+        # state_dict["{}.moe.moe_layer.experts.0.ffn_layernorm.weight".format(name)] = ffn_weights
+        # state_dict["{}.moe.moe_layer.experts.0.ffn_layernorm.bias".format(name)] = ffn_bias
+        state_dict["{}.moe.moe_layer.gates.0.wg.weight".format(name)] = nn.init.kaiming_uniform_(torch.empty(n_experts*n_gpu, self.embed_dim))
 
 
     def upgrade_state_dict_named(self, state_dict, name):
@@ -206,18 +292,17 @@ class TransformerEncoderLayer(nn.Module):
                         "{}.{}.{}".format(name, new, m)
                     ] = self.state_dict()["{}.{}".format(new, m)]
 
-        moe_checker = "{}.moe.moe_layer.gates.0.wg.weight".format(name)
-        if moe_checker not in state_dict and "moe.moe_layer.gates.0.wg.weight" in self.state_dict():
-            self.moe_checkpoint_loader(name, state_dict)
-        elif "moe.moe_layer.gates.0.wg.weight" not in self.state_dict():
-            assert False
+        # moe_checker = "{}.moe.moe_layer.gates.0.wg.weight".format(name)
+        # if moe_checker not in state_dict and "moe.moe_layer.gates.0.wg.weight" in self.state_dict():
+        #     self.moe_checkpoint_loader(name, state_dict, n_gpu=1)
+        if "{}.doe.fc1.weight".format(name) not in state_dict and "doe.fc1.weight" in self.state_dict():
+            self.doe_checkpoint_loader(name, state_dict)
 
         prefix = name + "." if name != "" else ""
         for param_name, param_tensor in self.state_dict().items():
             if (prefix + param_name) not in state_dict and param_name in self.state_dict():
                 state_dict[prefix + param_name] = self.state_dict()[param_name]
         
-
     def forward(
         self,
         x,
@@ -271,21 +356,24 @@ class TransformerEncoderLayer(nn.Module):
             x = self.self_attn_layer_norm(x)
 
         residual = x
-
-        moe_x = self.moe(residual)
-
         if self.normalize_before:
             x = self.final_layer_norm(x)
+
+        moe_x = self.doe(x)
+        # self.aux_loss += self.moe.aux_loss
+
         x = self.activation_fn(self.fc1(x))
         x = self.activation_dropout_module(x)
         if self.ffn_layernorm is not None:
             x = self.ffn_layernorm(x)
         x = self.fc2(x)
         x = self.dropout_module(x)
+
+        x = self.residual_scale_combination(x, moe_x)
+        # x = moe_x
+
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
-
-        x = self.residual_connection(x, moe_x)
 
         x = self.residual_connection(x, residual)
         if not self.normalize_before:
@@ -377,7 +465,12 @@ class TransformerDecoderLayer(nn.Module):
             self.quant_noise,
             self.quant_noise_block_size,
         )
-        self.moe = MoE_layer(self.embed_dim, args.decoder_ffn_embed_dim)
+
+        # self.moe = MoE_layer(self.embed_dim, args.decoder_ffn_embed_dim, None)   
+        self.doe = Dummy_layer(self.embed_dim, args.encoder_ffn_embed_dim, self.activation_fn, self.ffn_layernorm, self.activation_dropout_module, self.dropout_module, self.quant_noise, self.quant_noise_block_size)        
+     
+        self.aux_loss = 0
+
         self.final_layer_norm = LayerNorm(self.embed_dim, export=export)
         self.need_attn = True
 
@@ -426,6 +519,9 @@ class TransformerDecoderLayer(nn.Module):
 
     def residual_connection(self, x, residual):
         return residual + self.drop_path(x)
+
+    def residual_scale_combination(self, x, residual):
+        return (residual + self.drop_path(x)) / 2
 
     def forward(
         self,
@@ -547,10 +643,12 @@ class TransformerDecoderLayer(nn.Module):
                 x = self.encoder_attn_layer_norm(x)
 
         residual = x
-        moe_x = self.moe(x)
 
         if self.normalize_before:
             x = self.final_layer_norm(x)
+
+        moe_x = self.doe(x)
+        # self.aux_loss += self.moe.aux_loss
 
         x = self.activation_fn(self.fc1(x))
         x = self.activation_dropout_module(x)
@@ -558,10 +656,13 @@ class TransformerDecoderLayer(nn.Module):
             x = self.ffn_layernorm(x)
         x = self.fc2(x)
         x = self.dropout_module(x)
+
+        x = self.residual_scale_combination(x, moe_x)
+        # x = moe_x
+
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
         
-        x = self.residual_connection(x, moe_x)
         x = self.residual_connection(x, residual)
         if not self.normalize_before:
             x = self.final_layer_norm(x)
@@ -582,16 +683,33 @@ class TransformerDecoderLayer(nn.Module):
     def make_generation_fast_(self, need_attn: bool = False, **kwargs):
         self.need_attn = need_attn
 
-    def moe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=0.1):
-
-        if "{}.fc1.weight".format(name) not in state_dict:
-            assert False
+    def doe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=0.05, boise_coef=0.05, ln_coef=0.05):
 
         # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
         fc1_weights = state_dict["{}.fc1.weight".format(name)]
         fc2_weights = state_dict["{}.fc2.weight".format(name)]
         fc1_bias = state_dict["{}.fc1.bias".format(name)]
         fc2_bias = state_dict["{}.fc2.bias".format(name)]
+        ffn_weights = state_dict["{}.ffn_layernorm.weight".format(name)]
+        ffn_bias = state_dict["{}.ffn_layernorm.bias".format(name)]
+
+        # copy fc1, fc2 + noise
+        state_dict["{}.doe.fc1.weight".format(name)] = fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
+        state_dict["{}.doe.fc2.weight".format(name)] = fc2_weights + torch.randn(fc2_weights.size()) * noise_coef
+        state_dict["{}.doe.fc1.bias".format(name)] = fc1_bias * boise_coef
+        state_dict["{}.doe.fc2.bias".format(name)] = fc2_bias * boise_coef        
+        state_dict["{}.doe.ffn_layernorm.weight".format(name)] = ffn_weights     
+        state_dict["{}.doe.ffn_layernorm.bias".format(name)] = ffn_bias
+
+    def moe_checkpoint_loader(self, name, state_dict, n_gpu, n_experts=2, noise_coef=0):
+
+         # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
+        fc1_weights = state_dict["{}.fc1.weight".format(name)]
+        fc2_weights = state_dict["{}.fc2.weight".format(name)]
+        fc1_bias = state_dict["{}.fc1.bias".format(name)]
+        fc2_bias = state_dict["{}.fc2.bias".format(name)]
+        ffn_weights = state_dict["{}.ffn_layernorm.weight".format(name)]
+        ffn_bias = state_dict["{}.ffn_layernorm.bias".format(name)]
 
         # copy fc1, fc2 + noise
         state_dict["{}.moe.moe_layer.experts.0.fc1_weight".format(name)] = torch.zeros((n_experts, self.inner_dim, self.embed_dim))
@@ -602,7 +720,9 @@ class TransformerDecoderLayer(nn.Module):
         state_dict["{}.moe.moe_layer.experts.0.fc1_bias".format(name)] += fc1_bias
         state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] = torch.zeros((n_experts, 1, self.embed_dim))
         state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] += fc2_bias
-        state_dict["{}.moe.moe_layer.gates.0.wg.weight".format(name)] = nn.init.kaiming_uniform_(torch.empty(n_experts*4, self.embed_dim))
+        # state_dict["{}.moe.moe_layer.experts.0.ffn_layernorm.weight".format(name)] = ffn_weights
+        # state_dict["{}.moe.moe_layer.experts.0.ffn_layernorm.bias".format(name)] = ffn_bias
+        state_dict["{}.moe.moe_layer.gates.0.wg.weight".format(name)] = nn.init.kaiming_uniform_(torch.empty(n_experts*n_gpu, self.embed_dim))
 
     def upgrade_state_dict_named(self, state_dict, name):
         """
@@ -629,11 +749,11 @@ class TransformerDecoderLayer(nn.Module):
                         "{}.{}.{}".format(name, new, m)
                     ] = self.state_dict()["{}.{}".format(new, m)]
 
-        moe_checker = "{}.moe.moe_layer.gates.0.wg.weight".format(name)
-        if moe_checker not in state_dict and "moe.moe_layer.gates.0.wg.weight" in self.state_dict():
-            self.moe_checkpoint_loader(name, state_dict)
-        elif "moe.moe_layer.gates.0.wg.weight" not in self.state_dict():
-            assert False
+        # moe_checker = "{}.moe.moe_layer.gates.0.wg.weight".format(name)
+        # if moe_checker not in state_dict and "moe.moe_layer.gates.0.wg.weight" in self.state_dict():
+        #     self.moe_checkpoint_loader(name, state_dict, n_gpu=1)
+        if "{}.doe.fc1.weight".format(name) not in state_dict and "doe.fc1.weight" in self.state_dict():
+            self.doe_checkpoint_loader(name, state_dict)
 
         prefix = name + "." if name != "" else ""
         for param_name, param_tensor in self.state_dict().items():

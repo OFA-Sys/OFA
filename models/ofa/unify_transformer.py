@@ -107,6 +107,7 @@ class TransformerModel(FairseqEncoderDecoderModel):
     def add_args(parser):
         """Add model-specific arguments to the parser."""
         # fmt: off
+
         parser.add_argument('--activation-fn',
                             choices=utils.get_available_activation_fns(),
                             help='activation function to use')
@@ -255,7 +256,6 @@ class TransformerModel(FairseqEncoderDecoderModel):
     @classmethod
     def build_model(cls, args, task):
         """Build a new model instance."""
-
         # make sure all arguments are present in older models
         base_architecture(args)
 
@@ -761,6 +761,8 @@ class TransformerEncoder(FairseqEncoder):
         if return_all_hiddens:
             encoder_states.append(x)
 
+        # aux_loss = 0
+
         # encoder layers
         for idx, layer in enumerate(self.layers):
             self_attn_bias = abs_pos_bias.clone()
@@ -781,6 +783,8 @@ class TransformerEncoder(FairseqEncoder):
             if return_all_hiddens:
                 assert encoder_states is not None
                 encoder_states.append(x)
+            # aux_loss += layer.aux_loss
+            # layer.aux_loss = 0
 
         if self.layer_norm is not None:
             x = self.layer_norm(x)
@@ -797,6 +801,7 @@ class TransformerEncoder(FairseqEncoder):
             "src_tokens": [],
             "src_lengths": [],
             "position_embeddings": [pos_embed],  # B x T x C
+            # "aux_loss": aux_loss
         }
 
     @torch.jit.export
@@ -1296,6 +1301,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         if self.cross_self_attention or prev_output_tokens.eq(self.padding_idx).any():
             self_attn_padding_mask = prev_output_tokens.eq(self.padding_idx)
 
+        # aux_loss = 0
         # decoder layers
         attn: Optional[Tensor] = None
         inner_states: List[Optional[Tensor]] = [x]
@@ -1332,6 +1338,11 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             inner_states.append(x)
             if layer_attn is not None and idx == alignment_layer:
                 attn = layer_attn.float().to(x)
+            
+        #     aux_loss += layer.aux_loss
+        #     layer.aux_loss = 0
+        
+        # aux_loss += encoder_out["aux_loss"]
 
         if attn is not None:
             if alignment_heads is not None:

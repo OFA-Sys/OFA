@@ -47,7 +47,6 @@ from omegaconf import DictConfig, OmegaConf
 from utils import checkpoint_utils
 from trainer import Trainer
 
-
 def main(cfg: FairseqConfig) -> None:
     if isinstance(cfg, argparse.Namespace):
         cfg = convert_namespace_to_omegaconf(cfg)

@@ -6,7 +6,6 @@
 """
 Train a network across multiple GPUs.
 """
-
 import contextlib
 import logging
 import sys
@@ -14,7 +13,6 @@ import time
 from argparse import Namespace
 from itertools import chain
 from typing import Any, Dict, List
-
 import torch
 from fairseq import models, optim, utils
 from fairseq.dataclass.configs import FairseqConfig
@@ -52,6 +50,8 @@ class Trainer(object):
 
         self.cfg = cfg
         self.task = task
+        
+
 
         # catalog shared parameters
         shared_params = _catalog_shared_params(model)
@@ -107,6 +107,7 @@ class Trainer(object):
             # so only handle cases which don't use the wrapper
             and not self.use_distributed_wrapper
         ):
+            logger.info("Debugging")
             self._criterion = self._criterion.to(device=self.device)
             self._model = self._model.to(device=self.device)
         self.pipeline_model_parallel = cfg.distributed_training.pipeline_model_parallel
