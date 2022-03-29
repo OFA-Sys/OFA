@@ -18,9 +18,25 @@ from torch.nn import Parameter
 
 @with_incremental_state
 class MultiheadAttention(nn.Module):
-    """Multi-headed attention.
+    r"""
+    Multi-headed attention.
+    Different from the conventional attention, we add components from Normformer (https://arxiv.org/abs/2110.09456).
 
-    See "Attention Is All You Need" for more details.
+    Args:
+        embed_dim: the dimension of embedding
+        num_heads: the number of heads
+        kdim: the dimension of the key
+        vdim: the dimension of the value
+        dropout: the ratio for dropout
+        bias: whether to add biases in qkv projections
+        add_bias_kv: whether to add biases for keys and values
+        add_zero_attn: whether to add zero attention (to be deprecated)
+        self_attention: whether to use cross self attention. (to be deprecated)
+        encoder_decoder_attention: whether to use cross attention
+        q_noise: the quantization noise
+        qn_block_size: the block size for quantization noises
+        scale_factor: the scaling factor query-key scaling
+        scale_heads: whether to scale heads with learnable variables (for Normformer)
     """
 
     def __init__(
@@ -95,6 +111,9 @@ class MultiheadAttention(nn.Module):
         self.onnx_trace = True
 
     def reset_parameters(self):
+        r"""
+        reset the parameters with new initialization methods.
+        """
         if self.qkv_same_dim:
             # Empirically observed the convergence to be much better with
             # the scaled initialization
@@ -129,22 +148,34 @@ class MultiheadAttention(nn.Module):
         need_head_weights: bool = False,
         attn_bias: Optional[Tensor] = None
     ) -> Tuple[Tensor, Optional[Tensor]]:
-        """Input shape: Time x Batch x Channel
-
+        r"""
         Args:
+            query (FloatTensor): input query representations.
+            key (FloatTensor, optional): input key representations
+                when the key is not identical to the query.
+            value (FloatTensor, optional): input key representations
+                when the value is not identical to the query.
+            incremental_state (Dict, optional): a dictionary to store
+                incremental states generated previously. Used at the
+                inference stage.
             key_padding_mask (ByteTensor, optional): mask to exclude
                 keys that are pads, of shape `(batch, src_len)`, where
                 padding elements are indicated by 1s.
             need_weights (bool, optional): return the attention weights,
                 averaged over heads (default: False).
+            static_kv (bool, optional): whether to use static kv.
             attn_mask (ByteTensor, optional): typically used to
                 implement causal attention, where the mask prevents the
                 attention from looking forward in time (default: None).
+            self_attn_mask (ByteTensor, optional): used for self attention
+                mask to avoid attending on tokens like padding.
             before_softmax (bool, optional): return the raw attention
                 weights and values before the attention softmax.
             need_head_weights (bool, optional): return the attention
                 weights for each head. Implies *need_weights*. Default:
                 return the average attention weights over all heads.
+            attn_bias (FloatTensor, optional): the attention bias for
+                positional information.
         """
         if need_head_weights:
             need_weights = True

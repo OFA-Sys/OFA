@@ -24,6 +24,14 @@ logger = logging.getLogger(__name__)
 
 @register_model("ofa")
 class OFAModel(TransformerModel):
+    r"""
+    OFA Model consisting of an Encoder and a decoder.
+
+    Args:
+        args: arguments
+        encoder: OFA encoder
+        decoder: OFA decoder
+    """
     __jit_unused_properties__ = ["supported_targets"]
 
     def __init__(self, args, encoder, decoder):
@@ -38,6 +46,9 @@ class OFAModel(TransformerModel):
 
     @staticmethod
     def add_args(parser):
+        r"""
+        Add specific arguments for OFA.
+        """
         super(OFAModel, OFAModel).add_args(parser)
         parser.add_argument(
             "--pooler-dropout",
@@ -73,16 +84,37 @@ class OFAModel(TransformerModel):
         prev_output_tokens,
         patch_images: Optional[torch.Tensor] = None,
         patch_images_2: Optional[torch.Tensor] = None,
-        patch_masks: Optional[torch.Tensor] = None,
-        code_masks: Optional[torch.Tensor] = None,
-        sample_patch_num: Optional[int] = None,
-        features_only: bool = False,
-        classification_head_name: Optional[str] = None,
-        token_embeddings: Optional[torch.Tensor] = None,
-        return_all_hiddens: bool = False,
-        alignment_layer: Optional[int] = None,
-        alignment_heads: Optional[int] = None,
+            patch_masks: Optional[torch.Tensor] = None,
+            code_masks: Optional[torch.Tensor] = None,
+            sample_patch_num: Optional[int] = None,
+            features_only: bool = False,
+            classification_head_name: Optional[str] = None,
+            token_embeddings: Optional[torch.Tensor] = None,
+            return_all_hiddens: bool = False,
+            alignment_layer: Optional[int] = None,
+            alignment_heads: Optional[int] = None,
     ):
+        r"""
+        # TODO
+        Args:
+            src_tokens (LongTensor): Indices of the input token sequence
+                of shape `(batch_size, sequence_length)`. The text is
+                tokenized by OFA tokenizer.
+            src_lengths (LongTensor): the lengths of the input tokens.
+            prev_output_tokens (LongTensor): the previous tokens, including prompts.
+            patch_images (FloatTensor): the input raw image, to be split into patches
+                and transformed to patch representations with ResNet.
+            patch_images_2 (FloatTensor): the second input raw images.
+            patch_masks (BoolTensor, optional): the mask of image patches.
+            code_masks (BoolTensor, optional):  the masks of image codes.
+            sample_patch_num: the number of sampled patches to reduce computation costs.
+            features_only (bool, optional): whether to generate features only.
+            classification_head_name (str, optional): the name of classification head.
+            token_embeddings (FloatTensor, optional): the token embeddings.
+            return_all_hiddens (bool, optional): whether to return states from all layers.
+            alignment_layer (int, optional): the number of alignment layers.
+            alignment_heads (int, optional): the number of alignment heads
+        """
         if classification_head_name is not None:
             features_only = True
 
@@ -124,7 +156,7 @@ class OFAModel(TransformerModel):
         return x, extra
 
     def register_embedding_tokens(self, ans2label_dict, src_dict, bpe):
-        """Register embedding tokens"""
+        r"""Register embedding tokens"""
         logger.info("Registering embedding tokens")
         self.ans_tensor_list = []
         for i in range(len(ans2label_dict)):
@@ -140,7 +172,7 @@ class OFAModel(TransformerModel):
     def register_classification_head(
         self, name, num_classes=None, inner_dim=None, use_two_images=False, **kwargs
     ):
-        """Register a classification head."""
+        r"""Register a classification head."""
         logger.info("Registering classification head: {0}".format(name))
         if name in self.classification_heads:
             prev_num_classes = self.classification_heads[name].out_proj.out_features
@@ -166,6 +198,7 @@ class OFAModel(TransformerModel):
         )
 
     def upgrade_state_dict_named(self, state_dict, name):
+        r"""Update the names of the state dictionary"""
         super().upgrade_state_dict_named(state_dict, name)
 
         prefix = name + "." if name != "" else ""
@@ -269,17 +302,29 @@ class OFAModel(TransformerModel):
 
 
 class OFAClassificationHead(nn.Module):
-    """Head for sentence-level classification tasks."""
+    r"""
+    Head for sentence-level classification tasks.
+
+    Args:
+        input_dim: the dimension of the input
+        inner_dim: the inner dimension for the two-layer neural network
+        num_classes: the number of classes
+        activation_fn: activation function
+        pooler_dropout: dropout function for the pooler
+        pooler_classifier: the choice of classifier (`mlp` and `linear`)
+        use_two_images: whether the number of input images are 2
+        do_spectral_norm: whether to use spectral normalization
+    """
 
     def __init__(
-        self,
-        input_dim,
-        inner_dim,
-        num_classes,
-        activation_fn,
-        pooler_dropout,
-        pooler_classifier,
-        use_two_images=False,
+            self,
+            input_dim,
+            inner_dim,
+            num_classes,
+            activation_fn,
+            pooler_dropout,
+            pooler_classifier,
+            use_two_images=False,
         do_spectral_norm=False,
     ):
         super().__init__()
@@ -301,6 +346,10 @@ class OFAClassificationHead(nn.Module):
             self.out_proj = torch.nn.utils.spectral_norm(self.out_proj)
 
     def forward(self, features, **kwargs):
+        r"""
+        Args:
+            features (FloatTensor): the input features from the OFA model.
+        """
         if self.pooler_classifier == 'mlp':
             x = features
             x = self.dropout(x)
@@ -319,6 +368,9 @@ class OFAClassificationHead(nn.Module):
 
 @register_model_architecture("ofa", "ofa_large")
 def ofa_large_architecture(args):
+    r"""
+    Specific attributes of the OFA-large model.
+    """
     args.encoder_embed_path = getattr(args, "encoder_embed_path", None)
     args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 1024)
     args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4 * 1024)
@@ -388,6 +440,10 @@ def ofa_large_architecture(args):
 
 @register_model_architecture("ofa", "ofa_base")
 def ofa_base_architecture(args):
+    r"""
+    Specific attributes of the OFA-base model.
+    """
+
     args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 768)
     args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4 * 768)
     args.encoder_layers = getattr(args, "encoder_layers", 6)
@@ -400,6 +456,9 @@ def ofa_base_architecture(args):
 
 @register_model_architecture("ofa", "ofa_huge")
 def ofa_huge_architecture(args):
+    r"""
+    Specific attributes of the OFA-huge model.
+    """
     args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 1280)
     args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4 * 1280)
     args.encoder_layers = getattr(args, "encoder_layers", 24)
@@ -408,4 +467,3 @@ def ofa_huge_architecture(args):
     args.decoder_attention_heads = getattr(args, "decoder_attention_heads", 16)
     args.resnet_type = getattr(args, "resnet_type", "resnet152")
     ofa_large_architecture(args)
-

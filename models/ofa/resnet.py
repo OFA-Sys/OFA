@@ -3,7 +3,8 @@ import torch.nn as nn
 
 
 def drop_path(x, drop_prob: float = 0., training: bool = False):
-    """Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks).
+    r"""
+    Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks).
     This is the same as the DropConnect impl I created for EfficientNet, etc networks, however,
     the original name is misleading as 'Drop Connect' is a.sh different form of dropout in a.sh separate paper...
     See discussion: https://github.com/tensorflow/tpu/issues/494#issuecomment-532968956 ... I've opted for
@@ -21,8 +22,10 @@ def drop_path(x, drop_prob: float = 0., training: bool = False):
 
 
 class DropPath(nn.Module):
-    """Drop paths (Stochastic Depth) per sample  (when applied in main path of residual blocks).
+    r"""
+    Drop paths (Stochastic Depth) per sample  (when applied in main path of residual blocks).
     """
+
     def __init__(self, drop_prob=None):
         super(DropPath, self).__init__()
         self.drop_prob = drop_prob
@@ -32,17 +35,35 @@ class DropPath(nn.Module):
 
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
-    """3x3 convolution with padding"""
+    r"""
+    3x3 convolution with padding
+    """
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=dilation, groups=groups, bias=False, dilation=dilation)
 
 
 def conv1x1(in_planes, out_planes, stride=1):
-    """1x1 convolution"""
+    r"""
+    1x1 convolution
+    """
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
 class BasicBlock(nn.Module):
+    r"""
+    The basic block of ResNet.
+
+    Args:
+        inplanes: the input channel size
+        planes: the output channel size
+        stride: the number of strides
+        downsample: whether to use downsampling
+        groups: the number of groups
+        base_width: base width
+        dilation: the number of dilations for dilated convolution
+        norm_layer: the normalization layer
+    """
+
     expansion = 1
 
     def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
@@ -84,11 +105,24 @@ class BasicBlock(nn.Module):
 
 
 class Bottleneck(nn.Module):
-    # Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2)
-    # while original implementation places the stride at the first 1x1 convolution(self.conv1)
-    # according to "Deep residual learning for image recognition"https://arxiv.org/abs/1512.03385.
-    # This variant is also known as ResNet V1.5 and improves accuracy according to
-    # https://ngc.nvidia.com/catalog/model-scripts/nvidia:resnet_50_v1_5_for_pytorch.
+    r"""
+    Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2)
+    while original implementation places the stride at the first 1x1 convolution(self.conv1)
+    according to "Deep residual learning for image recognition"https://arxiv.org/abs/1512.03385.
+    This variant is also known as ResNet V1.5 and improves accuracy according to
+    https://ngc.nvidia.com/catalog/model-scripts/nvidia:resnet_50_v1_5_for_pytorch.
+
+    Args:
+        inplanes: the input channel size
+        planes: the output channel size
+        stride: the number of strides
+        downsample: whether to use downsampling
+        groups: the number of groups
+        base_width: base width
+        dilation: the number of dilations for dilated convolution
+        norm_layer: the normalization layer
+        drop_path_rate: the ratio for drop path
+    """
 
     expansion = 4
 
@@ -134,6 +168,18 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
+    r"""
+    The whole network of ResNet.
+
+    Args:
+        layers: the number of blocks in each layer
+        zero_init_residual: whether to zero initialize the last BN in each residual branch
+        groups: the number of groups
+        width_per_group: the width of each group
+        replace_stride_with_dilation: whether to replace stride with dilation
+        norm_layer: the normalization layer
+        drop_path_rate: the ratio for drop path
+    """
 
     def __init__(self, layers, zero_init_residual=False,
                  groups=1, width_per_group=64, replace_stride_with_dilation=None,
@@ -183,6 +229,15 @@ class ResNet(nn.Module):
                     nn.init.constant_(m.bn2.weight, 0)
 
     def _make_layer(self, block, planes, blocks, stride=1, dilate=False, drop_path_rate=0.0):
+        r"""
+        Args:
+            block: the bottleneck block
+            planes: the output channel size
+            blocks: the number of blocks
+            stride: the number of strides
+            dilate: whether to use dilated convolution
+            drop_path_rate: the ratio for drop path
+        """
         norm_layer = self._norm_layer
         downsample = None
         previous_dilation = self.dilation
