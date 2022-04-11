@@ -238,7 +238,7 @@ class UnifyDataset(OFADataset):
 
     def get_negative_caption(self, caption, gt_objects):
         prob = random.random()
-        if gt_objects is not None and prob > 0.6:
+        if gt_objects is not None and gt_objects != '' and prob > 0.6:
             gt_object = random.choice(gt_objects.strip().split('&&'))
             negative_object = random.choice(self.all_object_list[:-1])
             negative_object = self.all_object_list[-1] if negative_object == gt_object else negative_object
