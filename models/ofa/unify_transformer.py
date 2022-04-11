@@ -889,7 +889,7 @@ class TransformerEncoder(FairseqEncoder):
 
         prefix = name + "." if name != "" else ""
         for param_name, param_tensor in self.state_dict().items():
-            if (prefix + param_name) not in state_dict or state_dict[prefix + param_name].size() != param_tensor.size():
+            if (prefix + param_name) not in state_dict:
                 state_dict[prefix + param_name] = self.state_dict()[param_name]
 
         if len(state_dict["encoder.embed_image_positions.weight"]) < len(self.state_dict()["embed_image_positions.weight"]):
@@ -1419,7 +1419,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         for image_param in image_params:
             state_dict[prefix + image_param] = self.state_dict()[image_param]
         for param_name, param_tensor in self.state_dict().items():
-            if (prefix + param_name) not in state_dict or state_dict[prefix + param_name].size() != param_tensor.size():
+            if (prefix + param_name) not in state_dict:
                 state_dict[prefix + param_name] = self.state_dict()[param_name]
 
         if len(state_dict["decoder.embed_image_positions.weight"]) < len(self.state_dict()["embed_image_positions.weight"]):
