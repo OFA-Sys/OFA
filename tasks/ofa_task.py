@@ -26,9 +26,8 @@ class OFAConfig(FairseqDataclass):
     data: Optional[str] = field(
         default=None,
         metadata={
-            "help": "colon separated path to data directories list, will be iterated upon during epochs "
-                    "in round-robin manner; however, valid and test data are always in the first directory "
-                    "to avoid the need for repeating them in all directories"
+            "help": "comma separated path to data list, will be iterated upon during epochs "
+                    "in round-robin manner; valid data are always in the last"
         },
     )
     selected_cols: Optional[str] = field(
