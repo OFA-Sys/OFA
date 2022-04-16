@@ -433,6 +433,8 @@ class TransformerEncoder(FairseqEncoder):
             self.embed_images = ResNet([3, 4, 23], norm_layer=norm_layer, drop_path_rate=args.resnet_drop_path_rate)
         elif args.resnet_type == 'resnet152':
             self.embed_images = ResNet([3, 8, 36], norm_layer=norm_layer, drop_path_rate=args.resnet_drop_path_rate)
+        elif args.resnet_type == 'resnet50':
+            self.embed_images = ResNet([3, 4, 6], norm_layer=norm_layer, drop_path_rate=args.resnet_drop_path_rate)
         else:
             raise NotImplementedError
         self.image_proj = Linear(1024, embed_dim)
