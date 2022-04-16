@@ -409,3 +409,26 @@ def ofa_huge_architecture(args):
     args.resnet_type = getattr(args, "resnet_type", "resnet152")
     ofa_large_architecture(args)
 
+
+@register_model_architecture("ofa", "ofa_medium")
+def ofa_medium_architecture(args):
+    args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 512)
+    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4 * 512)
+    args.encoder_layers = getattr(args, "encoder_layers", 4)
+    args.encoder_attention_heads = getattr(args, "encoder_attention_heads", 8)
+    args.decoder_layers = getattr(args, "decoder_layers", 4)
+    args.decoder_attention_heads = getattr(args, "decoder_attention_heads", 8)
+    args.resnet_type = getattr(args, "resnet_type", "resnet101")
+    ofa_large_architecture(args)
+
+
+@register_model_architecture("ofa", "ofa_tiny")
+def ofa_medium_architecture(args):
+    args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 256)
+    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4 * 256)
+    args.encoder_layers = getattr(args, "encoder_layers", 4)
+    args.encoder_attention_heads = getattr(args, "encoder_attention_heads", 4)
+    args.decoder_layers = getattr(args, "decoder_layers", 4)
+    args.decoder_attention_heads = getattr(args, "decoder_attention_heads", 4)
+    args.resnet_type = getattr(args, "resnet_type", "resnet50")
+    ofa_large_architecture(args)
