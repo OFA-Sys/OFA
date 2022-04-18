@@ -77,8 +77,25 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 
-# Approach
-![approach](examples/approach.jpg)
+# Model Card
+<table border="1" width="100%">
+    <tr align="center">
+        <th>Model</th><th>Ckpt</th><th>Params</th><th>Backbone</th><th>Hidden size</th><th>Intermediate size</th><th>Num. of heads</th><th>Enc layers</th><th>Dec layers</th>
+    </tr>
+    <tr align="center">
+        <td>OFA<sub>Tiny</sub></td><td><a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_tiny.pt">Download</a></td><td>33M</td><td>ResNet50</td><td>256</td><td>1024</td><td>4</td><td>4</td><td>4</td>
+    </tr>
+    <tr align="center">
+        <td>OFA<sub>Medium</sub></td><td><a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_medium.pt">Download</a></td><td>93M</td><td>ResNet101</td><td>512</td></td><td>2048</td><td>8</td><td>4</td><td>4</td>
+    </tr>
+    <tr align="center">
+        <td>OFA<sub>Base</sub></td><td><a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_base.pt">Download</a></td><td>180M</td><td>ResNet101</td><td>768</td></td><td>3072</td><td>12</td><td>6</td><td>6</td>
+    </tr>
+    <tr align="center">
+        <td>OFA<sub>Large</sub></td><td><a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_large.pt">Download</a></td><td>470M</td><td>ResNet152</td><td>1024</td></td><td>4096</td><td>16</td><td>12</td><td>12</td>
+    </tr>
+</table>
+<br></br>
 
 # Results
 <table border="1" width="100%">
