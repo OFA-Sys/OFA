@@ -55,7 +55,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 
 
 # News 
-* 2022.4.16: Released small models **OFA-Medium** (~93M params) and **OFA-Tiny** (~33M params).
+* 2022.4.16: Released lightweight pretrained models **OFA-Medium** (~93M params) and **OFA-Tiny** (~33M params) in [checkpoints.md](checkpoints.md). To use them, you just need to load the corresponding checkpoint and set `--arch=ofa_medium` or `--arch=ofa_tiny` in the scripts.
 * 2022.3.23: Added [Encouraging Loss](https://arxiv.org/pdf/2110.06537.pdf) as a feature. See [README_EncouragingLoss.md](README_EncouragingLoss.md). Leveraging this feature, OFA-Large has achieved improved results in both VQA (**test-std acc: 80.67**) and Image Classification (**test acc: 85.6**) recently.
 * 2022.3.21: Released codes for pretraining OFA.
 * 2022.3.18: Released the finetuned **OFA-Base** (~180M parameters) checkpoints and running scripts for vision & language tasks, including: **Caption (146.4 CIDEr), VQA (78.07 on test-std), SNLI-VE (89.3 on dev), RefCOCO (90.67 on testA), RefCOCO+ (87.15 on testA) and RefCOCOg (82.31 on test-u)** .
