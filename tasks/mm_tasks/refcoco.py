@@ -22,14 +22,13 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class RefcocoConfig(OFAConfig):
-    # options for reporting BLEU during validation
     eval_acc: bool = field(
-        default=False, metadata={"help": "evaluation with BLEU scores"}
+        default=False, metadata={"help": "evaluation with accuracy"}
     )
     eval_args: Optional[str] = field(
         default='{}',
         metadata={
-            "help": 'generation args for BLUE or CIDEr scoring, e.g., \'{"beam": 4, "lenpen": 0.6}\', as JSON string'
+            "help": 'generation args, e.g., \'{"beam": 4, "lenpen": 0.6}\', as JSON string'
         },
     )
     eval_print_samples: bool = field(
@@ -38,15 +37,6 @@ class RefcocoConfig(OFAConfig):
 
     max_image_size: int = field(
         default=512, metadata={"help": "max image size for normalization"}
-    )
-    scst: bool = field(
-        default=False, metadata={"help": "Self-critical sequence training"}
-    )
-    scst_args: str = field(
-        default='{}',
-        metadata={
-            "help": 'generation args for Self-critical sequence training, as JSON string'
-        },
     )
 
 
