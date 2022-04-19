@@ -78,6 +78,8 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 
 
 # Model Card
+We list the parameters and pretrained checkpoints of OFAs below. For finetuned checkpoints, please refer to [checkpoints.md](checkpoints.md). 
+
 <table border="1" width="100%">
     <tr align="center">
         <th>Model</th><th>Ckpt</th><th>Params</th><th>Backbone</th><th>Hidden size</th><th>Intermediate size</th><th>Num. of heads</th><th>Enc layers</th><th>Dec layers</th>
@@ -98,6 +100,8 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 <br></br>
 
 # Results
+Below we demonstrate the results of OFAs on cross-modal understanding and generation. 
+
 <table border="1" width="100%">
     <tr align="center">
         <th>Task</th><th>Image Captioning</th><th colspan="3">Text-to-Image Generation</th><th colspan="2">VQA</th><th colspan="2">Visual Entailment</th><th colspan="8">Referring Expression Comprehension</th>
