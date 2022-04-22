@@ -77,7 +77,7 @@ class VqaGenConfig(OFAConfig):
         metadata={"help": "inference type in validation (allcand or beamsearch), default to allcand"},
     )    
     eval_args: Optional[str] = field(
-        default='{"beam":5,"unnormalized":True,"temperature":1.0}',
+        default='{"beam":5,"unnormalized":true,"temperature":1.0}',
         metadata={
             "help": 'generation args as JSON string for inference, only activated when --val-inference-type=beamsearch'
         },
