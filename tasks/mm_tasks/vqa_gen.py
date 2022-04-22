@@ -158,7 +158,7 @@ class VqaGenTask(OFATask):
                 self.valid_constraint_masks_list += [constraint_mask_list[i:i+self.cfg.valid_batch_size]]
         elif self.cfg.val_inference_type == "beamsearch":
             gen_args = json.loads(self.cfg.eval_args)
-            self.sequence_generator = self.build_generator(
+            self.generator = self.build_generator(
                 [model], Namespace(**gen_args)
             )
         else:
