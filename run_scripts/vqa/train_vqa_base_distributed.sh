@@ -56,6 +56,10 @@ ema_fp32="--ema-fp32"
 ema_decay=0.9999
 ema_start_update=0
 
+# Specify the inference type in validation after each fine-tuning epoch
+# As mentioned in the readme, you can choose from allcand or beamsearch evaluation, default to allcand
+val_inference_type=allcand
+
 for max_epoch in {15,}; do
   echo "max_epoch "${max_epoch}
   for warmup_ratio in {0.04,}; do
@@ -134,6 +138,7 @@ for max_epoch in {15,}; do
             ${ema_fp32} \
             --ema-decay=${ema_decay} \
             --ema-start-update=${ema_start_update} \
+            --val-inference-type=${val_inference_type} \
             --num-workers=0 > ${log_file} 2>&1
       done
     done
