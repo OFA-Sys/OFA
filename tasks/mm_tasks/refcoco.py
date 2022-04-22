@@ -38,6 +38,15 @@ class RefcocoConfig(OFAConfig):
     max_image_size: int = field(
         default=512, metadata={"help": "max image size for normalization"}
     )
+    scst: bool = field(
+        default=False, metadata={"help": "Self-critical sequence training"}
+    )
+    scst_args: str = field(
+        default='{}',
+        metadata={
+            "help": 'generation args for Self-critical sequence training, as JSON string'
+        },
+    )
 
 
 @register_task("refcoco", dataclass=RefcocoConfig)
