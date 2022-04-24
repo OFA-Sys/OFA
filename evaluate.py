@@ -57,6 +57,10 @@ def main(cfg: DictConfig, **kwargs):
 
     # Load ensemble
     overrides = eval(cfg.common_eval.model_overrides)
+    # Deal with beam-search / all-candidate VQA eval
+    if cfg.task._name == "vqa_gen":
+        overrides['val_inference_type'] = "beamsearch" if kwargs['beam_search_vqa_eval'] else "allcand"
+
     logger.info("loading model(s) from {}".format(cfg.common_eval.path))
     models, saved_cfg, task = checkpoint_utils.load_model_ensemble_and_task(
         utils.split_paths(cfg.common_eval.path),
