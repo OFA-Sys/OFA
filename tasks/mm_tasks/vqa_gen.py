@@ -26,6 +26,22 @@ from utils.trie import Trie
 logger = logging.getLogger(__name__)
 
 
+def get_symbols_to_strip_from_output(generator):
+    if hasattr(generator, "symbols_to_strip_from_output"):
+        return generator.symbols_to_strip_from_output
+    else:
+        return {generator.bos, generator.eos}
+
+
+def decode_fn(x, tgt_dict, bpe, generator, tokenizer=None):
+    x = tgt_dict.string(x.int().cpu(), extra_symbols_to_ignore=get_symbols_to_strip_from_output(generator))
+    if bpe is not None:
+        x = bpe.decode(x)
+    if tokenizer is not None:
+        x = tokenizer.decode(x)
+    return x
+
+
 @dataclass
 class VqaGenConfig(OFAConfig):
     max_object_length: int = field(
@@ -56,6 +72,16 @@ class VqaGenConfig(OFAConfig):
         default=False,
         metadata={"help": "whether to use ema"},
     )
+    val_inference_type: Optional[str] = field(
+        default='allcand',
+        metadata={"help": "inference type in validation (allcand or beamsearch), default to allcand"},
+    )    
+    eval_args: Optional[str] = field(
+        default='{"beam":5,"unnormalized":true,"temperature":1.0}',
+        metadata={
+            "help": 'generation args as JSON string for inference, only activated when --val-inference-type=beamsearch'
+        },
+    )    
 
 
 @register_task("vqa_gen", dataclass=VqaGenConfig)
@@ -70,6 +96,9 @@ class VqaGenTask(OFATask):
             self.ans2label_dict = json.loads(self.cfg.ans2label_dict)
 
         self.uses_ema = self.cfg.uses_ema
+
+        assert self.cfg.val_inference_type in ["allcand", "beamsearch"], \
+            "Unknown inference type encountered: {}, should be allcand or beamsearch.".format(self.cfg.val_inference_type)
 
     def load_dataset(self, split, epoch=1, combine=False, **kwargs):
         paths = self.cfg.data.split(',')
@@ -121,11 +150,19 @@ class VqaGenTask(OFATask):
                 constraint_mask[i][constraint_nodes] = True
             constraint_mask_list.append(constraint_mask)
 
-        self.valid_answers_list = []
-        self.valid_constraint_masks_list = []
-        for i in range(0, len(answer_item_list), self.cfg.valid_batch_size):
-            self.valid_answers_list += [answer_item_list[i:i+self.cfg.valid_batch_size]]
-            self.valid_constraint_masks_list += [constraint_mask_list[i:i+self.cfg.valid_batch_size]]
+        if self.cfg.val_inference_type == "allcand":
+            self.valid_answers_list = []
+            self.valid_constraint_masks_list = []
+            for i in range(0, len(answer_item_list), self.cfg.valid_batch_size):
+                self.valid_answers_list += [answer_item_list[i:i+self.cfg.valid_batch_size]]
+                self.valid_constraint_masks_list += [constraint_mask_list[i:i+self.cfg.valid_batch_size]]
+        elif self.cfg.val_inference_type == "beamsearch":
+            gen_args = json.loads(self.cfg.eval_args)
+            self.generator = self.build_generator(
+                [model], Namespace(**gen_args)
+            )
+        else:
+            raise NotImplementedError("Error: Unknown inference type encountered.")
 
         return model
 
@@ -149,58 +186,71 @@ class VqaGenTask(OFATask):
 
         eval_model.eval()
         with torch.no_grad():
-            encoder_out = eval_model.encoder(
-                sample["net_input"]["src_tokens"],
-                src_lengths=sample["net_input"]["src_lengths"],
-                patch_images=sample["net_input"]["patch_images"],
-                patch_masks=sample["net_input"]["patch_masks"]
-            )
-            device = sample["net_input"]["src_tokens"].device
-            eos_item = torch.tensor([self.src_dict.eos()])
-            pad = self.src_dict.pad()
-            valid_result = []
-            for valid_answers, valid_constraint_masks in zip(self.valid_answers_list, self.valid_constraint_masks_list):
-                valid_size = len(valid_answers)
-                valid_tgt_items = [
-                    torch.cat([torch.tensor(decoder_prompt[1:]), valid_answer, eos_item])
-                    for decoder_prompt in sample["decoder_prompts"] for valid_answer in valid_answers
-                ]
-                valid_prev_items = [
-                    torch.cat([torch.tensor(decoder_prompt), valid_answer])
-                    for decoder_prompt in sample["decoder_prompts"] for valid_answer in valid_answers
-                ]
-                valid_constraint_mask_items = [
-                    torch.cat([torch.zeros(len(decoder_prompt)-1, valid_constraint_mask.size(1)).bool(), valid_constraint_mask], dim=0)
-                    for decoder_prompt in sample["decoder_prompts"] for valid_constraint_mask in valid_constraint_masks
-                ]
-                valid_tgt = data_utils.collate_tokens(valid_tgt_items, pad_idx=pad, left_pad=False).to(device)
-                valid_prev_output = data_utils.collate_tokens(valid_prev_items, pad_idx=pad, left_pad=False).to(device)
-                valid_constraint_masks = data_utils.collate_tokens(valid_constraint_mask_items, pad_idx=pad, left_pad=False).to(device)
+            if self.cfg.val_inference_type == "allcand":
+                encoder_out = eval_model.encoder(
+                    sample["net_input"]["src_tokens"],
+                    src_lengths=sample["net_input"]["src_lengths"],
+                    patch_images=sample["net_input"]["patch_images"],
+                    patch_masks=sample["net_input"]["patch_masks"]
+                )
+                device = sample["net_input"]["src_tokens"].device
+                eos_item = torch.tensor([self.src_dict.eos()])
+                pad = self.src_dict.pad()
+                valid_result = []
+                for valid_answers, valid_constraint_masks in zip(self.valid_answers_list, self.valid_constraint_masks_list):
+                    valid_size = len(valid_answers)
+                    valid_tgt_items = [
+                        torch.cat([torch.tensor(decoder_prompt[1:]), valid_answer, eos_item])
+                        for decoder_prompt in sample["decoder_prompts"] for valid_answer in valid_answers
+                    ]
+                    valid_prev_items = [
+                        torch.cat([torch.tensor(decoder_prompt), valid_answer])
+                        for decoder_prompt in sample["decoder_prompts"] for valid_answer in valid_answers
+                    ]
+                    valid_constraint_mask_items = [
+                        torch.cat([torch.zeros(len(decoder_prompt)-1, valid_constraint_mask.size(1)).bool(), valid_constraint_mask], dim=0)
+                        for decoder_prompt in sample["decoder_prompts"] for valid_constraint_mask in valid_constraint_masks
+                    ]
+                    valid_tgt = data_utils.collate_tokens(valid_tgt_items, pad_idx=pad, left_pad=False).to(device)
+                    valid_prev_output = data_utils.collate_tokens(valid_prev_items, pad_idx=pad, left_pad=False).to(device)
+                    valid_constraint_masks = data_utils.collate_tokens(valid_constraint_mask_items, pad_idx=pad, left_pad=False).to(device)
 
-                new_encoder_out = {}
-                new_encoder_out["encoder_out"] = [
-                    encoder_out["encoder_out"][0].repeat_interleave(valid_size, dim=1)
-                ]
-                new_encoder_out["encoder_padding_mask"] = [
-                    encoder_out["encoder_padding_mask"][0].repeat_interleave(valid_size, dim=0)
-                ]
-                new_encoder_out["position_embeddings"] = [
-                    encoder_out["position_embeddings"][0].repeat_interleave(valid_size, dim=0)
-                ]
+                    new_encoder_out = {}
+                    new_encoder_out["encoder_out"] = [
+                        encoder_out["encoder_out"][0].repeat_interleave(valid_size, dim=1)
+                    ]
+                    new_encoder_out["encoder_padding_mask"] = [
+                        encoder_out["encoder_padding_mask"][0].repeat_interleave(valid_size, dim=0)
+                    ]
+                    new_encoder_out["position_embeddings"] = [
+                        encoder_out["position_embeddings"][0].repeat_interleave(valid_size, dim=0)
+                    ]
 
-                decoder_out = eval_model.decoder(valid_prev_output, encoder_out=new_encoder_out)
-                decoder_out[0].masked_fill_(~valid_constraint_masks, -math.inf)
-                lprobs = eval_model.get_normalized_probs(decoder_out, log_probs=True)
-                scores = lprobs.gather(dim=-1, index=valid_tgt.unsqueeze(-1)).squeeze(-1)
-                scores = scores.masked_fill(valid_tgt.eq(self.tgt_dict.pad()), 0)
-                scores = scores.masked_fill((~valid_constraint_masks).all(2), 0)
-                scores = scores.sum(1)
-                scores = scores.view(-1, valid_size)
-                valid_result.append(scores)
+                    decoder_out = eval_model.decoder(valid_prev_output, encoder_out=new_encoder_out)
+                    decoder_out[0].masked_fill_(~valid_constraint_masks, -math.inf)
+                    lprobs = eval_model.get_normalized_probs(decoder_out, log_probs=True)
+                    scores = lprobs.gather(dim=-1, index=valid_tgt.unsqueeze(-1)).squeeze(-1)
+                    scores = scores.masked_fill(valid_tgt.eq(self.tgt_dict.pad()), 0)
+                    scores = scores.masked_fill((~valid_constraint_masks).all(2), 0)
+                    scores = scores.sum(1)
+                    scores = scores.view(-1, valid_size)
+                    valid_result.append(scores)
 
-        valid_result = torch.cat(valid_result, dim=-1)
-        predicts = valid_result.argmax(1).tolist()
-        hyps = [self.index2ans[predict_index] for predict_index in predicts]
+                valid_result = torch.cat(valid_result, dim=-1)
+                predicts = valid_result.argmax(1).tolist()
+                hyps = [self.index2ans[predict_index] for predict_index in predicts]                    
+            
+            elif self.cfg.val_inference_type == "beamsearch":
+                raw_hyps = self.inference_step(self.generator, [eval_model], sample, prefix_tokens=sample['prefix_tokens'])
+                hyps = []
+                for i, sample_id in enumerate(sample["id"].tolist()):
+                    prefix_len = sample['prefix_tokens'][i].ne(1).sum().item()
+                    detok_hypo_str = decode_fn(raw_hyps[i][0]["tokens"][prefix_len:], self.tgt_dict, self.bpe, self.generator)
+                    hyps.append(detok_hypo_str.strip())
+
+            else:
+                raise NotImplementedError("Error: Unknown inference type encountered.")
+
         scores = [ref_dict.get(hyp, 0) for ref_dict, hyp in zip(sample['ref_dict'], hyps)]
         logging_output["_vqa_score_sum"] = sum(scores)
         logging_output["_vqa_cnt"] = len(scores)
