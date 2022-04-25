@@ -98,7 +98,7 @@ def main():
 
         question = pre_question(question, task.cfg.max_src_length)
         question = question + '?' if not question.endswith('?') else question
-        src_text = encode_text(' {}'.format(question), append_bos=True, append_eos=True).unsqueeze(0)
+        src_text = encode_text(f' {question}', append_bos=True, append_eos=True).unsqueeze(0)
 
         src_length = torch.LongTensor([s.ne(pad_idx).long().sum() for s in src_text])
         ref_dict = np.array([{'yes': 1.0}])  # just placeholder
