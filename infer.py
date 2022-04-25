@@ -1,5 +1,6 @@
 import re
 import torch
+from matplotlib import pyplot as plt
 import numpy as np
 from fairseq import checkpoint_utils
 from fairseq import distributed_utils, options, tasks, utils
@@ -8,10 +9,20 @@ from PIL import Image
 from tasks.mm_tasks.vqa_gen import VqaGenTask
 from utils.zero_shot_utils import zero_shot_step
 
+# JW: imports for TTS and Speech Recognition
+import pyttsx3
+import speech_recognition as sr
+
+
+def tts(text):
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
+
 
 def main():
     # Register VQA task
-    tasks.register_task('vqa_gen',VqaGenTask)
+    tasks.register_task('vqa_gen', VqaGenTask)
 
     # turn on cuda if GPU is available
     use_cuda = torch.cuda.is_available()
@@ -20,7 +31,7 @@ def main():
 
     # specify some options for evaluation
     parser = options.get_generation_parser()
-    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/checkpoint_best.pt",
+    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/ofa_medium.pt",
                   "--bpe-dir=utils/BPE"]
     args = options.parse_args_and_arch(parser, input_args)
     cfg = convert_namespace_to_omegaconf(args)
@@ -118,49 +129,27 @@ def main():
     image = Image.open('test_images/test.jpg')
 
     # JW: Show image via PIL
-    image.show()
+    plt.imshow(image)
+    plt.show()
+
+    # JW Initialize speech recognizer
+    rec = sr.Recognizer()
 
     # JW: Add loop to ask multiple questions
     while True:
-        question = input('Enter your question: ')
-        if question in ['q', 'Q', 'quit', 'Quit']:
-            return 'Exiting...'
-
-        # ! wget https://ofa-silicon.oss-us-west-1.aliyuncs.com/assets/open_domain_vqa_colab/airship.jpg -O test.jpg
-        # image = Image.open('./test.jpg')
-        # question = "what does the red-roofed building right to the big airship look like?"
-
-        # ! wget https://ofa-silicon.oss-us-west-1.aliyuncs.com/assets/open_domain_vqa_colab/cat.jpg -O test.jpg
-        # image = Image.open('./test.jpg')
-        # question = "where are the cats?"
-
-        # ! wget https://ofa-silicon.oss-us-west-1.aliyuncs.com/assets/open_domain_vqa_colab/starry_night.jpeg -O test.jpeg
-        # image = Image.open('./test.jpeg')
-        # question = "whose style does the picture belong to?"
-
-        # ! wget https://ofa-silicon.oss-us-west-1.aliyuncs.com/assets/open_domain_vqa_colab/light_bulb.png -O test.png
-        # image = Image.open('./test.png')
-        # question = "what is the man sitting on?"
-
-        # ! wget https://ofa-silicon.oss-us-west-1.aliyuncs.com/assets/open_domain_vqa_colab/bathing_dog.jpg -O test.jpg
-        # image = Image.open('./test.jpg')
-        # question = "what is the dog doing now?"
-
-        # ! wget https://ofa-silicon.oss-us-west-1.aliyuncs.com/assets/open_domain_vqa_colab/hold_laptop.png -O test.png
-        # image = Image.open('./test.png')
-        # question = "what is the person in the right-bottom corner holding now?"
-
-        # ! wget https://ofa-silicon.oss-us-west-1.aliyuncs.com/assets/open_domain_vqa_colab/children_stick_figure.png -O test.png
-        # image = Image.open('./test.png')
-        # question = "what is the mood of the children in the picture?"
-
-        # ! wget https://ofa-silicon.oss-us-west-1.aliyuncs.com/assets/open_domain_vqa_colab/man_stick_figure.png -O test.png
-        # image = Image.open('./test.png')
-        # question = "what is the man doing?"
-
-        # ! wget https://ofa-silicon.oss-us-west-1.aliyuncs.com/assets/open_domain_vqa_colab/solar_system.jpg -O test.jpg
-        # image = Image.open('./test.jpg')
-        # question = "what is the name of the largest planet in the picture?"
+        tts("Please ask a question.")
+        try:
+            with sr.Microphone() as source:
+                rec.adjust_for_ambient_noise(source, duration=0.2)
+                audio = rec.listen(source)
+                question = rec.recognize_google(audio).lower()
+        except sr.RequestError as e:
+            tts("Sorry, I couldn't understand your question.")
+            continue
+        except sr.UnknownValueError:
+            return tts("No question detected, exiting...")
+        if question in ['quit', 'exit']:
+            return tts('Exiting...')
 
         # Construct input sample & preprocess for GPU if cuda available
         sample = construct_sample(image, question)
@@ -171,8 +160,12 @@ def main():
         with torch.no_grad():
             result, scores = zero_shot_step(task, generator, models, sample)
 
-        print(f'Question: {question}')
-        print(f'OFA\'s Answer: {result[0]["answer"]}\n')
+        """print(f'Question: {question}')
+        print(f'OFA\'s Answer: {result[0]["answer"]}\n')"""
+
+        # Answer question
+        tts(f'Your question was: {question}')
+        tts(f'OFA\'s Answer is: {result[0]["answer"]}\n')
 
 
 if __name__ == "__main__":
