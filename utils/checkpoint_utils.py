@@ -61,14 +61,14 @@ def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
     end_of_epoch = epoch_itr.end_of_epoch()
     updates = trainer.get_num_updates()
 
-    logger.info(f"Preparing to save checkpoint for epoch {epoch} @ {updates} updates")
+    logger.info(f"Preparing to save checkpoints for epoch {epoch} @ {updates} updates")
 
     def is_better(a, b):
         return a >= b if cfg.maximize_best_checkpoint_metric else a <= b
 
     suffix = trainer.checkpoint_suffix
     checkpoint_conds = collections.OrderedDict()
-    checkpoint_conds["checkpoint{}{}.pt".format(epoch, suffix)] = (
+    checkpoint_conds["checkpoints{}{}.pt".format(epoch, suffix)] = (
         end_of_epoch and not cfg.no_epoch_checkpoints and epoch % cfg.save_interval == 0
     )
     checkpoint_conds["checkpoint_{}_{}{}.pt".format(epoch, updates, suffix)] = (
@@ -84,7 +84,7 @@ def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
         worst_best = getattr(save_checkpoint, "best", None)
         chkpts = checkpoint_paths(
             cfg.save_dir,
-            pattern=r"checkpoint\.best_{}_(\d+\.?\d*){}\.pt".format(
+            pattern=r"checkpoints\.best_{}_(\d+\.?\d*){}\.pt".format(
                 cfg.best_checkpoint_metric, suffix
             ),
         )
@@ -96,7 +96,7 @@ def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
             rand_sfx = np.random.randint(0, cfg.keep_best_checkpoints)
 
         checkpoint_conds[
-            "checkpoint.best_{}_{:.3f}{}{}.pt".format(
+            "checkpoints.best_{}_{:.3f}{}{}.pt".format(
                 cfg.best_checkpoint_metric,
                 val_loss,
                 rand_sfx,
@@ -131,7 +131,7 @@ def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
 
         write_timer.stop()
         logger.info(
-            "Saved checkpoint {} (epoch {} @ {} updates, score {}) (writing took {} seconds)".format(
+            "Saved checkpoints {} (epoch {} @ {} updates, score {}) (writing took {} seconds)".format(
                 checkpoints[0], epoch, updates, val_loss, write_timer.sum
             )
         )
@@ -163,7 +163,7 @@ def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
     if cfg.keep_last_epochs > 0:
         # remove old epoch checkpoints; checkpoints are sorted in descending order
         checkpoints = checkpoint_paths(
-            cfg.save_dir, pattern=r"checkpoint(\d+){}\.pt".format(suffix)
+            cfg.save_dir, pattern=r"checkpoints(\d+){}\.pt".format(suffix)
         )
         for old_chk in checkpoints[cfg.keep_last_epochs :]:
             if os.path.lexists(old_chk):
@@ -175,7 +175,7 @@ def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
         # only keep the best N checkpoints according to validation metric
         checkpoints = checkpoint_paths(
             cfg.save_dir,
-            pattern=r"checkpoint\.best_{}_(\d+\.?\d*){}\.pt".format(
+            pattern=r"checkpoints\.best_{}_(\d+\.?\d*){}\.pt".format(
                 cfg.best_checkpoint_metric, suffix
             ),
         )
@@ -190,7 +190,7 @@ def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
 
 def load_checkpoint(cfg: CheckpointConfig, trainer, **passthrough_args):
     """
-    Load a checkpoint and restore the training iterator.
+    Load a checkpoints and restore the training iterator.
 
     *passthrough_args* will be passed through to
     ``trainer.get_train_iterator``.
@@ -219,8 +219,8 @@ def load_checkpoint(cfg: CheckpointConfig, trainer, **passthrough_args):
         )
         first_launch = not PathManager.exists(checkpoint_path)
         if cfg.finetune_from_model is not None and first_launch:
-            # if there is no last checkpoint to restore, start the finetune from pretrained model
-            # else just use usual logic to load checkpoint, e.g. restart from last checkpoint and etc.
+            # if there is no last checkpoints to restore, start the finetune from pretrained model
+            # else just use usual logic to load checkpoints, e.g. restart from last checkpoints and etc.
             if PathManager.exists(cfg.finetune_from_model):
                 checkpoint_path = cfg.finetune_from_model
                 reset_optimizer = True
@@ -263,7 +263,7 @@ def load_checkpoint(cfg: CheckpointConfig, trainer, **passthrough_args):
         save_checkpoint.best = extra_state["best"]
 
     if extra_state is not None and not reset_dataloader:
-        # restore iterator from checkpoint
+        # restore iterator from checkpoints
         itr_state = extra_state["train_iterator"]
         epoch_itr = trainer.get_train_iterator(
             epoch=itr_state["epoch"], load_dataset=True, **passthrough_args
@@ -294,20 +294,20 @@ def load_checkpoint(cfg: CheckpointConfig, trainer, **passthrough_args):
 
 
 def load_checkpoint_to_cpu(path, arg_overrides=None, load_on_all_ranks=False):
-    """Loads a checkpoint to CPU (with upgrading for backward compatibility).
+    """Loads a checkpoints to CPU (with upgrading for backward compatibility).
 
-    If doing single-GPU training or if the checkpoint is only being loaded by at
+    If doing single-GPU training or if the checkpoints is only being loaded by at
     most one process on each node (current default behavior is for only rank 0
-    to read the checkpoint from disk), load_on_all_ranks should be False to
+    to read the checkpoints from disk), load_on_all_ranks should be False to
     avoid errors from torch.distributed not having been initialized or
     torch.distributed.barrier() hanging.
 
-    If all processes on each node may be loading the checkpoint
+    If all processes on each node may be loading the checkpoints
     simultaneously, load_on_all_ranks should be set to True to avoid I/O
     conflicts.
 
     There's currently no support for > 1 but < all processes loading the
-    checkpoint on each node.
+    checkpoints on each node.
     """
     local_path = PathManager.get_local_path(path)
     # The locally cached file returned by get_local_path() may be stale for
@@ -367,14 +367,14 @@ def load_model_ensemble(
     """Loads an ensemble of models.
 
     Args:
-        filenames (List[str]): checkpoint files to load
+        filenames (List[str]): checkpoints files to load
         arg_overrides (Dict[str,Any], optional): override model args that
             were used during model training
         task (fairseq.tasks.FairseqTask, optional): task to use for loading
     """
     assert not (
         strict and num_shards > 1
-    ), "Cannot load state dict with strict=True and checkpoint shards > 1"
+    ), "Cannot load state dict with strict=True and checkpoints shards > 1"
     ensemble, args, _task = load_model_ensemble_and_task(
         filenames,
         arg_overrides,
@@ -417,7 +417,7 @@ def load_model_ensemble_and_task(
 
     assert not (
         strict and num_shards > 1
-    ), "Cannot load state dict with strict=True and checkpoint shards > 1"
+    ), "Cannot load state dict with strict=True and checkpoints shards > 1"
     ensemble = []
     cfg = None
     for filename in filenames:
@@ -468,7 +468,7 @@ def load_model_ensemble_and_task(
                         consolidated_model_state, strict=strict, model_cfg=cfg.model
                     )
             else:
-                # model parallel checkpoint or unsharded checkpoint
+                # model parallel checkpoints or unsharded checkpoints
                 model = task.build_model(cfg.model)
                 model.load_state_dict(
                     state["model"], strict=strict, model_cfg=cfg.model
@@ -487,7 +487,7 @@ def load_model_ensemble_and_task(
     return ensemble, cfg, task
 
 
-def checkpoint_paths(path, pattern=r"checkpoint(\d+)\.pt", keep_match=False):
+def checkpoint_paths(path, pattern=r"checkpoints(\d+)\.pt", keep_match=False):
     """Retrieves all checkpoints found in `path` directory.
 
     Checkpoints are identified by matching filename to the specified pattern. If
@@ -786,10 +786,10 @@ def load_pretrained_component_from_model(
     component: Union[FairseqEncoder, FairseqDecoder], checkpoint: str
 ):
     """
-    Load a pretrained FairseqEncoder or FairseqDecoder from checkpoint into the
+    Load a pretrained FairseqEncoder or FairseqDecoder from checkpoints into the
     provided `component` object. If state_dict fails to load, there may be a
     mismatch in the architecture of the corresponding `component` found in the
-    `checkpoint` file.
+    `checkpoints` file.
     """
     if not PathManager.exists(checkpoint):
         raise IOError("Model file not found: {}".format(checkpoint))
@@ -822,7 +822,7 @@ def verify_checkpoint_directory(save_dir: str) -> None:
             pass
     except OSError as e:
         logger.warning(
-            "Unable to access checkpoint save directory: {}".format(save_dir)
+            "Unable to access checkpoints save directory: {}".format(save_dir)
         )
         raise e
     else:
@@ -830,11 +830,11 @@ def verify_checkpoint_directory(save_dir: str) -> None:
 
 
 def load_ema_from_checkpoint(fpath):
-    """Loads exponential moving averaged (EMA) checkpoint from input and
+    """Loads exponential moving averaged (EMA) checkpoints from input and
     returns a model with ema weights.
 
     Args:
-      fpath: A string path of checkpoint to load from.
+      fpath: A string path of checkpoints to load from.
 
     Returns:
       A dict of string keys mapping to various values. The 'model' key
@@ -867,7 +867,7 @@ def load_ema_from_checkpoint(fpath):
 
         if len(params_dict) == 0:
             raise ValueError(
-                f"Input checkpoint path '{fpath}' does not contain "
+                f"Input checkpoints path '{fpath}' does not contain "
                 "ema model weights, is this model trained with EMA?"
             )
 

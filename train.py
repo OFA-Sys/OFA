@@ -81,7 +81,7 @@ def main(cfg: FairseqConfig) -> None:
             import iopath  # noqa: F401
         except ImportError:
             logging.exception(
-                "Asynchronous checkpoint writing is specified but iopath is "
+                "Asynchronous checkpoints writing is specified but iopath is "
                 "not installed: `pip install iopath`"
             )
             return
@@ -116,7 +116,7 @@ def main(cfg: FairseqConfig) -> None:
         )
     )
 
-    # Load valid dataset (we load training data below, based on the latest checkpoint)
+    # Load valid dataset (we load training data below, based on the latest checkpoints)
     # We load the valid dataset AFTER building the model
     # data_utils.raise_if_valid_subsets_unintentionally_ignored(cfg)
     if cfg.dataset.combine_valid_subsets:
@@ -152,7 +152,7 @@ def main(cfg: FairseqConfig) -> None:
         )
     )
 
-    # Load the latest checkpoint if one is available and restore the
+    # Load the latest checkpoints if one is available and restore the
     # corresponding train iterator
     extra_state, epoch_itr = checkpoint_utils.load_checkpoint(
         cfg.checkpoint,
@@ -207,7 +207,7 @@ def main(cfg: FairseqConfig) -> None:
     # ioPath implementation to wait for all asynchronous file writes to complete.
     if cfg.checkpoint.write_checkpoints_asynchronously:
         logger.info(
-            "ioPath PathManager waiting for all asynchronous checkpoint "
+            "ioPath PathManager waiting for all asynchronous checkpoints "
             "writes to finish."
         )
         PathManager.async_close()
@@ -403,7 +403,7 @@ def validate_and_save(
 
     should_stop |= should_stop_early(cfg, valid_losses[0])
 
-    # Save checkpoint
+    # Save checkpoints
     if do_save or should_stop:
         checkpoint_utils.save_checkpoint(
             cfg.checkpoint, trainer, epoch_itr, valid_losses[0]

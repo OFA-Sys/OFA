@@ -94,7 +94,7 @@ def load(name: str, device: Union[str, torch.device] = "cuda" if torch.cuda.is_a
     Parameters
     ----------
     name : str
-        A model name listed by `clip.available_models()`, or the path to a model checkpoint containing the state_dict
+        A model name listed by `clip.available_models()`, or the path to a model checkpoints containing the state_dict
 
     device : Union[str, torch.device]
         The device to put the loaded model

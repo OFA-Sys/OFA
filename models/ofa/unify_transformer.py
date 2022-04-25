@@ -163,11 +163,11 @@ class TransformerModel(FairseqEncoderDecoderModel):
                             help='add layernorm to embedding')
         parser.add_argument('--no-scale-embedding', action='store_true',
                             help='if True, dont scale embeddings')
-        parser.add_argument('--checkpoint-activations', action='store_true',
-                            help='checkpoint activations at each layer, which saves GPU '
+        parser.add_argument('--checkpoints-activations', action='store_true',
+                            help='checkpoints activations at each layer, which saves GPU '
                                  'memory usage at the cost of some additional compute')
         parser.add_argument('--offload-activations', action='store_true',
-                            help='checkpoint activations at each layer, then save to gpu. Sets --checkpoint-activations.')
+                            help='checkpoints activations at each layer, then save to gpu. Sets --checkpoints-activations.')
         # args for "Cross+Self-Attention for Transformer Models" (Peitz et al., 2019)
         parser.add_argument('--no-cross-attention', default=False, action='store_true',
                             help='do not perform cross-attention')
@@ -197,7 +197,7 @@ class TransformerModel(FairseqEncoderDecoderModel):
                 'training with --ddp-backend=fully_sharded. Smaller values will '
                 'improve memory efficiency, but may make torch.distributed '
                 'communication less efficient due to smaller input sizes. This option '
-                'is set to 0 (i.e., always wrap) when --checkpoint-activations or '
+                'is set to 0 (i.e., always wrap) when --checkpoints-activations or '
                 '--offload-activations are passed.'
             )
         )

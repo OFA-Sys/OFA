@@ -224,7 +224,7 @@ class Trainer(object):
 
     @property
     def checkpoint_suffix(self) -> str:
-        """Suffix to add to the checkpoint file name."""
+        """Suffix to add to the checkpoints file name."""
         if self.is_fsdp and self.cfg.distributed_training.use_sharded_state:
             return self.cfg.checkpoint.checkpoint_suffix + "-shard{0}".format(
                 self.data_parallel_rank
@@ -422,13 +422,13 @@ class Trainer(object):
             else:
                 state_dict["last_optimizer_state"] = self.optimizer.state_dict()
         if self.is_fsdp:
-            # save meta data for recombining checkpoint upon loading
+            # save meta data for recombining checkpoints upon loading
             state_dict["fsdp_metadata"] = self.model.local_metadata_dict()
         return state_dict
 
     def save_checkpoint(self, filename, extra_state):
-        """Save all training state in a checkpoint file."""
-        logger.info(f"Saving checkpoint to {filename}")
+        """Save all training state in a checkpoints file."""
+        logger.info(f"Saving checkpoints to {filename}")
         # call state_dict on all ranks in case it needs internal communication
         state_dict = utils.move_to_cpu(self.state_dict())
         state_dict["extra_state"].update(extra_state)
@@ -438,7 +438,7 @@ class Trainer(object):
                 filename,
                 async_write=self.cfg.checkpoint.write_checkpoints_asynchronously,
             )
-        logger.info(f"Finished saving checkpoint to {filename}")
+        logger.info(f"Finished saving checkpoints to {filename}")
 
     def load_checkpoint(
         self,
@@ -449,13 +449,13 @@ class Trainer(object):
         reset_meters=False,
     ):
         """
-        Load all training state from a checkpoint file.
-        rank = 0 will load the checkpoint, and then broadcast it to all
+        Load all training state from a checkpoints file.
+        rank = 0 will load the checkpoints, and then broadcast it to all
         other ranks.
         """
         extra_state, self._optim_history, last_optim_state = None, [], None
 
-        logger.info(f"Preparing to load checkpoint {filename}")
+        logger.info(f"Preparing to load checkpoints {filename}")
         is_distributed = self.data_parallel_world_size > 1
         bexists = PathManager.isfile(filename)
         if bexists:
@@ -464,7 +464,7 @@ class Trainer(object):
                 # TPUs don't support broadcast yet, so load checkpoints
                 # on every worker for now
                 or self.tpu
-                # FSDP requires loading checkpoint shards on all ranks
+                # FSDP requires loading checkpoints shards on all ranks
                 or (self.is_fsdp and self.cfg.distributed_training.use_sharded_state)
                 or getattr(self.cfg.model, "base_layers", 0) > 0
             )
@@ -522,7 +522,7 @@ class Trainer(object):
 
             except Exception:
                 raise Exception(
-                    "Cannot load model parameters from checkpoint {}; "
+                    "Cannot load model parameters from checkpoints {}; "
                     "please ensure that the architectures match.".format(filename)
                 )
             extra_state = state["extra_state"]
@@ -587,41 +587,41 @@ class Trainer(object):
                 if self.cfg.checkpoint.use_latest_weights_to_init_ema or "ema" not in extra_state:
                     if "ema" not in extra_state:
                         logger.warn(
-                            "EMA not found in checkpoint. But store_ema is True. "
-                            "EMA is re-initialized from checkpoint."
+                            "EMA not found in checkpoints. But store_ema is True. "
+                            "EMA is re-initialized from checkpoints."
                         )
                     elif self.cfg.checkpoint.use_latest_weights_to_init_ema:
                         logger.info(
-                            "use_latest_weights_to_init_ema = True. EMA is re-initialized from checkpoint."
+                            "use_latest_weights_to_init_ema = True. EMA is re-initialized from checkpoints."
                         )
                     self.ema.restore(state["model"], build_fp32_params=self.cfg.ema.ema_fp32)
                     del state["model"]
                 else:
                     logger.info(
-                        "Loading EMA from checkpoint"
+                        "Loading EMA from checkpoints"
                     )
                     self.ema.restore(extra_state["ema"], build_fp32_params=False)
 
                     if self.cfg.ema.ema_fp32:
                         if "ema_fp32_params" in extra_state:
                             logger.info(
-                                "Loading EMA fp32 params from checkpoint"
+                                "Loading EMA fp32 params from checkpoints"
                             )
                             self.ema.build_fp32_params(extra_state["ema_fp32_params"])
                         else:
                             logger.info(
-                                "Building EMA fp32 params from EMA model in checkpoint"
+                                "Building EMA fp32 params from EMA model in checkpoints"
                             )
                             self.ema.build_fp32_params()
 
             logger.info(
-                "Loaded checkpoint {} (epoch {} @ {} updates)".format(
+                "Loaded checkpoints {} (epoch {} @ {} updates)".format(
                     filename, epoch, self.get_num_updates()
                 )
             )
 
         else:
-            logger.info("No existing checkpoint found {}".format(filename))
+            logger.info("No existing checkpoints found {}".format(filename))
 
         return extra_state
 

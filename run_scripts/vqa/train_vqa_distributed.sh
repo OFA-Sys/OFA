@@ -8,11 +8,11 @@
 # To use the shuffled data (if exists), please uncomment the Line 24.
 
 # Number of GPUs per GPU worker
-GPUS_PER_NODE=8 
+GPUS_PER_NODE=1
 # Number of GPU workers, for single-worker training, please set to 1
-WORKER_CNT=4 
+WORKER_CNT=1
 # The ip address of the rank-0 worker, for single-worker training, please set to localhost
-export MASTER_ADDR=XX.XX.XX.XX
+export MASTER_ADDR=localhost
 # The port for communication
 export MASTER_PORT=8214
 # The rank of this worker, should be in {0, ..., WORKER_CNT-1}, for single-worker training, please set to 0
@@ -23,7 +23,7 @@ data=${data_dir}/vqa_train.tsv,${data_dir}/vqa_val.tsv
 # Note: If you have shuffled the data in advance, please uncomment the line below.
 # data=${data_dir}/vqa_train_1.tsv,${data_dir}/vqa_train_2.tsv,${data_dir}/vqa_train_3.tsv,${data_dir}/vqa_train_4.tsv,${data_dir}/vqa_train_5.tsv,${data_dir}/vqa_train_6.tsv,${data_dir}/vqa_train_7.tsv,${data_dir}/vqa_train_8.tsv,${data_dir}/vqa_train_9.tsv,${data_dir}/vqa_train_10.tsv,${data_dir}/vqa_val.tsv
 ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
-restore_file=../../checkpoints/ofa_large.pt
+restore_file=../../checkpoints/ofa_tiny.pt
 selected_cols=0,5,2,3,4
 
 log_dir=./vqa_logs
@@ -34,7 +34,7 @@ bpe_dir=../../utils/BPE
 user_dir=../../ofa_module
 
 task=vqa_gen
-arch=ofa_large
+arch=ofa_tiny
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.1
 batch_size=4
@@ -58,19 +58,19 @@ ema_start_update=0
 
 # Specify the inference type in validation after each fine-tuning epoch
 # As mentioned in the readme, you can choose from allcand or beamsearch evaluation, default to allcand
-val_inference_type=allcand
+val_inference_type=beamsearch
 
 for total_num_updates in {40000,}; do
-  echo "total_num_updates "${total_num_updates}
+  echo "total_num_updates ""${total_num_updates}"
   for warmup_updates in {1000,}; do
-    echo "warmup_updates "${warmup_updates}  
+    echo "warmup_updates ""${warmup_updates}"
     for lr in {5e-5,}; do
-      echo "lr "${lr}
+      echo "lr ""${lr}"
       for patch_image_size in {480,}; do
-        echo "patch_image_size "${patch_image_size}
+        echo "patch_image_size ""${patch_image_size}"
 
-        log_file=${log_dir}/${total_num_updates}"_"${warmup_updates}"_"${lr}"_"${patch_image_size}"_rank"${RANK}".log"
-        save_path=${save_dir}/${total_num_updates}"_"${warmup_updates}"_"${lr}"_"${patch_image_size}
+        log_file=${log_dir}/${total_num_updates}"_${warmup_updates}_${lr}_${patch_image_size}_rank${RANK}.log"
+        save_path=${save_dir}/${total_num_updates}"_${warmup_updates}_${lr}_"${patch_image_size}
         mkdir -p $save_path
 
         python3 -m torch.distributed.launch --nproc_per_node=${GPUS_PER_NODE} --nnodes=${WORKER_CNT} --node_rank=${RANK} --master_addr=${MASTER_ADDR} --master_port=${MASTER_PORT} ../../train.py \
@@ -105,15 +105,15 @@ for total_num_updates in {40000,}; do
             --adam-eps=1e-08 \
             --clip-norm=1.0 \
             --lr-scheduler=polynomial_decay \
-            --lr=${lr} \
-            --total-num-update=${total_num_updates} \
-            --warmup-updates=${warmup_updates} \
+            --lr="${lr}" \
+            --total-num-update="${total_num_updates}" \
+            --warmup-updates="${warmup_updates}" \
             --log-format=simple \
             --log-interval=10 \
             --fixed-validation-seed=7 \
             --keep-last-epochs=15 \
             --save-interval=1 --validate-interval=1 \
-            --max-update=${total_num_updates} \
+            --max-update="${total_num_updates}" \
             --best-checkpoint-metric=vqa_score --maximize-best-checkpoint-metric \
             --max-src-length=${max_src_length} \
             --max-object-length=${max_object_length} \
@@ -129,7 +129,7 @@ for total_num_updates in {40000,}; do
             --scale-heads \
             --disable-entangle \
             --num-bins=${num_bins} \
-            --patch-image-size=${patch_image_size} \
+            --patch-image-size="${patch_image_size}" \
             --prompt-type=prev_output \
             --fp16 \
             --fp16-scale-window=512 \

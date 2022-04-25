@@ -195,7 +195,7 @@ class OFAModel(TransformerModel):
             else:
                 if head_name not in current_head_names:
                     logger.warning(
-                        "deleting classification head ({}) from checkpoint "
+                        "deleting classification head ({}) from checkpoints "
                         "not present in current model: {}".format(head_name, k)
                     )
                     keys_to_delete.append(k)
@@ -206,7 +206,7 @@ class OFAModel(TransformerModel):
                     != self.classification_heads[head_name].dense.out_features
                 ):
                     logger.warning(
-                        "deleting classification head ({}) from checkpoint "
+                        "deleting classification head ({}) from checkpoints "
                         "with different dimensions than current model: {}".format(
                             head_name, k
                         )

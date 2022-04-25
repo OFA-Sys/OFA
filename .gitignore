@@ -1,2 +1,5 @@
 .idea/*
 .DS_Store
+/checkpoints/*
+/dataset/vqa_data/*
+/test_images/*

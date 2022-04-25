@@ -19,6 +19,8 @@ from omegaconf import DictConfig
 from utils import checkpoint_utils
 from utils.eval_utils import eval_step, merge_results
 
+import gc
+
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -70,7 +72,7 @@ def main(cfg: DictConfig, **kwargs):
         num_shards=cfg.checkpoint.checkpoint_shard_count,
     )
 
-    # loading the dataset should happen after the checkpoint has been loaded so we can give it the saved task config
+    # loading the dataset should happen after the checkpoints has been loaded so we can give it the saved task config
     task.load_dataset(cfg.dataset.gen_subset, task_cfg=saved_cfg.task)
 
     # Move models to GPU
@@ -139,4 +141,6 @@ def cli_main():
 
 
 if __name__ == "__main__":
+    gc.collect()
+    torch.cuda.empty_cache()
     cli_main()
