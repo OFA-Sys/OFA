@@ -60,7 +60,7 @@ ema_start_update=0
 # As mentioned in the readme, you can choose from allcand or beamsearch evaluation, default to allcand
 val_inference_type=beamsearch
 
-for total_num_updates in {40000,}; do
+for total_num_updates in {1000000,}; do
   echo "total_num_updates ""${total_num_updates}"
   for warmup_updates in {1000,}; do
     echo "warmup_updates ""${warmup_updates}"
