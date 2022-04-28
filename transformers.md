@@ -30,5 +30,5 @@ To use it in transformers, please refer to https://github.com/OFA-Sys/OFA/tree/f
 >>> patch_img = patch_resize_transform(img).unsqueeze(0)
 
 >>> gen = model.generate(inputs, patch_img=patch_img, num_beams=4)
->>> print(tokenizer.decode(gen, skip_special_tokens=True, clean_up_tokenization_spaces=False))
+>>> print(tokenizer.batch_decode(gen, skip_special_tokens=True))
 ```
