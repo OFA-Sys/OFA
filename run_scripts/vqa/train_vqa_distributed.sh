@@ -7,6 +7,10 @@
 # After setting the options, please run the script on each worker.
 # To use the shuffled data (if exists), please uncomment the Line 24.
 
+# JW: epoch length and number of epochs
+epoch_length=114280
+num_epochs=10
+
 # Number of GPUs per GPU worker
 GPUS_PER_NODE=1
 # Number of GPU workers, for single-worker training, please set to 1
@@ -60,7 +64,8 @@ ema_start_update=0
 # As mentioned in the readme, you can choose from allcand or beamsearch evaluation, default to allcand
 val_inference_type=beamsearch
 
-for total_num_updates in {1000000,}; do
+# JW: Calculate total_num_updates from epoch "length" and number of epochs
+for total_num_updates in {$((epoch_length * num_epochs)),}; do
   echo "total_num_updates ""${total_num_updates}"
   for warmup_updates in {1000,}; do
     echo "warmup_updates ""${warmup_updates}"
