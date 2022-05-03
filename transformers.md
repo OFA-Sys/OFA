@@ -10,7 +10,7 @@ To use it in transformers, please refer to https://github.com/OFA-Sys/OFA/tree/f
 ```
 git clone --single-branch --branch feature/add_transformers https://github.com/OFA-Sys/OFA.git
 pip install OFA/transformers/
-it clone https://huggingface.co/OFA-Sys/OFA-tiny 
+git clone https://huggingface.co/OFA-Sys/OFA-tiny 
 ```
 
 After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the testing example below. Also, ensure that you have pillow and torchvision in your environment. 
