@@ -18,9 +18,11 @@ run_scripts/glue/resmo_logs
 run_scripts/glue/resmo_checkpoints
 run_scripts/glue/tutel_logs
 run_scripts/glue/tutel_checkpoints
+run_scripts/glue/fairseq_checkpoints
 run_scripts/snli_ve/resmo_logs
 run_scripts/snli_ve/resmo_checkpoints
 run_scripts/snli_ve/dummy_checkpoints
 run_scripts/snli_ve/dummy_logs
 run_scripts/snli_ve/tutel_checkpoints
 run_scripts/snli_ve/tutel_logs
+run_scripts/snli_ve/dyn_scale_checkpoints

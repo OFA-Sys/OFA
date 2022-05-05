@@ -1,0 +1,16 @@
+2022-04-27 00:03:28 - utils.py[line:255] - INFO: distributed init (rank 0): env://
+2022-04-27 00:03:28 - utils.py[line:261] - INFO: Start init
+Retry: 1, with value error <class 'RuntimeError'>
+Traceback (most recent call last):
+  File "/opt/conda/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/opt/conda/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/opt/conda/lib/python3.8/site-packages/torch/distributed/launch.py", line 340, in <module>
+    main()
+  File "/opt/conda/lib/python3.8/site-packages/torch/distributed/launch.py", line 326, in main
+    sigkill_handler(signal.SIGTERM, None)  # not coming back
+  File "/opt/conda/lib/python3.8/site-packages/torch/distributed/launch.py", line 301, in sigkill_handler
+    raise subprocess.CalledProcessError(returncode=last_return_code, cmd=cmd)
+subprocess.CalledProcessError: Command '['/opt/conda/bin/python3', '-u', '../../train.py', '--local_rank=0', '../../dataset/glue_data/mnli_train.tsv,../../dataset/glue_data/mnli_dev.tsv', '--selected-cols=0,1,2', '--bpe-dir=../../utils/BPE', '--user-dir=../../ofa_module', '--restore-file=../../checkpoints/ofa_base.pt', '--reset-optimizer', '--reset-dataloader', '--reset-meters', '--save-dir=./fairseq_checkpoints/mnli/5_9e-6_8', '--task=mnli', '--arch=ofa_resmo', '--criterion=adjust_label_smoothed_cross_entropy', '--label-smoothing=0.0', '--batch-size=32', '--update-freq=8', '--encoder-normalize-before', '--decoder-normalize-before', '--share-decoder-input-output-embed', '--share-all-embeddings', '--layernorm-embedding', '--patch-layernorm-embedding', '--code-layernorm-embedding', '--resnet-drop-path-rate=0.0', '--encoder-drop-path-rate=0.1', '--decoder-drop-path-rate=0.1', '--dropout=0.1', '--attention-dropout=0.0', '--weight-decay=0.01', '--optimizer=adam', '--adam-betas=(0.9,0.999)', '--adam-eps=1e-08', '--clip-norm=0.0', '--lr-scheduler=polynomial_decay', '--lr=9e-6', '--max-epoch=5', '--warmup-ratio=0.06', '--log-format=simple', '--log-interval=10', '--fixed-validation-seed=7', '--keep-best-checkpoints=1', '--save-interval=1000', '--validate-interval=1', '--save-interval-updates=1000', '--validate-interval-updates=100', '--best-checkpoint-metric=acc', '--maximize-best-checkpoint-metric', '--max-src-length=512', '--max-tgt-length=30', '--find-unused-parameters', '--add-type-embedding', '--scale-attn', '--scale-fc', '--scale-heads', '--disable-entangle', '--num-bins=1000', '--prompt-type=src', '--fp16', '--fp16-init-scale=16', '--fp16-scale-window=512', '--num-workers=0']' returned non-zero exit status 255.
+Killing subprocess 2193

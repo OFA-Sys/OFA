@@ -13,18 +13,18 @@ user_dir=../../ofa_module
 
 data_dir=../../dataset/caption_data
 data=${data_dir}/caption_stage1_train.tsv,${data_dir}/caption_val.tsv
-restore_file=../../checkpoints/ofa_large.pt
+restore_file=../../checkpoints/ofa_base.pt
 selected_cols=0,4,2
 
 task=caption
-arch=ofa_large
+arch=ofa_base
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.1
 lr=1e-5
 max_epoch=5
 warmup_ratio=0.06
-batch_size=2
-update_freq=8
+batch_size=8
+update_freq=4
 resnet_drop_path_rate=0.0
 encoder_drop_path_rate=0.1
 decoder_drop_path_rate=0.1

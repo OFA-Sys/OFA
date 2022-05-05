@@ -5,8 +5,8 @@
 export MASTER_PORT=3051
 
 task=cola
-log_dir=./resmo_logs/${task}
-save_dir=./resmo_checkpoints/${task}
+log_dir=./fairseq_logs/${task}
+save_dir=./fairseq_checkpoints/${task}
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE
@@ -46,7 +46,7 @@ for max_epoch in {5,7,10}; do
       save_path=${save_dir}/${max_epoch}"_"${lr}"_"${update_freq}
       mkdir -p $save_path
 
-      CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../train.py \
+      CUDA_VISIBLE_DEVICES=0 python3 -m torch.distributed.launch --nproc_per_node=1 --master_port=${MASTER_PORT} ../../train.py \
           $data \
           --selected-cols=${selected_cols} \
           --bpe-dir=${bpe_dir} \
@@ -72,7 +72,7 @@ for max_epoch in {5,7,10}; do
           --decoder-drop-path-rate=${decoder_drop_path_rate} \
           --dropout=${dropout} \
           --attention-dropout=${attention_dropout} \
-          --weight-decay=0.01 --optimizer=adam --adam-betas="(0.9,0.999)" --adam-eps=1e-08 --clip-norm=1.0 \
+          --weight-decay=0.01 --optimizer=adam --adam-betas="(0.9,0.999)" --adam-eps=1e-08 --clip-norm=0.0 \
           --lr-scheduler=polynomial_decay --lr=${lr} \
           --max-epoch=${max_epoch} --warmup-ratio=${warmup_ratio} \
           --log-format=simple --log-interval=10 \

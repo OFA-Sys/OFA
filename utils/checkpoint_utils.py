@@ -6,6 +6,7 @@
 import ast
 import collections
 import contextlib
+import functools
 import logging
 import numpy as np
 import os
@@ -23,16 +24,19 @@ from fairseq.dataclass.utils import (
     overwrite_args_by_name,
 )
 from fairseq.distributed.fully_sharded_data_parallel import FSDP, has_FSDP
+from fairseq.data.multilingual.multilingual_utils import get_lang_tok
 from fairseq.file_io import PathManager
 from fairseq.models import FairseqDecoder, FairseqEncoder
 from omegaconf import DictConfig, open_dict, OmegaConf
-
+from fairseq.distributed import utils as dist_utils
+from fairseq.file_io import PathManager, torch_load_cpu
 from data import data_utils
-
+from fairseq import moe_checkpoint_utils
+from omegaconf import DictConfig, open_dict, OmegaConf
 logger = logging.getLogger(__name__)
 
 
-def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
+def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss, training_finished=False, async_callback_fn=None):
     from fairseq import meters
 
     # only one worker should attempt to create the required dir
@@ -76,11 +80,19 @@ def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
         and cfg.save_interval_updates > 0
         and updates % cfg.save_interval_updates == 0
     )
-    checkpoint_conds["checkpoint_best{}.pt".format(suffix)] = val_loss is not None and (
-        not hasattr(save_checkpoint, "best")
-        or is_better(val_loss, save_checkpoint.best)
+    checkpoint_conds["checkpoint_best{}.pt".format(suffix)] = (
+        val_loss is not None
+        and (
+            not hasattr(save_checkpoint, "best")
+            or is_better(val_loss, save_checkpoint.best)
+        )
+        and not cfg.no_best_checkpoints
     )
-    if val_loss is not None and cfg.keep_best_checkpoints > 0:
+    if (
+        val_loss is not None
+        and cfg.keep_best_checkpoints > 0
+        and not cfg.no_best_checkpoints
+    ):
         worst_best = getattr(save_checkpoint, "best", None)
         chkpts = checkpoint_paths(
             cfg.save_dir,
@@ -115,20 +127,32 @@ def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
         os.path.join(cfg.save_dir, fn) for fn, cond in checkpoint_conds.items() if cond
     ]
     if len(checkpoints) > 0:
-        trainer.save_checkpoint(checkpoints[0], extra_state)
-        for cp in checkpoints[1:]:
-            if cfg.write_checkpoints_asynchronously:
-                # TODO[ioPath]: Need to implement a delayed asynchronous
-                # file copying/moving feature.
-                logger.warning(
-                    f"ioPath is not copying {checkpoints[0]} to {cp} "
-                    "since async write mode is on."
-                )
-            else:
-                assert PathManager.copy(
-                    checkpoints[0], cp, overwrite=True
-                ), f"Failed to copy {checkpoints[0]} to {cp}"
+        if PathManager.islink(checkpoints[0]):
+            PathManager.rm(checkpoints[0])
+        if trainer.is_moe and trainer.is_data_parallel_master:
+            shared = re.sub("rank-[0-9]+", "shared", checkpoints[0])
+            if PathManager.islink(shared):
+                PathManager.rm(shared)
 
+        trainer.save_checkpoint(
+            checkpoints[0], extra_state, training_finished=training_finished, async_callback_fn=async_callback_fn
+        )
+
+        def copy_or_symlink(src, dest):
+            if cfg.symlink_best_and_last_checkpoints:
+                PathManager.symlink(src, dest)
+            elif cfg.write_checkpoints_asynchronously:
+                pass  # TODO[ioPath]: Need to implement a delayed asynchronous file copying/moving feature.
+            else:
+                assert PathManager.copy(src, dest, overwrite=True), f"Failed to copy {src} to {dest}"
+
+        for cp in checkpoints[1:]:
+            copy_or_symlink(src=checkpoints[0], dest=cp)
+            if (trainer.is_moe or trainer.is_base_moe) and not trainer.is_fsdp and trainer.is_data_parallel_master:
+                copy_or_symlink(
+                    src=re.sub("rank-[0-9]+", "shared", checkpoints[0]),
+                    dest=re.sub("rank-[0-9]+", "shared", cp),
+                )
         write_timer.stop()
         logger.info(
             "Saved checkpoint {} (epoch {} @ {} updates, score {}) (writing took {} seconds)".format(
@@ -137,6 +161,10 @@ def save_checkpoint(cfg: CheckpointConfig, trainer, epoch_itr, val_loss):
         )
 
     if not end_of_epoch and cfg.keep_interval_updates > 0:
+
+        suffixes = [suffix]
+        if is_moe and is_data_parallel_master:
+            suffixes.append("-shared")
         # remove old checkpoints; checkpoints are sorted in descending order
         if cfg.keep_interval_updates_pattern == -1:
             checkpoints = checkpoint_paths(
@@ -293,7 +321,7 @@ def load_checkpoint(cfg: CheckpointConfig, trainer, **passthrough_args):
     return extra_state, epoch_itr
 
 
-def load_checkpoint_to_cpu(path, arg_overrides=None, load_on_all_ranks=False):
+def load_checkpoint_to_cpu(path, arg_overrides=None, load_on_all_ranks=False, is_moe=False):
     """Loads a checkpoint to CPU (with upgrading for backward compatibility).
 
     If doing single-GPU training or if the checkpoint is only being loaded by at
@@ -326,9 +354,14 @@ def load_checkpoint_to_cpu(path, arg_overrides=None, load_on_all_ranks=False):
             torch.distributed.barrier()
         local_path = PathManager.get_local_path(path)
 
-    with open(local_path, "rb") as f:
-        state = torch.load(f, map_location=torch.device("cpu"))
-
+    # path to checkpoint...-shared.pt
+    shared_path = re.sub('rank-[0-9]+', 'shared', local_path)
+    if is_moe and os.path.exists(shared_path):
+        expert_state = moe_checkpoint_utils.load_expert_state(local_path)  # Possibly merge experts
+        shared_state = torch_load_cpu(shared_path)
+        state = moe_checkpoint_utils.merge_expert_and_shared_state(expert_state, shared_state)
+    else:
+        state = torch_load_cpu(local_path)
     if "args" in state and state["args"] is not None and arg_overrides is not None:
         args = state["args"]
         for arg_name, arg_val in arg_overrides.items():
@@ -363,6 +396,7 @@ def load_model_ensemble(
     suffix="",
     num_shards=1,
     state=None,
+    is_moe=False,
 ):
     """Loads an ensemble of models.
 
@@ -383,9 +417,53 @@ def load_model_ensemble(
         suffix,
         num_shards,
         state,
+        is_moe=is_moe,
     )
     return ensemble, args
 
+def upgrade_state_for_langs_difference(state, model_config, task):
+    """Accounts for the difference in dictionaries due to language tokens
+    to allow ensembling between multilingual and bilingual models"""
+
+    lang_count_diff = len(task.langs) - len(model_config.langs)
+    assert lang_count_diff >= 0, "Removing langs from ensemble components not yet supported!"
+
+    if model_config.encoder_langtok is not None:
+        orig_embed_tokens = state["model"]["encoder.embed_tokens.weight"]
+        upgraded_embed_tokens = torch.zeros(
+            (orig_embed_tokens.shape[0] + lang_count_diff, orig_embed_tokens.shape[1]),
+            dtype=orig_embed_tokens.dtype,
+            device=orig_embed_tokens.device,
+        )
+
+        first_lang_tok = task.source_dictionary.index(get_lang_tok(task.langs[0], "multilingual"))
+        # language tokens appear at the end of the dictionary
+        upgraded_embed_tokens[: first_lang_tok, :] = orig_embed_tokens[: first_lang_tok, :]
+        for i, lang in enumerate(model_config.langs):
+            lang_tok = task.source_dictionary.index(get_lang_tok(lang, "multilingual"))
+            upgraded_embed_tokens[lang_tok, :] = orig_embed_tokens[first_lang_tok + i, :]
+
+        state["model"]["encoder.embed_tokens.weight"] = upgraded_embed_tokens
+        del orig_embed_tokens
+
+    if model_config.decoder_langtok:
+        for weight_name in ("decoder.embed_tokens.weight", "decoder.output_projection.weight"):
+            orig_weights = state["model"][weight_name]
+            upgraded_weights = torch.zeros(
+                (orig_weights.shape[0] + lang_count_diff, orig_weights.shape[1]),
+                dtype=orig_weights.dtype,
+                device=orig_weights.device,
+            )
+
+            first_lang_tok = task.target_dictionary.index(get_lang_tok(task.langs[0], "multilingual"))
+            # language tokens appear at the end of the dictionary
+            upgraded_weights[: first_lang_tok, :] = orig_weights[: first_lang_tok, :]
+            for i, lang in enumerate(model_config.langs):
+                lang_tok = task.target_dictionary.index(get_lang_tok(lang, "multilingual"))
+                upgraded_weights[lang_tok, :] = orig_weights[first_lang_tok + i, :]
+
+            state["model"][weight_name] = upgraded_weights
+            del orig_weights
 
 def get_maybe_sharded_checkpoint_filename(
     filename: str, suffix: str, shard_idx: int, num_shards: int
@@ -410,7 +488,9 @@ def load_model_ensemble_and_task(
     suffix="",
     num_shards=1,
     state=None,
+    is_moe=False,
 ):
+    logger.info("load_model_ensemble_and_task is_moe={}".format(is_moe))
     assert state is None or len(filenames) == 1
 
     from fairseq import tasks
@@ -433,7 +513,7 @@ def load_model_ensemble_and_task(
             if not PathManager.exists(filename):
                 raise IOError("Model file not found: {}".format(filename))
             if state is None:
-                state = load_checkpoint_to_cpu(filename, arg_overrides)
+                state = load_checkpoint_to_cpu(filename, arg_overrides, is_moe=is_moe)
             if "args" in state and state["args"] is not None:
                 cfg = convert_namespace_to_omegaconf(state["args"])
             elif "cfg" in state and state["cfg"] is not None:
@@ -470,6 +550,13 @@ def load_model_ensemble_and_task(
             else:
                 # model parallel checkpoint or unsharded checkpoint
                 model = task.build_model(cfg.model)
+                if (
+                    hasattr(cfg.model, "langs")
+                    and hasattr(task, "langs")
+                    and cfg.model.langs != task.langs
+                ):
+                    upgrade_state_for_langs_difference(state, cfg.model, task)
+
                 model.load_state_dict(
                     state["model"], strict=strict, model_cfg=cfg.model
                 )
@@ -509,9 +596,14 @@ def checkpoint_paths(path, pattern=r"checkpoint(\d+)\.pt", keep_match=False):
         return [os.path.join(path, x[1]) for x in sorted(entries, reverse=True)]
 
 
-def torch_persistent_save(obj, filename, async_write: bool = False):
+def torch_persistent_save(obj, filename: str, async_write: bool = False, async_callback_fn=None):
+    assert async_callback_fn is None or async_write, 'async_callback_fn requires async_write=True (--save-async)'
+    if async_write and async_callback_fn is not None:
+        callback = functools.partial(async_callback_fn, filename)
+    else:
+        callback = None
     if async_write:
-        with PathManager.opena(filename, "wb") as f:
+        with PathManager.opena(filename, "wb", callback_after_file_close=callback) as f:
             _torch_persistent_save(obj, f)
     else:
         with PathManager.open(filename, "wb") as f:
@@ -527,16 +619,16 @@ def torch_persistent_save(obj, filename, async_write: bool = False):
         #         _torch_persistent_save(obj, f)
 
 
-def _torch_persistent_save(obj, f):
+def _torch_persistent_save(obj, f, num_retries=3):
     if isinstance(f, str):
         with PathManager.open(f, "wb") as h:
             torch_persistent_save(obj, h)
         return
-    for i in range(3):
+    for i in range(num_retries):
         try:
             return torch.save(obj, f)
         except Exception:
-            if i == 2:
+            if i == num_retries - 1:
                 logger.error(traceback.format_exc())
                 raise
 
@@ -816,7 +908,8 @@ def load_pretrained_component_from_model(
 def verify_checkpoint_directory(save_dir: str) -> None:
     if not os.path.exists(save_dir):
         os.makedirs(save_dir, exist_ok=True)
-    temp_file_path = os.path.join(save_dir, "dummy")
+    rank = dist_utils.get_global_rank()
+    temp_file_path = os.path.join(save_dir, f"dummy{rank}")
     try:
         with open(temp_file_path, "w"):
             pass
@@ -826,7 +919,10 @@ def verify_checkpoint_directory(save_dir: str) -> None:
         )
         raise e
     else:
-        os.remove(temp_file_path)
+        try:
+            os.remove(temp_file_path)
+        except FileNotFoundError:
+            pass
 
 
 def load_ema_from_checkpoint(fpath):

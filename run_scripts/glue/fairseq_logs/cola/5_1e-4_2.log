@@ -1,0 +1,1687 @@
+2022-04-25 22:15:17 - utils.py[line:255] - INFO: distributed init (rank 0): env://
+2022-04-25 22:15:17 - utils.py[line:261] - INFO: Start init
+2022-04-25 22:15:17 - distributed_c10d.py[line:187] - INFO: Added key: store_based_barrier_key:1 to store for rank: 0
+2022-04-25 22:15:17 - utils.py[line:271] - INFO: initialized host heming-ng1 as rank 0
+single-machine distributed training is initialized.
+2022-04-25 22:15:22 - train.py[line:76] - INFO: {'_name': None, 'common': {'_name': None, 'no_progress_bar': False, 'log_interval': 10, 'log_format': 'simple', 'log_file': None, 'tensorboard_logdir': None, 'wandb_project': None, 'azureml_logging': False, 'seed': 1, 'cpu': False, 'tpu': False, 'bf16': False, 'memory_efficient_bf16': False, 'fp16': True, 'memory_efficient_fp16': False, 'fp16_no_flatten_grads': False, 'fp16_init_scale': 16, 'fp16_scale_window': 512, 'fp16_scale_tolerance': 0.0, 'on_cpu_convert_precision': False, 'min_loss_scale': 0.0001, 'threshold_loss_scale': None, 'amp': False, 'amp_batch_retries': 2, 'amp_init_scale': 128, 'amp_scale_window': None, 'user_dir': '../../ofa_module', 'empty_cache_freq': 0, 'all_gather_list_size': 16384, 'model_parallel_size': 1, 'quantization_config_path': None, 'profile': False, 'reset_logging': False, 'suppress_crashes': False, 'use_plasma_view': False, 'plasma_path': '/tmp/plasma'}, 'common_eval': {'_name': None, 'path': None, 'post_process': None, 'quiet': False, 'model_overrides': '{}', 'results_path': None}, 'distributed_training': {'_name': None, 'distributed_world_size': 1, 'distributed_num_procs': 1, 'distributed_rank': 0, 'distributed_backend': 'nccl', 'distributed_init_method': 'env://', 'distributed_port': -1, 'device_id': 0, 'distributed_no_spawn': True, 'ddp_backend': 'pytorch_ddp', 'ddp_comm_hook': 'none', 'bucket_cap_mb': 25, 'fix_batches_to_gpus': False, 'find_unused_parameters': True, 'gradient_as_bucket_view': False, 'fast_stat_sync': False, 'heartbeat_timeout': -1, 'broadcast_buffers': False, 'slowmo_momentum': None, 'slowmo_algorithm': 'LocalSGD', 'localsgd_frequency': 3, 'nprocs_per_node': 1, 'pipeline_model_parallel': False, 'pipeline_balance': None, 'pipeline_devices': None, 'pipeline_chunks': 0, 'pipeline_encoder_balance': None, 'pipeline_encoder_devices': None, 'pipeline_decoder_balance': None, 'pipeline_decoder_devices': None, 'pipeline_checkpoint': 'never', 'zero_sharding': 'none', 'fp16': True, 'memory_efficient_fp16': False, 'tpu': False, 'no_reshard_after_forward': False, 'fp32_reduce_scatter': False, 'cpu_offload': False, 'use_sharded_state': False}, 'dataset': {'_name': None, 'num_workers': 0, 'skip_invalid_size_inputs_valid_test': False, 'max_tokens': None, 'batch_size': 16, 'required_batch_size_multiple': 8, 'required_seq_len_multiple': 1, 'dataset_impl': None, 'data_buffer_size': 10, 'train_subset': 'train', 'valid_subset': 'valid', 'combine_valid_subsets': None, 'ignore_unused_valid_subsets': False, 'validate_interval': 1, 'validate_interval_updates': 10, 'validate_after_updates': 0, 'fixed_validation_seed': 7, 'disable_validation': False, 'max_tokens_valid': None, 'batch_size_valid': 16, 'max_valid_steps': None, 'curriculum': 0, 'gen_subset': 'test', 'num_shards': 1, 'shard_id': 0}, 'optimization': {'_name': None, 'max_epoch': 5, 'max_update': 0, 'stop_time_hours': 0.0, 'clip_norm': 0.0, 'sentence_avg': False, 'update_freq': [2], 'lr': [0.0001], 'stop_min_lr': -1.0, 'use_bmuf': False}, 'checkpoint': {'_name': None, 'save_dir': './fairseq_checkpoints/cola/5_1e-4_2', 'restore_file': '../../checkpoints/ofa_base.pt', 'finetune_from_model': None, 'reset_dataloader': True, 'reset_lr_scheduler': False, 'reset_meters': True, 'reset_optimizer': True, 'optimizer_overrides': '{}', 'save_interval': 10, 'save_interval_updates': 100, 'keep_interval_updates': -1, 'keep_interval_updates_pattern': -1, 'keep_last_epochs': -1, 'keep_best_checkpoints': 1, 'no_save': False, 'no_epoch_checkpoints': False, 'no_last_checkpoints': False, 'no_save_optimizer_state': False, 'best_checkpoint_metric': 'mcc', 'maximize_best_checkpoint_metric': True, 'patience': -1, 'checkpoint_suffix': '', 'checkpoint_shard_count': 1, 'load_checkpoint_on_all_dp_ranks': False, 'write_checkpoints_asynchronously': False, 'model_parallel_size': 1, 'use_ema_weights_to_init_param': False, 'use_latest_weights_to_init_ema': False}, 'bmuf': {'_name': None, 'block_lr': 1.0, 'block_momentum': 0.875, 'global_sync_iter': 50, 'warmup_iterations': 500, 'use_nbm': False, 'average_sync': False, 'distributed_world_size': 1}, 'generation': {'_name': None, 'beam': 5, 'nbest': 1, 'max_len_a': 0.0, 'max_len_b': 200, 'min_len': 1, 'match_source_len': False, 'unnormalized': False, 'no_early_stop': False, 'no_beamable_mm': False, 'lenpen': 1.0, 'unkpen': 0.0, 'replace_unk': None, 'sacrebleu': False, 'score_reference': False, 'prefix_size': 0, 'no_repeat_ngram_size': 0, 'sampling': False, 'sampling_topk': -1, 'sampling_topp': -1.0, 'constraints': None, 'temperature': 1.0, 'diverse_beam_groups': -1, 'diverse_beam_strength': 0.5, 'diversity_rate': -1.0, 'print_alignment': None, 'print_step': False, 'lm_path': None, 'lm_weight': 0.0, 'iter_decode_eos_penalty': 0.0, 'iter_decode_max_iter': 10, 'iter_decode_force_max_iter': False, 'iter_decode_with_beam': 1, 'iter_decode_with_external_reranker': False, 'retain_iter_history': False, 'retain_dropout': False, 'retain_dropout_modules': None, 'decoding_format': None, 'no_seed_provided': False}, 'eval_lm': {'_name': None, 'output_word_probs': False, 'output_word_stats': False, 'context_window': 0, 'softmax_batch': 9223372036854775807}, 'interactive': {'_name': None, 'buffer_size': 0, 'input': '-'}, 'model': Namespace(_name='ofa_resmo', activation_fn='gelu', adam_betas='(0.9,0.999)', adam_eps=1e-08, adaptive_softmax_cutoff=None, adaptive_softmax_dropout=0, add_type_embedding=True, all_gather_list_size=16384, amp=False, amp_batch_retries=2, amp_init_scale=128, amp_scale_window=None, ans2label_dict='{"no": 0, "yes": 1}', arch='ofa_resmo', attention_dropout=0.0, attn_scale_factor=2, azureml_logging=False, batch_size=16, batch_size_valid=16, best_checkpoint_metric='mcc', bf16=False, bpe=None, bpe_dir='../../utils/BPE', broadcast_buffers=False, bucket_cap_mb=25, checkpoint_shard_count=1, checkpoint_suffix='', clip_norm=0.0, code_dict_size=8192, code_image_size=128, code_layernorm_embedding=True, combine_valid_subsets=None, constraint_range=None, cpu=False, cpu_offload=False, criterion='adjust_label_smoothed_cross_entropy', cross_self_attention=False, curriculum=0, data='../../dataset/glue_data/cola_train.tsv,../../dataset/glue_data/cola_dev.tsv', data_buffer_size=10, dataset_impl=None, ddp_backend='pytorch_ddp', ddp_comm_hook='none', decoder_attention_heads=12, decoder_drop_path_rate=0.1, decoder_embed_dim=768, decoder_embed_path=None, decoder_ffn_embed_dim=3072, decoder_input_dim=768, decoder_layerdrop=0, decoder_layers=6, decoder_layers_to_keep=None, decoder_learned_pos=True, decoder_normalize_before=True, decoder_output_dim=768, device_id=0, disable_entangle=True, disable_validation=False, distributed_backend='nccl', distributed_init_method=None, distributed_no_spawn=False, distributed_num_procs=1, distributed_port=-1, distributed_rank=0, distributed_world_size=1, drop_worst_after=0, drop_worst_ratio=0.0, dropout=0.1, ema_decay=0.9999, ema_fp32=False, ema_seed_model=None, ema_start_update=0, ema_update_freq=1, empty_cache_freq=0, encoder_attention_heads=12, encoder_drop_path_rate=0.1, encoder_embed_dim=768, encoder_embed_path=None, encoder_ffn_embed_dim=3072, encoder_layerdrop=0, encoder_layers=6, encoder_layers_to_keep=None, encoder_learned_pos=True, encoder_normalize_before=True, end_learning_rate=0.0, entangle_position_embedding=False, eos=2, fast_stat_sync=False, find_unused_parameters=True, finetune_from_model=None, fix_batches_to_gpus=False, fixed_validation_seed=7, force_anneal=None, fp16=True, fp16_adam_stats=False, fp16_init_scale=16, fp16_no_flatten_grads=False, fp16_scale_tolerance=0.0, fp16_scale_window=512, fp32_reduce_scatter=False, freeze_decoder_embedding=False, freeze_encoder_embedding=False, gen_subset='test', gradient_as_bucket_view=False, heartbeat_timeout=-1, ignore_eos=False, ignore_prefix_size=0, ignore_unused_valid_subsets=False, image_bucket_size=42, imagenet_default_mean_and_std=False, keep_best_checkpoints=1, keep_interval_updates=-1, keep_interval_updates_pattern=-1, keep_last_epochs=-1, label_smoothing=0.0, layernorm_embedding=True, load_checkpoint_on_all_dp_ranks=False, localsgd_frequency=3, log_file=None, log_format='simple', log_interval=10, lr=[0.0001], lr_scheduler='polynomial_decay', max_epoch=5, max_source_positions=1024, max_src_length=512, max_target_positions=1024, max_tgt_length=30, max_tokens=None, max_tokens_valid=None, max_update=0, max_valid_steps=None, maximize_best_checkpoint_metric=True, memory_efficient_bf16=False, memory_efficient_fp16=False, min_loss_scale=0.0001, min_params_to_wrap=100000000, model_parallel_size=1, moe_gate_loss_combine_method='average', moe_gate_loss_transform='none', moe_gate_loss_wt=1.0, no_cross_attention=False, no_epoch_checkpoints=False, no_last_checkpoints=False, no_progress_bar=False, no_reshard_after_forward=False, no_save=False, no_save_optimizer_state=False, no_scale_embedding=True, no_seed_provided=False, no_token_positional_embeddings=False, nprocs_per_node=1, num_bins=1000, num_shards=1, num_workers=0, on_cpu_convert_precision=False, optimizer='adam', optimizer_overrides='{}', pad=1, patch_image_size=480, patch_layernorm_embedding=True, patience=-1, pipeline_balance=None, pipeline_checkpoint='never', pipeline_chunks=0, pipeline_decoder_balance=None, pipeline_decoder_devices=None, pipeline_devices=None, pipeline_encoder_balance=None, pipeline_encoder_devices=None, pipeline_model_parallel=False, plasma_path='/tmp/plasma', pooler_activation_fn='tanh', pooler_classifier='mlp', pooler_dropout=0.0, power=1.0, profile=False, prompt_type='src', quant_noise_pq=0, quant_noise_pq_block_size=8, quant_noise_scalar=0, quantization_config_path=None, reg_alpha=1.0, relu_dropout=0.0, report_accuracy=False, required_batch_size_multiple=8, required_seq_len_multiple=1, reset_dataloader=True, reset_logging=False, reset_lr_scheduler=False, reset_meters=True, reset_optimizer=True, resnet_drop_path_rate=0.0, resnet_type='resnet101', restore_file='../../checkpoints/ofa_base.pt', sample_patch_num=196, save_dir='./fairseq_checkpoints/cola/5_1e-4_2', save_interval=10, save_interval_updates=100, scale_attn=True, scale_fc=True, scale_heads=True, scale_resids=False, scoring='bleu', seed=1, selected_cols='1,2', sentence_avg=False, shard_id=0, share_all_embeddings=True, share_decoder_input_output_embed=True, simul_type=None, skip_invalid_size_inputs_valid_test=False, slowmo_algorithm='LocalSGD', slowmo_momentum=None, stop_min_lr=-1.0, stop_time_hours=0, store_ema=False, suppress_crashes=False, sync_bn=False, task='cola', tensorboard_logdir=None, threshold_loss_scale=None, token_bucket_size=256, tokenizer=None, total_num_update=1000000, tpu=False, train_subset='train', unk=3, update_freq=[2], use_bmuf=False, use_ema_weights_to_init_param=False, use_latest_weights_to_init_ema=False, use_old_adam=False, use_plasma_view=False, use_rdrop=False, use_sharded_state=False, user_dir='../../ofa_module', valid_subset='valid', validate_after_updates=0, validate_interval=1, validate_interval_updates=10, wandb_project=None, warmup_ratio=0.06, warmup_updates=0, weight_decay=0.01, write_checkpoints_asynchronously=False, zero_sharding='none'), 'task': {'_name': 'cola', 'data': '../../dataset/glue_data/cola_train.tsv,../../dataset/glue_data/cola_dev.tsv', 'selected_cols': '1,2', 'bpe_dir': '../../utils/BPE', 'max_source_positions': 1024, 'max_target_positions': 1024, 'max_src_length': 512, 'max_tgt_length': 30, 'code_dict_size': 8192, 'patch_image_size': 480, 'num_bins': 1000, 'imagenet_default_mean_and_std': False, 'constraint_range': None, 'ans2label_dict': '{"no": 0, "yes": 1}', 'prompt_type': 'src'}, 'criterion': {'_name': 'adjust_label_smoothed_cross_entropy', 'label_smoothing': 0.0, 'report_accuracy': False, 'ignore_prefix_size': 0, 'ignore_eos': False, 'sentence_avg': False, 'drop_worst_ratio': 0.0, 'drop_worst_after': 0, 'use_rdrop': False, 'reg_alpha': 1.0, 'sample_patch_num': 196, 'constraint_range': None, 'moe_gate_loss_wt': 1.0, 'moe_gate_loss_combine_method': 'average', 'moe_gate_loss_transform': 'none'}, 'optimizer': {'_name': 'adam', 'adam_betas': '(0.9,0.999)', 'adam_eps': 1e-08, 'weight_decay': 0.01, 'use_old_adam': False, 'fp16_adam_stats': False, 'tpu': False, 'lr': [0.0001]}, 'lr_scheduler': {'_name': 'polynomial_decay', 'warmup_updates': 0, 'warmup_ratio': 0.06, 'force_anneal': None, 'end_learning_rate': 0.0, 'power': 1.0, 'total_num_update': 1000000.0, 'lr': [0.0001]}, 'scoring': {'_name': 'bleu', 'pad': 1, 'eos': 2, 'unk': 3}, 'bpe': None, 'tokenizer': None, 'ema': {'_name': None, 'store_ema': False, 'ema_decay': 0.9999, 'ema_start_update': 0, 'ema_seed_model': None, 'ema_update_freq': 1, 'ema_fp32': False}, 'simul_type': None}
+2022-04-25 22:15:22 - ofa_task.py[line:103] - INFO: source dictionary: 59457 types
+2022-04-25 22:15:22 - ofa_task.py[line:104] - INFO: target dictionary: 59457 types
+2022-04-25 22:15:23 - distributed_c10d.py[line:187] - INFO: Added key: store_based_barrier_key:2 to store for rank: 0
+2022-04-25 22:15:23 - distributed_c10d.py[line:187] - INFO: Added key: store_based_barrier_key:3 to store for rank: 0
+2022-04-25 22:15:23 - distributed_c10d.py[line:187] - INFO: Added key: store_based_barrier_key:4 to store for rank: 0
+2022-04-25 22:15:29 - train.py[line:100] - INFO: OFAModel(
+  (encoder): TransformerEncoder(
+    (dropout_module): FairseqDropout()
+    (embed_tokens): Embedding(59457, 768, padding_idx=1)
+    (layernorm_embedding): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (type_embedding): Embedding(2, 768)
+    (embed_images): ResNet(
+      (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (maxpool): MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+      (layer1): Sequential(
+        (0): Bottleneck(
+          (conv1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (downsample): Sequential(
+            (0): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+            (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+          (drop_path): Identity()
+        )
+        (1): Bottleneck(
+          (conv1): Conv2d(256, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (2): Bottleneck(
+          (conv1): Conv2d(256, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+      )
+      (layer2): Sequential(
+        (0): Bottleneck(
+          (conv1): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (downsample): Sequential(
+            (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+            (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+          (drop_path): Identity()
+        )
+        (1): Bottleneck(
+          (conv1): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (2): Bottleneck(
+          (conv1): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (3): Bottleneck(
+          (conv1): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+      )
+      (layer3): Sequential(
+        (0): Bottleneck(
+          (conv1): Conv2d(512, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (downsample): Sequential(
+            (0): Conv2d(512, 1024, kernel_size=(1, 1), stride=(2, 2), bias=False)
+            (1): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+          (drop_path): Identity()
+        )
+        (1): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (2): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (3): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (4): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (5): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (6): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (7): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (8): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (9): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (10): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (11): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (12): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (13): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (14): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (15): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (16): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (17): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (18): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (19): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (20): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (21): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (22): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+      )
+    )
+    (image_proj): Linear(in_features=1024, out_features=768, bias=True)
+    (patch_layernorm_embedding): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (embed_positions): Embedding(1026, 768)
+    (embed_image_positions): Embedding(1765, 768)
+    (pos_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (image_pos_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (pos_q_linear): Linear(in_features=768, out_features=768, bias=True)
+    (pos_k_linear): Linear(in_features=768, out_features=768, bias=True)
+    (layers): ModuleList(
+      (0): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): Identity()
+      )
+      (1): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.019999999552965164)
+      )
+      (2): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.03999999910593033)
+      )
+      (3): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.06000000238418579)
+      )
+      (4): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.07999999821186066)
+      )
+      (5): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.10000000149011612)
+      )
+    )
+    (layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (token_rel_pos_table_list): ModuleList(
+      (0): Embedding(511, 12)
+      (1): Embedding(511, 12)
+      (2): Embedding(511, 12)
+      (3): Embedding(511, 12)
+      (4): Embedding(511, 12)
+      (5): Embedding(511, 12)
+    )
+    (image_rel_pos_table_list): ModuleList(
+      (0): Embedding(6892, 12)
+      (1): Embedding(6892, 12)
+      (2): Embedding(6892, 12)
+      (3): Embedding(6892, 12)
+      (4): Embedding(6892, 12)
+      (5): Embedding(6892, 12)
+    )
+  )
+  (decoder): TransformerDecoder(
+    (dropout_module): FairseqDropout()
+    (embed_tokens): Embedding(59457, 768, padding_idx=1)
+    (layernorm_embedding): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (embed_positions): Embedding(1026, 768)
+    (embed_image_positions): Embedding(1765, 768)
+    (pos_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (image_pos_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (self_pos_q_linear): Linear(in_features=768, out_features=768, bias=True)
+    (self_pos_k_linear): Linear(in_features=768, out_features=768, bias=True)
+    (cross_pos_q_linear): Linear(in_features=768, out_features=768, bias=True)
+    (cross_pos_k_linear): Linear(in_features=768, out_features=768, bias=True)
+    (code_layernorm_embedding): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (layers): ModuleList(
+      (0): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): Identity()
+      )
+      (1): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.019999999552965164)
+      )
+      (2): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.03999999910593033)
+      )
+      (3): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.06000000238418579)
+      )
+      (4): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.07999999821186066)
+      )
+      (5): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.10000000149011612)
+      )
+    )
+    (layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (output_projection): Linear(in_features=768, out_features=59457, bias=False)
+    (token_rel_pos_table_list): ModuleList(
+      (0): Embedding(511, 12)
+      (1): Embedding(511, 12)
+      (2): Embedding(511, 12)
+      (3): Embedding(511, 12)
+      (4): Embedding(511, 12)
+      (5): Embedding(511, 12)
+    )
+    (image_rel_pos_table_list): ModuleList(
+      (0): Embedding(6892, 12)
+      (1): Embedding(6892, 12)
+      (2): Embedding(6892, 12)
+      (3): Embedding(6892, 12)
+      (4): Embedding(6892, 12)
+      (5): Embedding(6892, 12)
+    )
+  )
+  (classification_heads): ModuleDict()
+)
+2022-04-25 22:15:29 - train.py[line:101] - INFO: task: COLATask
+2022-04-25 22:15:29 - train.py[line:102] - INFO: model: OFAModel
+2022-04-25 22:15:29 - train.py[line:103] - INFO: criterion: AdjustLabelSmoothedCrossEntropyCriterion
+2022-04-25 22:15:29 - train.py[line:104] - INFO: num. shared model params: 182,275,400 (num. trained: 182,275,400)
+2022-04-25 22:15:29 - train.py[line:111] - INFO: num. expert model params: 226676736 (num. trained: 226676736)
+local datafile ../../dataset/glue_data/cola_dev.tsv slice_id 0 begin to initialize row_count and line_idx-to-offset mapping
+local datafile ../../dataset/glue_data/cola_dev.tsv slice_id 0 finished initializing row_count and line_idx-to-offset mapping
+file ../../dataset/glue_data/cola_dev.tsv slice_id 0 row count 1043 total row count 1043
+2022-04-25 22:15:29 - trainer.py[line:110] - INFO: Debugging
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_tokens.weight <- decoder.embed_tokens.weight
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_tokens.weight <- decoder.output_projection.weight
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.0.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.0.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.0.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.0.downsample.0.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.1.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.1.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.1.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.2.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.2.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.2.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.0.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.0.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.0.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.0.downsample.0.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.1.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.1.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.1.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.2.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.2.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.2.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.3.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.3.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.3.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.0.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.0.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.0.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.0.downsample.0.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.1.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.1.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.1.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.2.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.2.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.2.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.3.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.3.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.3.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.4.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.4.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.4.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.5.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.5.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.5.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.6.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.6.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.6.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.7.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.7.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.7.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.8.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.8.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.8.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.9.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.9.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.9.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.10.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.10.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.10.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.11.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.11.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.11.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.12.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.12.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.12.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.13.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.13.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.13.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.14.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.14.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.14.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.15.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.15.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.15.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.16.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.16.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.16.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.17.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.17.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.17.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.18.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.18.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.18.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.19.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.19.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.19.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.20.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.20.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.20.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.21.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.21.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.21.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.22.conv1.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.22.conv2.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.22.conv3.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.0.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.1.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.2.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.3.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.4.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.5.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.0.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.1.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.2.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.3.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.4.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.5.moe_layer.gate.wg.bias
+2022-04-25 22:15:30 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.output_projection.bias
+2022-04-25 22:15:30 - utils.py[line:759] - INFO: ***********************CUDA enviroments for all 1 workers***********************
+2022-04-25 22:15:30 - utils.py[line:761] - INFO: rank   0: capabilities =  8.6  ; total memory = 23.700 GB ; name = NVIDIA GeForce RTX 3090                 
+2022-04-25 22:15:30 - utils.py[line:767] - INFO: ***********************CUDA enviroments for all 1 workers***********************
+2022-04-25 22:15:30 - train.py[line:142] - INFO: training on 1 devices (GPUs/TPUs)
+2022-04-25 22:15:30 - train.py[line:147] - INFO: max tokens per device = None and max sentences per device = 16
+2022-04-25 22:15:30 - trainer.py[line:459] - INFO: Preparing to load checkpoint ../../checkpoints/ofa_base.pt
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+2022-04-25 22:15:34 - adam.py[line:68] - INFO: using FusedAdam
+2022-04-25 22:15:34 - trainer.py[line:618] - INFO: Loaded checkpoint ../../checkpoints/ofa_base.pt (epoch 48 @ 0 updates)
+2022-04-25 22:15:34 - trainer.py[line:640] - INFO: loading train data for epoch 1
+local datafile ../../dataset/glue_data/cola_train.tsv slice_id 0 begin to initialize row_count and line_idx-to-offset mapping
+local datafile ../../dataset/glue_data/cola_train.tsv slice_id 0 finished initializing row_count and line_idx-to-offset mapping
+file ../../dataset/glue_data/cola_train.tsv slice_id 0 row count 8551 total row count 8551
+slice_id 0 seek offset 0
+Total steps 1340, warmup steps 80, warmup_factor 0.0125
+2022-04-25 22:15:35 - trainer.py[line:704] - INFO: begin training epoch 1
+2022-04-25 22:15:35 - train.py[line:295] - INFO: Start iterating over samples
+2022-04-25 22:15:53 - progress_bar.py[line:272] - INFO: epoch 001:     10 / 268 loss=2.097, loss_v1=0, loss_v2=0, nll_loss=0.971, ntokens=32, nsentences=32, sample_size=32, sample_size_v1=0, sample_size_v2=0, ppl=1.96, wps=22.6, ups=0.71, wpb=32, bsz=32, num_updates=10, lr=1.25e-05, gnorm=9.978, loss_scale=16, train_wall=19, gb_free=15.3, wall=24
+2022-04-25 22:15:53 - train.py[line:435] - INFO: begin validation on "valid" subset
+slice_id 0 seek offset 0
+slice_id 0 seek offset 0
+Traceback (most recent call last):
+  File "../../train.py", line 527, in <module>
+    cli_main()
+  File "../../train.py", line 520, in cli_main
+    distributed_utils.call_main(cfg, main)
+  File "/workspace/OFA/fairseq/fairseq/distributed/utils.py", line 379, in call_main
+    distributed_main(cfg.distributed_training.device_id, main, cfg, kwargs)
+  File "/workspace/OFA/fairseq/fairseq/distributed/utils.py", line 353, in distributed_main
+    main(cfg, **kwargs)
+  File "../../train.py", line 189, in main
+    valid_losses, should_stop = train(cfg, trainer, task, epoch_itr)
+  File "/opt/conda/lib/python3.8/contextlib.py", line 75, in inner
+    return func(*args, **kwds)
+  File "../../train.py", line 314, in train
+    valid_losses, should_stop = validate_and_save(
+  File "../../train.py", line 401, in validate_and_save
+    valid_losses = validate(cfg, trainer, task, epoch_itr, valid_subsets)
+  File "../../train.py", line 471, in validate
+    trainer.valid_step(sample)
+  File "/opt/conda/lib/python3.8/contextlib.py", line 75, in inner
+    return func(*args, **kwds)
+  File "/workspace/OFA/trainer.py", line 1095, in valid_step
+    logging_output = self._reduce_and_log_stats(logging_outputs, sample_size)
+  File "/workspace/OFA/trainer.py", line 1468, in _reduce_and_log_stats
+    logging_output = agg.get_smoothed_values()
+  File "/workspace/OFA/fairseq/fairseq/logging/meters.py", line 302, in get_smoothed_values
+    [
+  File "/workspace/OFA/fairseq/fairseq/logging/meters.py", line 303, in <listcomp>
+    (key, self.get_smoothed_value(key))
+  File "/workspace/OFA/fairseq/fairseq/logging/meters.py", line 295, in get_smoothed_value
+    return meter.fn(self)
+  File "/workspace/OFA/tasks/nlu_tasks/cola.py", line 132, in compute_mcc
+    score = (TP*TN - FP*FN) / math.sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
+ZeroDivisionError: float division by zero
+Traceback (most recent call last):
+  File "/opt/conda/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/opt/conda/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/opt/conda/lib/python3.8/site-packages/torch/distributed/launch.py", line 340, in <module>
+    main()
+  File "/opt/conda/lib/python3.8/site-packages/torch/distributed/launch.py", line 326, in main
+    sigkill_handler(signal.SIGTERM, None)  # not coming back
+  File "/opt/conda/lib/python3.8/site-packages/torch/distributed/launch.py", line 301, in sigkill_handler
+    raise subprocess.CalledProcessError(returncode=last_return_code, cmd=cmd)
+subprocess.CalledProcessError: Command '['/opt/conda/bin/python3', '-u', '../../train.py', '--local_rank=0', '../../dataset/glue_data/cola_train.tsv,../../dataset/glue_data/cola_dev.tsv', '--selected-cols=1,2', '--bpe-dir=../../utils/BPE', '--user-dir=../../ofa_module', '--restore-file=../../checkpoints/ofa_base.pt', '--reset-optimizer', '--reset-dataloader', '--reset-meters', '--save-dir=./fairseq_checkpoints/cola/5_1e-4_2', '--task=cola', '--arch=ofa_resmo', '--criterion=adjust_label_smoothed_cross_entropy', '--label-smoothing=0.0', '--batch-size=16', '--update-freq=2', '--encoder-normalize-before', '--decoder-normalize-before', '--share-decoder-input-output-embed', '--share-all-embeddings', '--layernorm-embedding', '--patch-layernorm-embedding', '--code-layernorm-embedding', '--resnet-drop-path-rate=0.0', '--encoder-drop-path-rate=0.1', '--decoder-drop-path-rate=0.1', '--dropout=0.1', '--attention-dropout=0.0', '--weight-decay=0.01', '--optimizer=adam', '--adam-betas=(0.9,0.999)', '--adam-eps=1e-08', '--clip-norm=0.0', '--lr-scheduler=polynomial_decay', '--lr=1e-4', '--max-epoch=5', '--warmup-ratio=0.06', '--log-format=simple', '--log-interval=10', '--fixed-validation-seed=7', '--keep-best-checkpoints=1', '--save-interval=10', '--validate-interval=1', '--save-interval-updates=100', '--validate-interval-updates=10', '--best-checkpoint-metric=mcc', '--maximize-best-checkpoint-metric', '--max-src-length=512', '--max-tgt-length=30', '--find-unused-parameters', '--add-type-embedding', '--scale-attn', '--scale-fc', '--scale-heads', '--disable-entangle', '--num-bins=1000', '--prompt-type=src', '--fp16', '--fp16-init-scale=16', '--fp16-scale-window=512', '--num-workers=0']' returned non-zero exit status 1.
+Killing subprocess 54938

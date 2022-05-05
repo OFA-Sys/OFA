@@ -7,65 +7,80 @@ from typing import Dict, List, Optional
 
 import torch
 import torch.nn as nn
-from fairseq import utils
-from fairseq.modules import LayerNorm, MultiheadAttention
+import torch.nn.functional as F
+from fairseq import distributed_utils as dist_utils, utils
+from fairseq.modules import gelu, LayerNorm, MultiheadAttention
 from fairseq.modules.fairseq_dropout import FairseqDropout
+from fairseq.modules.moe import Top1Gate, Top2Gate, MOELayer
 from fairseq.modules.quant_noise import quant_noise
+from fairseq.modules.fused_bias_gelu import fused_bias_gelu, has_fused_bias_gelu
 from torch import Tensor
-from fairseq.models.transformer import (
-    TransformerConfig,
-)
+
+def _linear(x, weight, bias=None):
+    return F.linear(x, weight, bias)
 
 
-class TransformerEncoderLayerBase(nn.Module):
-    """Encoder layer block.
+def _ffn(
+    x,
+    fc1,
+    activation_fn,
+    activation_dropout_module,
+    fc2,
+    dropout_module,
+):
+    x_shape = x.shape
+    x = x.reshape(-1, x.size(-1))
+    if has_fused_bias_gelu and activation_fn == gelu:
+        x = _linear(x, fc1.weight)
+        x = fused_bias_gelu(x, fc1.bias)
+        x = activation_dropout_module(x)
+        x = _linear(x, fc2.weight, fc2.bias)
+    else:
+        x = _linear(x, fc1.weight, fc1.bias)
+        x = activation_fn(x)
+        x = activation_dropout_module(x)
+        x = _linear(x, fc2.weight, fc2.bias)
+    x = x.view(x_shape)
+    x = dropout_module(x)
+    return x
 
-    In the original paper each operation (multi-head attention or FFN) is
-    postprocessed with: `dropout -> add residual -> layernorm`. In the
-    tensor2tensor code they suggest that learning is more robust when
-    preprocessing each layer with layernorm and postprocessing with:
-    `dropout -> add residual`. We default to the approach in the paper, but the
-    tensor2tensor approach can be enabled by setting
-    *cfg.encoder.normalize_before* to ``True``.
 
-    Args:
-        args (argparse.Namespace): parsed command-line arguments
+class FeedForwardNetwork(nn.Module):
     """
-
-    def __init__(self, cfg):
+        Feed Forward Network layer in the Transformer model
+    """
+    def __init__(self, args, embed_dim, ffn_dim, dropout_module=None):
         super().__init__()
-        self.cfg = cfg
-        self.embed_dim = cfg.encoder.embed_dim
-        self.quant_noise = cfg.quant_noise.pq
-        self.quant_noise_block_size = cfg.quant_noise.pq_block_size
-        self.self_attn = self.build_self_attention(self.embed_dim, cfg)
-        self.self_attn_layer_norm = LayerNorm(self.embed_dim, export=cfg.export)
-        self.dropout_module = FairseqDropout(
-            cfg.dropout, module_name=self.__class__.__name__
+        self.embed_dim = embed_dim
+        self.quant_noise = getattr(args, "quant_noise_pq", 0)
+        self.quant_noise_block_size = getattr(args, "quant_noise_pq_block_size", 8)
+        self.activation_fn = utils.get_activation_fn(
+            activation=str(args.activation_fn)
+            if getattr(args, "activation_fn", None) is not None
+            else "relu"
         )
-        self.activation_fn = utils.get_activation_fn(activation=cfg.activation_fn)
-        activation_dropout_p = cfg.activation_dropout
+        activation_dropout_p = getattr(args, "activation_dropout", 0) or 0
         if activation_dropout_p == 0:
-            # for backwards compatibility with models that use cfg.relu_dropout
-            activation_dropout_p = cfg.relu_dropout or 0
+            # for backwards compatibility with models that use args.relu_dropout
+            activation_dropout_p = getattr(args, "relu_dropout", 0) or 0
         self.activation_dropout_module = FairseqDropout(
             float(activation_dropout_p), module_name=self.__class__.__name__
         )
-        self.normalize_before = cfg.encoder.normalize_before
         self.fc1 = self.build_fc1(
             self.embed_dim,
-            cfg.encoder.ffn_embed_dim,
+            ffn_dim,
             self.quant_noise,
             self.quant_noise_block_size,
         )
         self.fc2 = self.build_fc2(
-            cfg.encoder.ffn_embed_dim,
+            ffn_dim,
             self.embed_dim,
             self.quant_noise,
             self.quant_noise_block_size,
         )
-
-        self.final_layer_norm = LayerNorm(self.embed_dim, export=cfg.export)
+        self.dropout_module = FairseqDropout(
+                args.dropout, module_name=self.__class__.__name__
+            ) if not dropout_module else dropout_module
 
     def build_fc1(self, input_dim, output_dim, q_noise, qn_block_size):
         return quant_noise(
@@ -77,11 +92,112 @@ class TransformerEncoderLayerBase(nn.Module):
             nn.Linear(input_dim, output_dim), p=q_noise, block_size=qn_block_size
         )
 
-    def build_self_attention(self, embed_dim, cfg):
+    def forward(self, x):
+        return _ffn(
+            x,
+            fc1=self.fc1,
+            activation_fn=self.activation_fn,
+            activation_dropout_module=self.activation_dropout_module,
+            fc2=self.fc2,
+            dropout_module=self.dropout_module,
+        )
+        return x
+
+
+class TransformerEncoderLayer(nn.Module):
+    """Encoder layer block.
+
+    In the original paper each operation (multi-head attention or FFN) is
+    postprocessed with: `dropout -> add residual -> layernorm`. In the
+    tensor2tensor code they suggest that learning is more robust when
+    preprocessing each layer with layernorm and postprocessing with:
+    `dropout -> add residual`. We default to the approach in the paper, but the
+    tensor2tensor approach can be enabled by setting
+    *args.encoder_normalize_before* to ``True``.
+
+    Args:
+        args (argparse.Namespace): parsed command-line arguments
+    """
+
+    def __init__(self, args, is_moe_layer=False):
+        super().__init__()
+        self.args = args
+        self.embed_dim = args.encoder_embed_dim
+        self.quant_noise = getattr(args, 'quant_noise_pq', 0)
+        self.quant_noise_block_size = getattr(args, 'quant_noise_pq_block_size', 8) or 8
+        self.self_attn = self.build_self_attention(self.embed_dim, args)
+        self.self_attn_layer_norm = LayerNorm(self.embed_dim)
+        self.dropout_module = FairseqDropout(
+            args.dropout, module_name=self.__class__.__name__
+        )
+        self.normalize_before = args.encoder_normalize_before
+        self.is_moe_layer = is_moe_layer
+        ffn_dim = args.encoder_ffn_embed_dim
+        if self.is_moe_layer and getattr(args, "alternate_ffn_embed_dim", 0.0) > 0:
+            ffn_dim = getattr(args, "alternate_ffn_embed_dim", 0.0)
+        # the second condition is for a "pseudo" MoE layer
+        # (shared FFN with expert FFN dimension) that tries
+        # to replicate FLOPs used by an expert MoE layer with perfectly balanced load
+        if not self.is_moe_layer or getattr(args, "alternate_ffn_embed_dim", 0.0) > 0:
+            self.activation_fn = utils.get_activation_fn(
+                activation=getattr(args, 'activation_fn', 'relu') or "relu"
+            )
+            activation_dropout_p = getattr(args, "activation_dropout", 0) or 0
+            if activation_dropout_p == 0:
+                # for backwards compatibility with models that use args.relu_dropout
+                activation_dropout_p = getattr(args, "relu_dropout", 0) or 0
+            self.activation_dropout_module = FairseqDropout(
+                float(activation_dropout_p), module_name=self.__class__.__name__
+            )
+            self.fc1 = self.build_fc1(
+                self.embed_dim,
+                ffn_dim,
+                self.quant_noise,
+                self.quant_noise_block_size,
+            )
+            self.fc2 = self.build_fc2(
+                ffn_dim,
+                self.embed_dim,
+                self.quant_noise,
+                self.quant_noise_block_size,
+            )
+        else:
+            if args.moe_top1_expert:
+                gate = Top1Gate(
+                    self.embed_dim,
+                    args.moe_expert_count,
+                    use_fp32=args.moe_gating_use_fp32,
+                    moe_eval_capacity_token_fraction=getattr(args, "moe_eval_capacity_token_fraction", 0.25),
+                )
+            else:
+                gate = Top2Gate(
+                    self.embed_dim,
+                    args.moe_expert_count,
+                    args.moe_gating_use_fp32,
+                    args.moe_second_expert_policy,
+                    args.moe_normalize_gate_prob_before_dropping,
+                    getattr(args, "moe_eval_capacity_token_fraction", 0.25),
+                    getattr(args, "moe_batch_prioritized_routing", False),
+                )
+            experts = make_experts(args, self.embed_dim, ffn_dim, self.dropout_module)
+            self.moe_layer = MOELayer(gate, experts, args)
+        self.final_layer_norm = LayerNorm(self.embed_dim)
+
+    def build_fc1(self, input_dim, output_dim, q_noise, qn_block_size):
+        return quant_noise(
+            nn.Linear(input_dim, output_dim), p=q_noise, block_size=qn_block_size
+        )
+
+    def build_fc2(self, input_dim, output_dim, q_noise, qn_block_size):
+        return quant_noise(
+            nn.Linear(input_dim, output_dim), p=q_noise, block_size=qn_block_size
+        )
+
+    def build_self_attention(self, embed_dim, args):
         return MultiheadAttention(
             embed_dim,
-            cfg.encoder.attention_heads,
-            dropout=cfg.attention_dropout,
+            args.encoder_attention_heads,
+            dropout=args.attention_dropout,
             self_attention=True,
             q_noise=self.quant_noise,
             qn_block_size=self.quant_noise_block_size,
@@ -104,12 +220,7 @@ class TransformerEncoderLayerBase(nn.Module):
                     state_dict["{}.{}.{}".format(name, new, m)] = state_dict[k]
                     del state_dict[k]
 
-    def forward(
-        self,
-        x,
-        encoder_padding_mask: Optional[Tensor],
-        attn_mask: Optional[Tensor] = None,
-    ):
+    def forward(self, x, encoder_padding_mask: Optional[Tensor], attn_mask: Optional[Tensor] = None):
         """
         Args:
             x (Tensor): input to the layer of shape `(seq_len, batch, embed_dim)`
@@ -131,10 +242,7 @@ class TransformerEncoderLayerBase(nn.Module):
         # the attention weight (before softmax) for some padded element in query
         # will become -inf, which results in NaN in model parameters
         if attn_mask is not None:
-            attn_mask = attn_mask.masked_fill(
-                attn_mask.to(torch.bool),
-                -1e8 if x.dtype == torch.float32 else -1e4
-            )
+            attn_mask = attn_mask.masked_fill(attn_mask.to(torch.bool), -1e8)
 
         residual = x
         if self.normalize_before:
@@ -155,29 +263,27 @@ class TransformerEncoderLayerBase(nn.Module):
         residual = x
         if self.normalize_before:
             x = self.final_layer_norm(x)
-        x = self.activation_fn(self.fc1(x))
-        x = self.activation_dropout_module(x)
-        x = self.fc2(x)
-        x = self.dropout_module(x)
+        if not self.is_moe_layer or getattr(self.args, "alternate_ffn_embed_dim", 0.0) > 0:
+            x = self.activation_fn(self.fc1(x))
+            x = self.activation_dropout_module(x)
+            x = self.fc2(x)
+            x = self.dropout_module(x)
+            l_aux = None
+        else:
+            # x - seq_len, batch_size, model_dim
+            x = x.transpose(0, 1) # batch_size, seq_len, model_dim
+            if getattr(self.args, "use_moe_pad_mask", False):
+                x, l_aux = self.moe_layer(x, input_padding_mask=encoder_padding_mask)
+            else:
+                x, l_aux = self.moe_layer(x)
+            x = x.transpose(0, 1) # seq_len, batch_size, model_dim
         x = self.residual_connection(x, residual)
         if not self.normalize_before:
             x = self.final_layer_norm(x)
-        return x
+        return x, l_aux
 
 
-# backward compatible with the legacy argparse format
-class TransformerEncoderLayer(TransformerEncoderLayerBase):
-    def __init__(self, args):
-        super().__init__(TransformerConfig.from_namespace(args))
-        self.args = args
-
-    def build_self_attention(self, embed_dim, args):
-        return super().build_self_attention(
-            embed_dim, TransformerConfig.from_namespace(args)
-        )
-
-
-class TransformerDecoderLayerBase(nn.Module):
+class TransformerDecoderLayer(nn.Module):
     """Decoder layer block.
 
     In the original paper each operation (multi-head attention, encoder
@@ -186,7 +292,7 @@ class TransformerDecoderLayerBase(nn.Module):
     robust when preprocessing each layer with layernorm and postprocessing with:
     `dropout -> add residual`. We default to the approach in the paper, but the
     tensor2tensor approach can be enabled by setting
-    *cfg.decoder.normalize_before* to ``True``.
+    *args.decoder_normalize_before* to ``True``.
 
     Args:
         args (argparse.Namespace): parsed command-line arguments
@@ -195,61 +301,101 @@ class TransformerDecoderLayerBase(nn.Module):
     """
 
     def __init__(
-        self, cfg, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False
+        self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False, is_moe_layer=False,
     ):
         super().__init__()
-        self.embed_dim = cfg.decoder.embed_dim
+        self.embed_dim = args.decoder_embed_dim
         self.dropout_module = FairseqDropout(
-            cfg.dropout, module_name=self.__class__.__name__
+            args.dropout, module_name=self.__class__.__name__
         )
-        self.quant_noise = cfg.quant_noise.pq
-        self.quant_noise_block_size = cfg.quant_noise.pq_block_size
+        self.quant_noise = getattr(args, "quant_noise_pq", 0)
+        self.quant_noise_block_size = getattr(args, "quant_noise_pq_block_size", 8)
 
-        self.cross_self_attention = cfg.cross_self_attention
+        self.cross_self_attention = getattr(args, "cross_self_attention", False)
 
         self.self_attn = self.build_self_attention(
             self.embed_dim,
-            cfg,
+            args,
             add_bias_kv=add_bias_kv,
             add_zero_attn=add_zero_attn,
         )
 
-        self.activation_fn = utils.get_activation_fn(activation=cfg.activation_fn)
-        activation_dropout_p = cfg.activation_dropout
-        if activation_dropout_p == 0:
-            # for backwards compatibility with models that use cfg.relu_dropout
-            activation_dropout_p = cfg.relu_dropout or 0
-        self.activation_dropout_module = FairseqDropout(
-            float(activation_dropout_p), module_name=self.__class__.__name__
-        )
-        self.normalize_before = cfg.decoder.normalize_before
+        self.normalize_before = args.decoder_normalize_before
 
-        self.self_attn_layer_norm = LayerNorm(self.embed_dim, export=cfg.export)
+        # use layerNorm rather than FusedLayerNorm for exporting.
+        # char_inputs can be used to determint this.
+        # TODO  remove this once we update apex with the fix
+        export = getattr(args, "char_inputs", False)
+
+        self.self_attn_layer_norm = LayerNorm(self.embed_dim, export=export)
 
         if no_encoder_attn:
             self.encoder_attn = None
             self.encoder_attn_layer_norm = None
         else:
-            self.encoder_attn = self.build_encoder_attention(self.embed_dim, cfg)
-            self.encoder_attn_layer_norm = LayerNorm(self.embed_dim, export=cfg.export)
+            self.encoder_attn = self.build_encoder_attention(self.embed_dim, args)
+            self.encoder_attn_layer_norm = LayerNorm(self.embed_dim, export=export)
 
-        self.fc1 = self.build_fc1(
-            self.embed_dim,
-            cfg.decoder.ffn_embed_dim,
-            self.quant_noise,
-            self.quant_noise_block_size,
-        )
-        self.fc2 = self.build_fc2(
-            cfg.decoder.ffn_embed_dim,
-            self.embed_dim,
-            self.quant_noise,
-            self.quant_noise_block_size,
-        )
+        self.is_moe_layer = is_moe_layer
 
-        self.final_layer_norm = LayerNorm(self.embed_dim, export=cfg.export)
+        ffn_dim = args.decoder_ffn_embed_dim
+        if self.is_moe_layer and getattr(args, "alternate_decoder_ffn_embed_dim", 0.0) > 0:
+            ffn_dim = getattr(args, "alternate_decoder_ffn_embed_dim", 0.0)
+
+        if not self.is_moe_layer or getattr(args, "alternate_decoder_ffn_embed_dim", 0.0) > 0:
+            self.activation_fn = utils.get_activation_fn(
+                activation=str(args.activation_fn)
+                if getattr(args, "activation_fn", None) is not None
+                else "relu"
+            )
+            activation_dropout_p = getattr(args, "activation_dropout", 0) or 0
+            if activation_dropout_p == 0:
+                # for backwards compatibility with models that use args.relu_dropout
+                activation_dropout_p = getattr(args, "relu_dropout", 0) or 0
+            self.activation_dropout_module = FairseqDropout(
+                float(activation_dropout_p), module_name=self.__class__.__name__
+            )
+            self.fc1 = self.build_fc1(
+                self.embed_dim,
+                ffn_dim,
+                self.quant_noise,
+                self.quant_noise_block_size,
+            )
+            self.fc2 = self.build_fc2(
+                ffn_dim,
+                self.embed_dim,
+                self.quant_noise,
+                self.quant_noise_block_size,
+            )
+        else:
+
+            if args.moe_top1_expert:
+                gate = Top1Gate(
+                    self.embed_dim,
+                    args.moe_expert_count,
+                    use_fp32=args.moe_gating_use_fp32,
+                    moe_eval_capacity_token_fraction=getattr(args, "moe_eval_capacity_token_fraction", 0.25),
+                )
+            else:
+                gate = Top2Gate(
+                    self.embed_dim,
+                    args.moe_expert_count,
+                    args.moe_gating_use_fp32,
+                    args.moe_second_expert_policy,
+                    args.moe_normalize_gate_prob_before_dropping,
+                    getattr(args, "moe_eval_capacity_token_fraction", 0.25),
+                    getattr(args, "moe_batch_prioritized_routing", False),
+                )
+            experts = make_experts(args, self.embed_dim, ffn_dim, self.dropout_module)
+            self.moe_layer = MOELayer(gate, experts, args)
+
+
+        self.final_layer_norm = LayerNorm(self.embed_dim, export=export)
         self.need_attn = True
 
         self.onnx_trace = False
+
+        self.args = args
 
     def build_fc1(self, input_dim, output_dim, q_noise, qn_block_size):
         return quant_noise(nn.Linear(input_dim, output_dim), q_noise, qn_block_size)
@@ -258,26 +404,26 @@ class TransformerDecoderLayerBase(nn.Module):
         return quant_noise(nn.Linear(input_dim, output_dim), q_noise, qn_block_size)
 
     def build_self_attention(
-        self, embed_dim, cfg, add_bias_kv=False, add_zero_attn=False
+        self, embed_dim, args, add_bias_kv=False, add_zero_attn=False
     ):
         return MultiheadAttention(
             embed_dim,
-            cfg.decoder.attention_heads,
-            dropout=cfg.attention_dropout,
+            args.decoder_attention_heads,
+            dropout=args.attention_dropout,
             add_bias_kv=add_bias_kv,
             add_zero_attn=add_zero_attn,
-            self_attention=not cfg.cross_self_attention,
+            self_attention=not getattr(args, "cross_self_attention", False),
             q_noise=self.quant_noise,
             qn_block_size=self.quant_noise_block_size,
         )
 
-    def build_encoder_attention(self, embed_dim, cfg):
+    def build_encoder_attention(self, embed_dim, args):
         return MultiheadAttention(
             embed_dim,
-            cfg.decoder.attention_heads,
-            kdim=cfg.encoder.embed_dim,
-            vdim=cfg.encoder.embed_dim,
-            dropout=cfg.attention_dropout,
+            args.decoder_attention_heads,
+            kdim=getattr(args, "encoder_embed_dim", None),
+            vdim=getattr(args, "encoder_embed_dim", None),
+            dropout=args.attention_dropout,
             encoder_decoder_attention=True,
             q_noise=self.quant_noise,
             qn_block_size=self.quant_noise_block_size,
@@ -403,11 +549,24 @@ class TransformerDecoderLayerBase(nn.Module):
         residual = x
         if self.normalize_before:
             x = self.final_layer_norm(x)
-
-        x = self.activation_fn(self.fc1(x))
-        x = self.activation_dropout_module(x)
-        x = self.fc2(x)
-        x = self.dropout_module(x)
+        if not self.is_moe_layer or getattr(self.args, "alternate_decoder_ffn_embed_dim", 0.0) > 0:
+            x = _ffn(
+                x,
+                fc1=self.fc1,
+                activation_fn=self.activation_fn,
+                activation_dropout_module=self.activation_dropout_module,
+                fc2=self.fc2,
+                dropout_module=self.dropout_module,
+            )
+            l_aux = None
+        else:
+            # x - seq_len, batch_size, model_dim
+            x = x.transpose(0, 1) # batch_size, seq_len, model_dim
+            if getattr(self.args, "use_moe_pad_mask", False):
+                x, l_aux = self.moe_layer(x, input_padding_mask=self_attn_padding_mask)
+            else:
+                x, l_aux = self.moe_layer(x)
+            x = x.transpose(0, 1) # seq_len, batch_size, model_dim
         x = self.residual_connection(x, residual)
         if not self.normalize_before:
             x = self.final_layer_norm(x)
@@ -423,37 +582,29 @@ class TransformerDecoderLayerBase(nn.Module):
             else:
                 self_attn_state = [saved_state["prev_key"], saved_state["prev_value"]]
             return x, attn, self_attn_state
-        return x, attn, None
+        return x, attn, None, l_aux
 
     def make_generation_fast_(self, need_attn: bool = False, **kwargs):
         self.need_attn = need_attn
 
 
-# backward compatible with the legacy argparse format
-class TransformerDecoderLayer(TransformerDecoderLayerBase):
-    def __init__(
-        self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False
-    ):
-        super().__init__(
-            TransformerConfig.from_namespace(args),
-            no_encoder_attn=no_encoder_attn,
-            add_bias_kv=add_bias_kv,
-            add_zero_attn=add_zero_attn,
-        )
-        self.args = args
-
-    def build_self_attention(
-        self, embed_dim, args, add_bias_kv=False, add_zero_attn=False
-    ):
-        return super().build_self_attention(
-            embed_dim,
-            TransformerConfig.from_namespace(args),
-            add_bias_kv=add_bias_kv,
-            add_zero_attn=add_zero_attn,
-        )
-
-    def build_encoder_attention(self, embed_dim, args):
-        return super().build_encoder_attention(
-            embed_dim,
-            TransformerConfig.from_namespace(args),
-        )
+def make_experts(args, embed_dim, expert_ffn_dim, dropout_module) -> nn.ModuleList:
+    world_size = 1 if not torch.distributed.is_initialized() else torch.distributed.get_world_size()
+    expert_list = []
+    ddp_rank = dist_utils.get_data_parallel_rank()
+    start_seed = torch.randint(1000000, (1,)).item()
+    # at least as many experts than gpus
+    if args.moe_expert_count >= world_size:
+        assert args.moe_expert_count % world_size == 0, f'{args.moe_expert_count}, {world_size}'
+        local_moe_expert_count = args.moe_expert_count // world_size
+        for i in range(local_moe_expert_count):
+            with utils.set_torch_seed(start_seed + ddp_rank * local_moe_expert_count + i):
+                expert_list.append(FeedForwardNetwork(args, embed_dim, expert_ffn_dim, dropout_module))
+    # less experts than gpus
+    else:
+        assert world_size % args.moe_expert_count == 0, f'{world_size}, {args.moe_expert_count}'
+        # initialize each FFN with the same seed on different GPUs
+        with utils.set_torch_seed(start_seed + ddp_rank % args.moe_expert_count):
+            expert_list.append(FeedForwardNetwork(args, embed_dim, expert_ffn_dim, dropout_module))
+    experts = nn.ModuleList(expert_list)
+    return experts

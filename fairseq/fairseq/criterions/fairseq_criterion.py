@@ -4,12 +4,19 @@
 # LICENSE file in the root directory of this source tree.
 
 import inspect
+import math
+from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
+import torch
+import torch.nn.functional as F
 from fairseq import metrics, utils
 from fairseq.dataclass import FairseqDataclass
 from fairseq.dataclass.utils import gen_parser_from_dataclass
 from torch.nn.modules.loss import _Loss
+
+from omegaconf import II
+
 
 
 class FairseqCriterion(_Loss):

@@ -4,8 +4,8 @@
 # you need to specify different port numbers.
 export MASTER_PORT=7051
 
-log_dir=./dummy_logs
-save_dir=./dummy_checkpoints
+log_dir=./dyn_scale_logs
+save_dir=./dyn_scale_checkpoints
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE
@@ -23,8 +23,8 @@ label_smoothing=0.0
 lr=3e-5
 max_epoch=5
 warmup_ratio=0.06
-batch_size=4
-update_freq=24
+batch_size=6
+update_freq=32
 resnet_drop_path_rate=0.0
 encoder_drop_path_rate=0.2
 decoder_drop_path_rate=0.2

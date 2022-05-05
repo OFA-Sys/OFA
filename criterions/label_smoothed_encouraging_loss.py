@@ -3,6 +3,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import inspect
 import math
 from dataclasses import dataclass, field
 from typing import Optional
@@ -14,6 +15,7 @@ from fairseq import metrics, utils
 from fairseq.criterions import FairseqCriterion, register_criterion
 from fairseq.dataclass import FairseqDataclass
 from omegaconf import II
+from fairseq.modules.moe import MOELayer
 
 
 @dataclass
@@ -69,7 +71,26 @@ class AdjustLabelSmoothedEncouragingLossConfig(FairseqDataclass):
         default=0,
         metadata={"help": "steps for discarding best samples"},
     )
-
+    moe_gate_loss_wt: float = field(
+        default=1.0,
+        metadata={
+            "help": "Weight associated with MoE gate loss"
+                    "in the weighted sum of gate loss and cross entropy loss"
+        }
+    )
+    moe_gate_loss_combine_method: str = field(
+        default="average",
+        metadata={
+            "help": "Method of combining the gate loss from each MoE layers"
+                    "('sum', 'average')"
+        }
+    )
+    moe_gate_loss_transform: str = field(
+        default="none",
+        metadata={
+            "help": "Transformation to apply to the gate loss ('none', 'neg_log')"
+        }
+    )
 
 
 def construct_rdrop_sample(x):
@@ -152,9 +173,27 @@ def label_smoothed_nll_loss(
     "adjust_label_smoothed_encouraging_loss", dataclass=AdjustLabelSmoothedEncouragingLossConfig
 )
 class AdjustLabelSmoothedEncouragingLossCriterion(FairseqCriterion):
+
+    moe_logging_keys = [
+        "overflow_expert1",        # average % of overflowed tokens from 1st expert
+        "overflow_expert2",        # average % of overflowed tokens from 2nd expert
+        "entropy_gating",          # average entropy of the gating distribution
+        "expert1_balance_top",     # average cumulative % of tokens processed by the most used 20% 1st experts
+        "expert1_balance_bottom",  # average cumulative % of tokens processed by the least used 20% 1st experts
+        "unused_expert1_count",    # average number of 1st experts which process no tokens
+        "expert2_balance_top",     # average cumulative % of tokens processed by the most used 20% 2nd experts
+        "expert2_balance_bottom",  # average cumulative % of tokens processed by the least used 20% 2nd experts
+        "unused_expert2_count",    # average number of 2nd experts which process no tokens
+        "all_to_all_cpu_time_ms",  # CPU time spent in all to all calls in milliseconds
+        "all_to_all_cuda_time_ms", # CUDA ttime spent in all to all calls in milliseconds
+    ]
+
     def __init__(
         self,
         task,
+        moe_gate_loss_wt, 
+        moe_gate_loss_combine_method, 
+        moe_gate_loss_transform, 
         sentence_avg,
         label_smoothing,
         ignore_prefix_size=0,
@@ -181,7 +220,6 @@ class AdjustLabelSmoothedEncouragingLossCriterion(FairseqCriterion):
         self.use_rdrop = use_rdrop
         self.reg_alpha = reg_alpha
         self.sample_patch_num = sample_patch_num
-
         self.constraint_start = None
         self.constraint_end = None
         if constraint_range is not None:
@@ -191,6 +229,11 @@ class AdjustLabelSmoothedEncouragingLossCriterion(FairseqCriterion):
         self.log_end = log_end
         self.drop_best_ratio = drop_best_ratio
         self.drop_best_after = drop_best_after
+
+        self.gate_loss_weight = moe_gate_loss_wt
+        self.gate_loss_combine_method = moe_gate_loss_combine_method
+        self.gate_loss_transform = moe_gate_loss_transform
+
         print('el, self.log_end=', self.log_end)
     # @staticmethod
     # def add_args(parser):
@@ -276,6 +319,18 @@ class AdjustLabelSmoothedEncouragingLossCriterion(FairseqCriterion):
 
     def compute_loss(self, model, net_output, sample, update_num, reduce=True):
         lprobs, target, constraint_masks = self.get_lprobs_and_target(model, net_output, sample)
+        gate_loss = 0.0
+        gate_count = 0
+        for l_aux in net_output[1]["l_aux"]:
+            if l_aux is not None:
+                gate_loss += l_aux
+                gate_count += 1
+        if self.gate_loss_combine_method == "average":
+            gate_loss = gate_loss / gate_count
+        if self.gate_loss_transform == "neg_log":
+            gate_loss = - torch.log(gate_loss)
+        gate_loss = sample_size * gate_loss
+        
         if constraint_masks is not None:
             constraint_masks = constraint_masks[target != self.padding_idx]
         lprobs = lprobs[target != self.padding_idx]
@@ -312,9 +367,22 @@ class AdjustLabelSmoothedEncouragingLossCriterion(FairseqCriterion):
         smoothing_c_loss = smoothing_c_loss.sum()
         c_loss = c_loss * (1 - self.eps) + (self.eps / lprobs.size(-1)) * smoothing_c_loss
         loss = loss + c_loss
-        # loss += net_output[1]["aux_loss"]
+        loss = loss + self.gate_loss_weight * gate_loss
         # end for encouraging loss
         return loss, nll_loss, ntokens
+
+    def get_moe_metadata(self, model):
+        moe_logging_output = {}
+        for key in MoECriterion.moe_logging_keys:
+            total_val = 0
+            count = 0
+            for _, module in model.named_modules():
+                if isinstance(module, MOELayer):
+                    total_val += module.metadata[key] if key in module.metadata else 0
+                    count += 1
+            moe_logging_output[key] = total_val / count
+        moe_logging_output["batch_count"] = 1
+        return moe_logging_output
 
     def compute_accuracy(self, model, net_output, sample):
         lprobs, target = self.get_lprobs_and_target(model, net_output, sample)
@@ -324,6 +392,28 @@ class AdjustLabelSmoothedEncouragingLossCriterion(FairseqCriterion):
         )
         total = torch.sum(mask)
         return n_correct, total
+
+    @staticmethod
+    def reduce_moe_metrics(logging_outputs) -> None:
+        """Aggregate logging outputs from data parallel training."""
+        loss_sum = sum(log.get("loss", 0) for log in logging_outputs)
+        moe_loss_sum = sum(log.get("moe_loss", 0) for log in logging_outputs)
+        ntokens = sum(log.get("ntokens", 0) for log in logging_outputs)
+        sample_size = sum(log.get("sample_size", 0) for log in logging_outputs)
+
+        # we divide by log(2) to convert the loss from base e to base 2
+        metrics.log_scalar(
+            "loss", loss_sum / sample_size / math.log(2), sample_size, round=3
+        )
+        metrics.log_scalar(
+            "moe_gate_loss", moe_loss_sum / sample_size, sample_size, round=8
+        )
+        batch_count = sum(log.get("batch_count", 0) for log in logging_outputs)
+        for key in MoECriterion.moe_logging_keys:
+            val = sum(log.get(key, 0) for log in logging_outputs)
+            metrics.log_scalar(
+                key, val / batch_count, batch_count, round=3
+            )
 
     @classmethod
     def reduce_metrics(cls, logging_outputs) -> None:

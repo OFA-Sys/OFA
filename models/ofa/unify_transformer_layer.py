@@ -9,11 +9,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from fairseq import utils
+from fairseq.distributed import utils as dist_utils, fsdp_wrap
 from fairseq.modules import LayerNorm
+from fairseq.modules.moe import Top1Gate, Top2Gate, MOELayer
 from fairseq.modules.fairseq_dropout import FairseqDropout
+from fairseq.modules.fused_bias_gelu import fused_bias_gelu, has_fused_bias_gelu
 from fairseq.modules.quant_noise import quant_noise
 from torch import Tensor
-from tutel import moe as tutel_moe
 from .unify_multihead_attention import MultiheadAttention
 
 class Dummy_layer(nn.Module):
@@ -69,39 +71,91 @@ class Dummy_layer(nn.Module):
             nn.Linear(input_dim, output_dim), p=q_noise, block_size=qn_block_size
         )
 
-class MoE_layer(nn.Module):
+def _linear(x, weight, bias=None):
+    return F.linear(x, weight, bias)
 
-    def __init__(self, d_model, d_inner, ffn_layernorm, resmoe_topk=1, resmoe_double_expert=False, resmoe_input=0, resmoe_output=1, resmoe_num_expert=2, resmoe_freeze_tuning=False):
+def _ffn(
+    x,
+    fc1,
+    activation_fn,
+    activation_dropout_module,
+    fc2,
+    dropout_module,
+):
+    x_shape = x.shape
+    x = x.reshape(-1, x.size(-1))
+    if has_fused_bias_gelu and activation_fn == gelu:
+        x = _linear(x, fc1.weight)
+        x = fused_bias_gelu(x, fc1.bias)
+        x = activation_dropout_module(x)
+        x = _linear(x, fc2.weight, fc2.bias)
+    else:
+        x = _linear(x, fc1.weight, fc1.bias)
+        x = activation_fn(x)
+        x = activation_dropout_module(x)
+        x = _linear(x, fc2.weight, fc2.bias)
+    x = x.view(x_shape)
+    x = dropout_module(x)
+    return x
+
+
+class FeedForwardNetwork(nn.Module):
+    """
+        Feed Forward Network layer in the Transformer model
+    """
+    def __init__(self, args, embed_dim, ffn_dim, dropout_module=None):
         super().__init__()
-        self.topK = resmoe_topk
-        self.d_model = d_model
-        self.d_inner = d_inner
-        self.double_expert = resmoe_double_expert
-        # 0: X, 1: X + FFN(X), 2: FFN(X)
-        self.moe_input = resmoe_input
-        # 1: MoE(X) + FFN(X), 2: MoE(FFN(X)) + FFN(X), 3: MoE(FFN(X))
-        self.moe_output = resmoe_input
-        self.num_expert = resmoe_num_expert
-        self.freeze_tuning = resmoe_freeze_tuning
-        self.moe_layer = tutel_moe.moe_layer(
-            gate_type = {'type': 'top', 'k': self.topK},
-            ffn_layernorm = ffn_layernorm,
-            experts = {
-                'type': 'ffn', 
-                'count_per_node': self.num_expert, 
-                'hidden_size_per_expert': self.d_inner, 
-                'activation_fn': lambda x: F.relu(x)},
-            model_dim = self.d_model,
-            a2a_ffn_overlap_degree=1,
-            seeds = (1, dist.get_rank() + 1, 1),
-            scan_expert_func = lambda name, param: setattr(param, 'skip_allreduce', True),
-            result_func = lambda output: (output, output.l_aux),
+        self.embed_dim = embed_dim
+        self.quant_noise = getattr(args, "quant_noise_pq", 0)
+        self.quant_noise_block_size = getattr(args, "quant_noise_pq_block_size", 8)
+        self.activation_fn = utils.get_activation_fn(
+            activation=str(args.activation_fn)
+            if getattr(args, "activation_fn", None) is not None
+            else "relu"
         )
-        self.aux_loss = None
-    
+        activation_dropout_p = getattr(args, "activation_dropout", 0) or 0
+        if activation_dropout_p == 0:
+            # for backwards compatibility with models that use args.relu_dropout
+            activation_dropout_p = getattr(args, "relu_dropout", 0) or 0
+        self.activation_dropout_module = FairseqDropout(
+            float(activation_dropout_p), module_name=self.__class__.__name__
+        )
+        self.fc1 = self.build_fc1(
+            self.embed_dim,
+            ffn_dim,
+            self.quant_noise,
+            self.quant_noise_block_size,
+        )
+        self.fc2 = self.build_fc2(
+            ffn_dim,
+            self.embed_dim,
+            self.quant_noise,
+            self.quant_noise_block_size,
+        )
+        self.dropout_module = FairseqDropout(
+                args.dropout, module_name=self.__class__.__name__
+            ) if not dropout_module else dropout_module
+
+    def build_fc1(self, input_dim, output_dim, q_noise, qn_block_size):
+        return quant_noise(
+            nn.Linear(input_dim, output_dim), p=q_noise, block_size=qn_block_size
+        )
+
+    def build_fc2(self, input_dim, output_dim, q_noise, qn_block_size):
+        return quant_noise(
+            nn.Linear(input_dim, output_dim), p=q_noise, block_size=qn_block_size
+        )
+
     def forward(self, x):
-        out, self.aux_loss = self.moe_layer(x)
-        return out
+        return _ffn(
+            x,
+            fc1=self.fc1,
+            activation_fn=self.activation_fn,
+            activation_dropout_module=self.activation_dropout_module,
+            fc2=self.fc2,
+            dropout_module=self.dropout_module,
+        )
+        return x
 
 def drop_path(x, drop_prob: float = 0.0, training: bool = False):
     """
@@ -151,11 +205,11 @@ class TransformerEncoderLayer(nn.Module):
         args (argparse.Namespace): parsed command-line arguments
     """
 
-    def __init__(self, args, drop_path_rate=0.0):
+    def __init__(self, args, drop_path_rate=0.0, is_moe_layer=False):
         super().__init__()
         self.args = args
         self.embed_dim = args.encoder_embed_dim
-        self.inner_dim = args.encoder_ffn_embed_dim
+        self.ffn_dim = args.encoder_ffn_embed_dim
         self.quant_noise = getattr(args, 'quant_noise_pq', 0)
         self.quant_noise_block_size = getattr(args, 'quant_noise_pq_block_size', 8) or 8
         self.self_attn = self.build_self_attention(self.embed_dim, args)
@@ -163,29 +217,55 @@ class TransformerEncoderLayer(nn.Module):
         self.dropout_module = FairseqDropout(
             args.dropout, module_name=self.__class__.__name__
         )
-        self.activation_fn = utils.get_activation_fn(
-            activation=getattr(args, 'activation_fn', 'relu') or "relu"
-        )
-        activation_dropout_p = getattr(args, "activation_dropout", 0) or 0
-        if activation_dropout_p == 0:
-            # for backwards compatibility with models that use args.relu_dropout
-            activation_dropout_p = getattr(args, "relu_dropout", 0) or 0
-        self.activation_dropout_module = FairseqDropout(
-            float(activation_dropout_p), module_name=self.__class__.__name__
-        )
+        self.is_moe_layer = is_moe_layer
+        if self.is_moe_layer and getattr(args, "alternate_ffn_embed_dim", 0.0) > 0:
+            self.ffn_dim = getattr(args, "alternate_ffn_embed_dim", 0.0)
         self.normalize_before = args.encoder_normalize_before
-        self.fc1 = self.build_fc1(
-            self.embed_dim,
-            args.encoder_ffn_embed_dim,
-            self.quant_noise,
-            self.quant_noise_block_size,
-        )
-        self.fc2 = self.build_fc2(
-            args.encoder_ffn_embed_dim,
-            self.embed_dim,
-            self.quant_noise,
-            self.quant_noise_block_size,
-        )
+        if not self.is_moe_layer or getattr(args, "alternate_ffn_embed_dim", 0.0) > 0:
+            self.activation_fn = utils.get_activation_fn(
+                activation=getattr(args, 'activation_fn', 'relu') or "relu"
+            )
+            activation_dropout_p = getattr(args, "activation_dropout", 0) or 0
+            if activation_dropout_p == 0:
+                # for backwards compatibility with models that use args.relu_dropout
+                activation_dropout_p = getattr(args, "relu_dropout", 0) or 0
+            self.activation_dropout_module = FairseqDropout(
+                float(activation_dropout_p), module_name=self.__class__.__name__
+            )
+            
+            self.fc1 = self.build_fc1(
+                self.embed_dim,
+                self.ffn_dim,
+                self.quant_noise,
+                self.quant_noise_block_size,
+            )
+            self.fc2 = self.build_fc2(
+                self.ffn_dim,
+                self.embed_dim,
+                self.quant_noise,
+                self.quant_noise_block_size,
+            )
+        else:
+            if args.moe_top1_expert:
+                gate = Top1Gate(
+                    self.embed_dim,
+                    args.moe_expert_count,
+                    use_fp32=args.moe_gating_use_fp32,
+                    moe_eval_capacity_token_fraction=getattr(args, "moe_eval_capacity_token_fraction", 0.25),
+                )
+            else:
+                gate = Top2Gate(
+                    self.embed_dim,
+                    args.moe_expert_count,
+                    args.moe_gating_use_fp32,
+                    args.moe_second_expert_policy,
+                    args.moe_normalize_gate_prob_before_dropping,
+                    getattr(args, "moe_eval_capacity_token_fraction", 0.25),
+                    getattr(args, "moe_batch_prioritized_routing", False),
+                )
+            experts = make_experts(args, self.embed_dim, self.ffn_dim, self.dropout_module)
+            self.moe_layer = MOELayer(gate, experts, args)
+            # self.doe = Dummy_layer(self.embed_dim, args.encoder_ffn_embed_dim, self.activation_fn, self.ffn_layernorm, self.activation_dropout_module, self.dropout_module, self.quant_noise, self.quant_noise_block_size)        
 
         self.attn_ln = LayerNorm(self.embed_dim) if getattr(args, 'scale_attn', False) else None
         self.nh = self.self_attn.num_heads
@@ -193,19 +273,10 @@ class TransformerEncoderLayer(nn.Module):
 
         self.ffn_layernorm = LayerNorm(args.encoder_ffn_embed_dim) if getattr(args, 'scale_fc', False) else None
         self.w_resid = nn.Parameter(torch.ones(self.embed_dim, ), requires_grad=True) if getattr(args, 'scale_resids', False) else None
-
-        # self.moe = MoE_layer(self.embed_dim, args.encoder_ffn_embed_dim, None) 
-        self.doe = Dummy_layer(self.embed_dim, args.encoder_ffn_embed_dim, self.activation_fn, self.ffn_layernorm, self.activation_dropout_module, self.dropout_module, self.quant_noise, self.quant_noise_block_size)        
-       
-        self.aux_loss = 0
-
+            
         self.final_layer_norm = LayerNorm(self.embed_dim)
-
         self.drop_path = DropPath(drop_path_rate) if drop_path_rate > 0.0 else nn.Identity()
 
-        self.training_times = 0
-
-        self.learned_res_coef = nn.Parameter(torch.ones(1, 1))
 
     def build_fc1(self, input_dim, output_dim, q_noise, qn_block_size):
         return quant_noise(
@@ -246,6 +317,73 @@ class TransformerEncoderLayer(nn.Module):
             self.learned_res_coef = 1e-7
         return residual * (self.learned_res_coef) + self.drop_path(x) * (1 - self.learned_res_coef)
     
+
+    def doe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=0, boise_coef=0.05, ln_coef=0.05):
+
+        # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
+        fc1_weights = state_dict["{}.fc1.weight".format(name)]
+        fc2_weights = state_dict["{}.fc2.weight".format(name)]
+        fc1_bias = state_dict["{}.fc1.bias".format(name)]
+        fc2_bias = state_dict["{}.fc2.bias".format(name)]
+        ffn_weights = state_dict["{}.ffn_layernorm.weight".format(name)]
+        ffn_bias = state_dict["{}.ffn_layernorm.bias".format(name)]
+
+        # copy fc1, fc2 + noise
+        state_dict["{}.doe.fc1.weight".format(name)] = fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
+        state_dict["{}.doe.fc2.weight".format(name)] = fc2_weights + torch.randn(fc2_weights.size()) * noise_coef
+        state_dict["{}.doe.fc1.bias".format(name)] = fc1_bias
+        state_dict["{}.doe.fc2.bias".format(name)] = fc2_bias 
+        state_dict["{}.doe.ffn_layernorm.weight".format(name)] = ffn_weights     
+        state_dict["{}.doe.ffn_layernorm.bias".format(name)] = ffn_bias
+
+    def moe_checkpoint_loader(self, name, state_dict, noise_coef=0):
+
+        n_experts = self.args.moe_expert_count
+        # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
+        fc1_weights = state_dict["{}.fc1.weight".format(name)]
+        fc2_weights = state_dict["{}.fc2.weight".format(name)]
+        fc1_bias = state_dict["{}.fc1.bias".format(name)]
+        fc2_bias = state_dict["{}.fc2.bias".format(name)]
+        ffn_weights = state_dict["{}.ffn_layernorm.weight".format(name)]
+        ffn_bias = state_dict["{}.ffn_layernorm.bias".format(name)]
+
+        # copy fc1, fc2 + noise
+        for i in range(n_experts):
+            state_dict["{}.moe_layer.experts.{}.fc1.weight".format(name, i)] = fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
+            state_dict["{}.moe_layer.experts.{}.fc2.weight".format(name, i)] = fc2_weights + torch.randn(fc2_weights.size()) * noise_coef
+            state_dict["{}.moe_layer.experts.{}.fc1.bias".format(name, i)] = fc1_bias
+            state_dict["{}.moe_layer.experts.{}.fc2.bias".format(name, i)] = fc2_bias
+        
+    def upgrade_state_dict_named(self, state_dict, name):
+        """
+        Rename layer norm states from `...layer_norms.0.weight` to
+        `...self_attn_layer_norm.weight` and `...layer_norms.1.weight` to
+        `...final_layer_norm.weight`
+        """
+        layer_norm_map = {"0": "self_attn_layer_norm", "1": "final_layer_norm"}
+        for old, new in layer_norm_map.items():
+            for m in ("weight", "bias"):
+                k = "{}.layer_norms.{}.{}".format(name, old, m)
+                if k in state_dict:
+                    state_dict["{}.{}.{}".format(name, new, m)] = state_dict[k]
+                    del state_dict[k]
+                if "{}.{}.{}".format(name, new, m) not in state_dict and "{}.{}".format(new, m) in self.state_dict():
+                    state_dict[
+                        "{}.{}.{}".format(name, new, m)
+                    ] = self.state_dict()["{}.{}".format(new, m)]
+
+        moe_checker = "{}.moe_layer.gate.wg.weight".format(name)
+        if moe_checker not in state_dict and "moe_layer.gate.wg.weight" in self.state_dict():
+            print("Loading Pre-trained checkpoints to MoE")
+            self.moe_checkpoint_loader(name, state_dict)
+        # if "{}.doe.fc1.weight".format(name) not in state_dict and "doe.fc1.weight" in self.state_dict():
+        #     self.doe_checkpoint_loader(name, state_dict)
+
+        prefix = name + "." if name != "" else ""
+        for param_name, param_tensor in self.state_dict().items():
+            if (prefix + param_name) not in state_dict and param_name in self.state_dict():
+                state_dict[prefix + param_name] = self.state_dict()[param_name]
+        
             
     def forward(
         self,
@@ -280,7 +418,7 @@ class TransformerEncoderLayer(nn.Module):
                 -1e8 if x.dtype == torch.float32 else -1e4
             )
 
-        self.training_times += 1
+        # self.training_times += 1
         residual = x
         if self.normalize_before:
             x = self.self_attn_layer_norm(x)
@@ -303,99 +441,29 @@ class TransformerEncoderLayer(nn.Module):
         residual = x
         if self.normalize_before:
             x = self.final_layer_norm(x)
-
-        moe_x = self.doe(x)
-        # self.aux_loss += self.moe.aux_loss
-
-        x = self.activation_fn(self.fc1(x))
-        x = self.activation_dropout_module(x)
-        if self.ffn_layernorm is not None:
-            x = self.ffn_layernorm(x)
-        x = self.fc2(x)
-        x = self.dropout_module(x)
-
-        x = self.residual_dynamic_scale_combination(x, moe_x)
-        # x = moe_x
+        
+        if not self.is_moe_layer or getattr(self.args, "alternate_ffn_embed_dim", 0.0) > 0:
+            x = self.activation_fn(self.fc1(x))
+            x = self.activation_dropout_module(x)
+            if self.ffn_layernorm is not None:
+                x = self.ffn_layernorm(x)
+            x = self.fc2(x)
+            x = self.dropout_module(x)
+            l_aux = None
+        else:
+            x = x.transpose(0, 1) # batch_size, seq_len, model_dim
+            if getattr(self.args, "use_moe_pad_mask", False):
+                x, l_aux = self.moe_layer(x, input_padding_mask=encoder_padding_mask)
+            else:
+                x, l_aux = self.moe_layer(x)
+            x = x.transpose(0, 1) # seq_len, batch_size, model_dim
 
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
-
         x = self.residual_connection(x, residual)
         if not self.normalize_before:
             x = self.final_layer_norm(x)
-        return x
-
-    def doe_checkpoint_loader(self, name, state_dict, n_experts=4, noise_coef=5e-5, boise_coef=0.05, ln_coef=0.05):
-
-        # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
-        fc1_weights = state_dict["{}.fc1.weight".format(name)]
-        fc2_weights = state_dict["{}.fc2.weight".format(name)]
-        fc1_bias = state_dict["{}.fc1.bias".format(name)]
-        fc2_bias = state_dict["{}.fc2.bias".format(name)]
-        ffn_weights = state_dict["{}.ffn_layernorm.weight".format(name)]
-        ffn_bias = state_dict["{}.ffn_layernorm.bias".format(name)]
-
-        # copy fc1, fc2 + noise
-        state_dict["{}.doe.fc1.weight".format(name)] = fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
-        state_dict["{}.doe.fc2.weight".format(name)] = fc2_weights + torch.randn(fc2_weights.size()) * noise_coef
-        state_dict["{}.doe.fc1.bias".format(name)] = fc1_bias * boise_coef
-        state_dict["{}.doe.fc2.bias".format(name)] = fc2_bias * boise_coef        
-        state_dict["{}.doe.ffn_layernorm.weight".format(name)] = ffn_weights     
-        state_dict["{}.doe.ffn_layernorm.bias".format(name)] = ffn_bias
-
-
-    def moe_checkpoint_loader(self, name, state_dict, n_gpu, n_experts=2, noise_coef=0):
-
-        # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
-        fc1_weights = state_dict["{}.fc1.weight".format(name)]
-        fc2_weights = state_dict["{}.fc2.weight".format(name)]
-        fc1_bias = state_dict["{}.fc1.bias".format(name)]
-        fc2_bias = state_dict["{}.fc2.bias".format(name)]
-        ffn_weights = state_dict["{}.ffn_layernorm.weight".format(name)]
-        ffn_bias = state_dict["{}.ffn_layernorm.bias".format(name)]
-
-        # copy fc1, fc2 + noise
-        state_dict["{}.moe.moe_layer.experts.0.fc1_weight".format(name)] = torch.zeros((n_experts, self.inner_dim, self.embed_dim))
-        state_dict["{}.moe.moe_layer.experts.0.fc1_weight".format(name)] += fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
-        state_dict["{}.moe.moe_layer.experts.0.fc2_weight".format(name)] = torch.zeros((n_experts, self.inner_dim, self.embed_dim))
-        state_dict["{}.moe.moe_layer.experts.0.fc2_weight".format(name)] += fc2_weights.t() + torch.randn(fc2_weights.t().size()) * noise_coef
-        state_dict["{}.moe.moe_layer.experts.0.fc1_bias".format(name)] = torch.zeros((n_experts, 1, self.inner_dim))
-        state_dict["{}.moe.moe_layer.experts.0.fc1_bias".format(name)] += fc1_bias
-        state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] = torch.zeros((n_experts, 1, self.embed_dim))
-        state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] += fc2_bias
-        # state_dict["{}.moe.moe_layer.experts.0.ffn_layernorm.weight".format(name)] = ffn_weights
-        # state_dict["{}.moe.moe_layer.experts.0.ffn_layernorm.bias".format(name)] = ffn_bias
-        state_dict["{}.moe.moe_layer.gates.0.wg.weight".format(name)] = nn.init.kaiming_uniform_(torch.empty(n_experts*n_gpu, self.embed_dim))
-
-
-    def upgrade_state_dict_named(self, state_dict, name):
-        """
-        Rename layer norm states from `...layer_norms.0.weight` to
-        `...self_attn_layer_norm.weight` and `...layer_norms.1.weight` to
-        `...final_layer_norm.weight`
-        """
-        layer_norm_map = {"0": "self_attn_layer_norm", "1": "final_layer_norm"}
-        for old, new in layer_norm_map.items():
-            for m in ("weight", "bias"):
-                k = "{}.layer_norms.{}.{}".format(name, old, m)
-                if k in state_dict:
-                    state_dict["{}.{}.{}".format(name, new, m)] = state_dict[k]
-                    del state_dict[k]
-                if "{}.{}.{}".format(name, new, m) not in state_dict and "{}.{}".format(new, m) in self.state_dict():
-                    state_dict[
-                        "{}.{}.{}".format(name, new, m)
-                    ] = self.state_dict()["{}.{}".format(new, m)]
-
-        # moe_checker = "{}.moe.moe_layer.gates.0.wg.weight".format(name)
-        # if moe_checker not in state_dict and "moe.moe_layer.gates.0.wg.weight" in self.state_dict():
-        #     self.moe_checkpoint_loader(name, state_dict, n_gpu=1)
-        if "{}.doe.fc1.weight".format(name) not in state_dict and "doe.fc1.weight" in self.state_dict():
-            self.doe_checkpoint_loader(name, state_dict)
-
-        prefix = name + "." if name != "" else ""
-        for param_name, param_tensor in self.state_dict().items():
-            if (prefix + param_name) not in state_dict and param_name in self.state_dict():
-                state_dict[prefix + param_name] = self.state_dict()[param_name]
+        return x, l_aux
 
 
 class TransformerDecoderLayer(nn.Module):
@@ -416,11 +484,13 @@ class TransformerDecoderLayer(nn.Module):
     """
 
     def __init__(
-        self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False, drop_path_rate=0.0
+        self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False, drop_path_rate=0.0, is_moe_layer=False
     ):
         super().__init__()
+        self.args = args
+        self.is_moe_layer = is_moe_layer
         self.embed_dim = args.decoder_embed_dim
-        self.inner_dim = args.decoder_ffn_embed_dim
+        self.ffn_dim = args.decoder_ffn_embed_dim
         self.dropout_module = FairseqDropout(
             args.dropout, module_name=self.__class__.__name__
         )
@@ -440,20 +510,6 @@ class TransformerDecoderLayer(nn.Module):
         self.nh = self.self_attn.num_heads
         self.head_dim = self.self_attn.head_dim
 
-        self.activation_fn = utils.get_activation_fn(
-            activation=str(args.activation_fn)
-            if getattr(args, "activation_fn", None) is not None
-            else "relu"
-        )
-        activation_dropout_p = getattr(args, "activation_dropout", 0) or 0
-        if activation_dropout_p == 0:
-            # for backwards compatibility with models that use args.relu_dropout
-            activation_dropout_p = getattr(args, "relu_dropout", 0) or 0
-        self.activation_dropout_module = FairseqDropout(
-            float(activation_dropout_p), module_name=self.__class__.__name__
-        )
-        self.normalize_before = args.decoder_normalize_before
-
         # use layerNorm rather than FusedLayerNorm for exporting.
         # char_inputs can be used to determint this.
         # TODO  remove this once we update apex with the fix
@@ -470,32 +526,61 @@ class TransformerDecoderLayer(nn.Module):
         self.ffn_layernorm = LayerNorm(args.decoder_ffn_embed_dim) if getattr(args, 'scale_fc', False) else None
         self.w_resid = nn.Parameter(torch.ones(self.embed_dim, ), requires_grad=True) if getattr(args, 'scale_resids', False) else None
 
-        self.fc1 = self.build_fc1(
-            self.embed_dim,
-            args.decoder_ffn_embed_dim,
-            self.quant_noise,
-            self.quant_noise_block_size,
-        )
-        self.fc2 = self.build_fc2(
-            args.decoder_ffn_embed_dim,
-            self.embed_dim,
-            self.quant_noise,
-            self.quant_noise_block_size,
-        )
+        if self.is_moe_layer and getattr(args, "alternate_decoder_ffn_embed_dim", 0.0) > 0:
+            self.ffn_dim = getattr(args, "alternate_decoder_ffn_embed_dim", 0.0)
 
-        # self.moe = MoE_layer(self.embed_dim, args.decoder_ffn_embed_dim, None)   
-        self.doe = Dummy_layer(self.embed_dim, args.encoder_ffn_embed_dim, self.activation_fn, self.ffn_layernorm, self.activation_dropout_module, self.dropout_module, self.quant_noise, self.quant_noise_block_size)        
-     
-        self.aux_loss = 0
+        if not self.is_moe_layer or getattr(args, "alternate_decoder_ffn_embed_dim", 0.0) > 0:
+            self.activation_fn = utils.get_activation_fn(
+                activation=str(args.activation_fn)
+                if getattr(args, "activation_fn", None) is not None
+                else "relu"
+            )
+            activation_dropout_p = getattr(args, "activation_dropout", 0) or 0
+            if activation_dropout_p == 0:
+                # for backwards compatibility with models that use args.relu_dropout
+                activation_dropout_p = getattr(args, "relu_dropout", 0) or 0
+            self.activation_dropout_module = FairseqDropout(
+                float(activation_dropout_p), module_name=self.__class__.__name__
+            )
+            self.fc1 = self.build_fc1(
+                self.embed_dim,
+                self.ffn_dim,
+                self.quant_noise,
+                self.quant_noise_block_size,
+            )
+            self.fc2 = self.build_fc2(
+                self.ffn_dim,
+                self.embed_dim,
+                self.quant_noise,
+                self.quant_noise_block_size,
+            )
+        else:
+            if args.moe_top1_expert:
+                gate = Top1Gate(
+                    self.embed_dim,
+                    args.moe_expert_count,
+                    use_fp32=args.moe_gating_use_fp32,
+                    moe_eval_capacity_token_fraction=getattr(args, "moe_eval_capacity_token_fraction", 0.25),
+                )
+            else:
+                gate = Top2Gate(
+                    self.embed_dim,
+                    args.moe_expert_count,
+                    args.moe_gating_use_fp32,
+                    args.moe_second_expert_policy,
+                    args.moe_normalize_gate_prob_before_dropping,
+                    getattr(args, "moe_eval_capacity_token_fraction", 0.25),
+                    getattr(args, "moe_batch_prioritized_routing", False),
+                )
+            experts = make_experts(args, self.embed_dim, self.ffn_dim, self.dropout_module)
+            self.moe_layer = MOELayer(gate, experts, args)
 
+        self.normalize_before = args.decoder_normalize_before
         self.final_layer_norm = LayerNorm(self.embed_dim, export=export)
         self.need_attn = True
-
         self.onnx_trace = False
-
         self.drop_path = DropPath(drop_path_rate) if drop_path_rate > 0.0 else nn.Identity()
 
-        self.training_times = 0
 
     def build_fc1(self, input_dim, output_dim, q_noise, qn_block_size):
         return quant_noise(nn.Linear(input_dim, output_dim), q_noise, qn_block_size)
@@ -545,6 +630,8 @@ class TransformerDecoderLayer(nn.Module):
     def residual_dynamic_scale_combination(self, x, residual):
         if self.training_times < 5000:
             return residual * (1 - self.training_times / 5000) + self.drop_path(x) * self.training_times / 5000
+        else:
+            return (residual + self.drop_path(x)) / 2
 
     def residual_learned_scale_combination(self, x, residual):
         if self.learned_res_coef >= 1:
@@ -582,7 +669,7 @@ class TransformerDecoderLayer(nn.Module):
         Returns:
             encoded output of shape `(seq_len, batch, embed_dim)`
         """
-        self.training_times += 1
+        # self.training_times += 1
 
         if need_head_weights:
             need_attn = True
@@ -676,26 +763,28 @@ class TransformerDecoderLayer(nn.Module):
                 x = self.encoder_attn_layer_norm(x)
 
         residual = x
-
         if self.normalize_before:
             x = self.final_layer_norm(x)
 
-        moe_x = self.doe(x)
-        # self.aux_loss += self.moe.aux_loss
-
-        x = self.activation_fn(self.fc1(x))
-        x = self.activation_dropout_module(x)
-        if self.ffn_layernorm is not None:
-            x = self.ffn_layernorm(x)
-        x = self.fc2(x)
-        x = self.dropout_module(x)
-
-        x = self.residual_dynamic_scale_combination(x, moe_x)
-        # x = moe_x
+        if not self.is_moe_layer or getattr(self.args, "alternate_decoder_ffn_embed_dim", 0.0) > 0:
+            x = self.activation_fn(self.fc1(x))
+            x = self.activation_dropout_module(x)
+            if self.ffn_layernorm is not None:
+                x = self.ffn_layernorm(x)
+            x = self.fc2(x)
+            x = self.dropout_module(x)
+            l_aux = None
+        else:
+            # x - seq_len, batch_size, model_dim
+            x = x.transpose(0, 1) # batch_size, seq_len, model_dim
+            if getattr(self.args, "use_moe_pad_mask", False):
+                x, l_aux = self.moe_layer(x, input_padding_mask=self_attn_padding_mask)
+            else:
+                x, l_aux = self.moe_layer(x)
+            x = x.transpose(0, 1)
 
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
-        
         x = self.residual_connection(x, residual)
         if not self.normalize_before:
             x = self.final_layer_norm(x)
@@ -711,7 +800,7 @@ class TransformerDecoderLayer(nn.Module):
             else:
                 self_attn_state = [saved_state["prev_key"], saved_state["prev_value"]]
             return x, attn, self_attn_state
-        return x, attn, None
+        return x, attn, None, l_aux
 
     def make_generation_fast_(self, need_attn: bool = False, **kwargs):
         self.need_attn = need_attn
@@ -729,14 +818,15 @@ class TransformerDecoderLayer(nn.Module):
         # copy fc1, fc2 + noise
         state_dict["{}.doe.fc1.weight".format(name)] = fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
         state_dict["{}.doe.fc2.weight".format(name)] = fc2_weights + torch.randn(fc2_weights.size()) * noise_coef
-        state_dict["{}.doe.fc1.bias".format(name)] = fc1_bias * boise_coef
-        state_dict["{}.doe.fc2.bias".format(name)] = fc2_bias * boise_coef        
+        state_dict["{}.doe.fc1.bias".format(name)] = fc1_bias
+        state_dict["{}.doe.fc2.bias".format(name)] = fc2_bias
         state_dict["{}.doe.ffn_layernorm.weight".format(name)] = ffn_weights     
         state_dict["{}.doe.ffn_layernorm.bias".format(name)] = ffn_bias
 
-    def moe_checkpoint_loader(self, name, state_dict, n_gpu, n_experts=2, noise_coef=0):
+    def moe_checkpoint_loader(self, name, state_dict, noise_coef=0):
 
-         # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
+        n_experts = self.args.moe_expert_count
+        # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
         fc1_weights = state_dict["{}.fc1.weight".format(name)]
         fc2_weights = state_dict["{}.fc2.weight".format(name)]
         fc1_bias = state_dict["{}.fc1.bias".format(name)]
@@ -745,18 +835,12 @@ class TransformerDecoderLayer(nn.Module):
         ffn_bias = state_dict["{}.ffn_layernorm.bias".format(name)]
 
         # copy fc1, fc2 + noise
-        state_dict["{}.moe.moe_layer.experts.0.fc1_weight".format(name)] = torch.zeros((n_experts, self.inner_dim, self.embed_dim))
-        state_dict["{}.moe.moe_layer.experts.0.fc1_weight".format(name)] += fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
-        state_dict["{}.moe.moe_layer.experts.0.fc2_weight".format(name)] = torch.zeros((n_experts, self.inner_dim, self.embed_dim))
-        state_dict["{}.moe.moe_layer.experts.0.fc2_weight".format(name)] += fc2_weights.t() + torch.randn(fc2_weights.t().size()) * noise_coef
-        state_dict["{}.moe.moe_layer.experts.0.fc1_bias".format(name)] = torch.zeros((n_experts, 1, self.inner_dim))
-        state_dict["{}.moe.moe_layer.experts.0.fc1_bias".format(name)] += fc1_bias
-        state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] = torch.zeros((n_experts, 1, self.embed_dim))
-        state_dict["{}.moe.moe_layer.experts.0.fc2_bias".format(name)] += fc2_bias
-        # state_dict["{}.moe.moe_layer.experts.0.ffn_layernorm.weight".format(name)] = ffn_weights
-        # state_dict["{}.moe.moe_layer.experts.0.ffn_layernorm.bias".format(name)] = ffn_bias
-        state_dict["{}.moe.moe_layer.gates.0.wg.weight".format(name)] = nn.init.kaiming_uniform_(torch.empty(n_experts*n_gpu, self.embed_dim))
-
+        for i in range(n_experts):
+            state_dict["{}.moe_layer.experts.{}.fc1.weight".format(name, i)] = fc1_weights + torch.randn(fc1_weights.size()) * noise_coef
+            state_dict["{}.moe_layer.experts.{}.fc2.weight".format(name, i)] = fc2_weights + torch.randn(fc2_weights.size()) * noise_coef
+            state_dict["{}.moe_layer.experts.{}.fc1.bias".format(name, i)] = fc1_bias
+            state_dict["{}.moe_layer.experts.{}.fc2.bias".format(name, i)] = fc2_bias
+      
     def upgrade_state_dict_named(self, state_dict, name):
         """
         Rename layer norm states from `...layer_norms.0.weight` to
@@ -782,13 +866,34 @@ class TransformerDecoderLayer(nn.Module):
                         "{}.{}.{}".format(name, new, m)
                     ] = self.state_dict()["{}.{}".format(new, m)]
 
-        # moe_checker = "{}.moe.moe_layer.gates.0.wg.weight".format(name)
-        # if moe_checker not in state_dict and "moe.moe_layer.gates.0.wg.weight" in self.state_dict():
-        #     self.moe_checkpoint_loader(name, state_dict, n_gpu=1)
-        if "{}.doe.fc1.weight".format(name) not in state_dict and "doe.fc1.weight" in self.state_dict():
-            self.doe_checkpoint_loader(name, state_dict)
+        moe_checker = "{}.moe_layer.gate.wg.weight".format(name)
+        if moe_checker not in state_dict and "moe_layer.gate.wg.weight" in self.state_dict():
+            self.moe_checkpoint_loader(name, state_dict)
+        # if "{}.doe.fc1.weight".format(name) not in state_dict and "doe.fc1.weight" in self.state_dict():
+        #     self.doe_checkpoint_loader(name, state_dict)
 
         prefix = name + "." if name != "" else ""
         for param_name, param_tensor in self.state_dict().items():
             if (prefix + param_name) not in state_dict and param_name in self.state_dict():
                 state_dict[prefix + param_name] = self.state_dict()[param_name]
+
+def make_experts(args, embed_dim, expert_ffn_dim, dropout_module) -> nn.ModuleList:
+    world_size = 1 if not torch.distributed.is_initialized() else torch.distributed.get_world_size()
+    expert_list = []
+    ddp_rank = dist_utils.get_data_parallel_rank()
+    start_seed = torch.randint(1000000, (1,)).item()
+    # at least as many experts than gpus
+    if args.moe_expert_count >= world_size:
+        assert args.moe_expert_count % world_size == 0, f'{args.moe_expert_count}, {world_size}'
+        local_moe_expert_count = args.moe_expert_count // world_size
+        for i in range(local_moe_expert_count):
+            with utils.set_torch_seed(start_seed + ddp_rank * local_moe_expert_count + i):
+                expert_list.append(FeedForwardNetwork(args, embed_dim, expert_ffn_dim, dropout_module))
+    # less experts than gpus
+    else:
+        assert world_size % args.moe_expert_count == 0, f'{world_size}, {args.moe_expert_count}'
+        # initialize each FFN with the same seed on different GPUs
+        with utils.set_torch_seed(start_seed + ddp_rank % args.moe_expert_count):
+            expert_list.append(FeedForwardNetwork(args, embed_dim, expert_ffn_dim, dropout_module))
+    experts = nn.ModuleList(expert_list)
+    return experts

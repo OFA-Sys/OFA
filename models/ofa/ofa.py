@@ -385,7 +385,7 @@ def ofa_large_architecture(args):
     args.scale_heads = getattr(args, "scale_heads", False)
     args.scale_resids = getattr(args, "scale_resids", False)
 
-@register_model_architecture("ofa", "ofa_resmo")
+@register_model_architecture("ofa", "ofa_moe_base")
 def ofa_base_architecture(args):
     args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 768)
     args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4 * 768)
@@ -395,7 +395,7 @@ def ofa_base_architecture(args):
     args.decoder_attention_heads = getattr(args, "decoder_attention_heads", 12)
     args.resnet_type = getattr(args, "resnet_type", "resnet101")
     ofa_large_architecture(args)
-
+    #
 @register_model_architecture("ofa", "ofa_base")
 def ofa_base_architecture(args):
     args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 768)

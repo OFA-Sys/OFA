@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/opt/conda/lib/python3.8/runpy.py", line 185, in _run_module_as_main
+    mod_name, mod_spec, code = _get_module_details(mod_name, _Error)
+  File "/opt/conda/lib/python3.8/runpy.py", line 111, in _get_module_details
+    __import__(pkg_name)
+  File "/opt/conda/lib/python3.8/site-packages/torch/__init__.py", line 190, in <module>
+    from torch._C import *
+RuntimeError: KeyboardInterrupt: 

@@ -64,7 +64,7 @@ def gen_parser_from_dataclass(
     """
 
     def argparse_name(name: str):
-        if name == "data" and (with_prefix is None or with_prefix == ''):
+        if name in dataclass_instance.positional_args():
             # normally data is positional args, so we don't add the -- nor the prefix
             return name
         if name == "_name":

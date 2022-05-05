@@ -1,0 +1,2065 @@
+2022-04-27 00:06:21 - utils.py[line:255] - INFO: distributed init (rank 0): env://
+2022-04-27 00:06:21 - utils.py[line:261] - INFO: Start init
+2022-04-27 00:06:21 - distributed_c10d.py[line:187] - INFO: Added key: store_based_barrier_key:1 to store for rank: 0
+2022-04-27 00:06:21 - utils.py[line:271] - INFO: initialized host heming-ng1 as rank 0
+single-machine distributed training is initialized.
+2022-04-27 00:07:10 - train.py[line:76] - INFO: {'_name': None, 'common': {'_name': None, 'no_progress_bar': False, 'log_interval': 10, 'log_format': 'simple', 'log_file': None, 'tensorboard_logdir': None, 'wandb_project': None, 'azureml_logging': False, 'seed': 1, 'cpu': False, 'tpu': False, 'bf16': False, 'memory_efficient_bf16': False, 'fp16': True, 'memory_efficient_fp16': False, 'fp16_no_flatten_grads': False, 'fp16_init_scale': 16, 'fp16_scale_window': 512, 'fp16_scale_tolerance': 0.0, 'on_cpu_convert_precision': False, 'min_loss_scale': 0.0001, 'threshold_loss_scale': None, 'amp': False, 'amp_batch_retries': 2, 'amp_init_scale': 128, 'amp_scale_window': None, 'user_dir': '../../ofa_module', 'empty_cache_freq': 0, 'all_gather_list_size': 16384, 'model_parallel_size': 1, 'quantization_config_path': None, 'profile': False, 'reset_logging': False, 'suppress_crashes': False, 'use_plasma_view': False, 'plasma_path': '/tmp/plasma'}, 'common_eval': {'_name': None, 'path': None, 'post_process': None, 'quiet': False, 'model_overrides': '{}', 'results_path': None}, 'distributed_training': {'_name': None, 'distributed_world_size': 1, 'distributed_num_procs': 1, 'distributed_rank': 0, 'distributed_backend': 'nccl', 'distributed_init_method': 'env://', 'distributed_port': -1, 'device_id': 0, 'distributed_no_spawn': True, 'ddp_backend': 'pytorch_ddp', 'ddp_comm_hook': 'none', 'bucket_cap_mb': 25, 'fix_batches_to_gpus': False, 'find_unused_parameters': True, 'gradient_as_bucket_view': False, 'fast_stat_sync': False, 'heartbeat_timeout': -1, 'broadcast_buffers': False, 'slowmo_momentum': None, 'slowmo_algorithm': 'LocalSGD', 'localsgd_frequency': 3, 'nprocs_per_node': 1, 'pipeline_model_parallel': False, 'pipeline_balance': None, 'pipeline_devices': None, 'pipeline_chunks': 0, 'pipeline_encoder_balance': None, 'pipeline_encoder_devices': None, 'pipeline_decoder_balance': None, 'pipeline_decoder_devices': None, 'pipeline_checkpoint': 'never', 'zero_sharding': 'none', 'fp16': True, 'memory_efficient_fp16': False, 'tpu': False, 'no_reshard_after_forward': False, 'fp32_reduce_scatter': False, 'cpu_offload': False, 'use_sharded_state': False}, 'dataset': {'_name': None, 'num_workers': 0, 'skip_invalid_size_inputs_valid_test': False, 'max_tokens': None, 'batch_size': 16, 'required_batch_size_multiple': 8, 'required_seq_len_multiple': 1, 'dataset_impl': None, 'data_buffer_size': 10, 'train_subset': 'train', 'valid_subset': 'valid', 'combine_valid_subsets': None, 'ignore_unused_valid_subsets': False, 'validate_interval': 1, 'validate_interval_updates': 100, 'validate_after_updates': 0, 'fixed_validation_seed': 7, 'disable_validation': False, 'max_tokens_valid': None, 'batch_size_valid': 16, 'max_valid_steps': None, 'curriculum': 0, 'gen_subset': 'test', 'num_shards': 1, 'shard_id': 0}, 'optimization': {'_name': None, 'max_epoch': 5, 'max_update': 0, 'stop_time_hours': 0.0, 'clip_norm': 0.0, 'sentence_avg': False, 'update_freq': [8], 'lr': [5e-06], 'stop_min_lr': -1.0, 'use_bmuf': False}, 'checkpoint': {'_name': None, 'save_dir': './fairseq_checkpoints/mnli/5_5e-6_8', 'restore_file': '../../checkpoints/ofa_base.pt', 'finetune_from_model': None, 'reset_dataloader': True, 'reset_lr_scheduler': False, 'reset_meters': True, 'reset_optimizer': True, 'optimizer_overrides': '{}', 'save_interval': 1000, 'save_interval_updates': 1000, 'keep_interval_updates': -1, 'keep_interval_updates_pattern': -1, 'keep_last_epochs': -1, 'keep_best_checkpoints': 1, 'no_save': False, 'no_epoch_checkpoints': False, 'no_last_checkpoints': False, 'no_save_optimizer_state': False, 'best_checkpoint_metric': 'acc', 'maximize_best_checkpoint_metric': True, 'patience': -1, 'checkpoint_suffix': '', 'checkpoint_shard_count': 1, 'load_checkpoint_on_all_dp_ranks': False, 'write_checkpoints_asynchronously': False, 'model_parallel_size': 1, 'use_ema_weights_to_init_param': False, 'use_latest_weights_to_init_ema': False}, 'bmuf': {'_name': None, 'block_lr': 1.0, 'block_momentum': 0.875, 'global_sync_iter': 50, 'warmup_iterations': 500, 'use_nbm': False, 'average_sync': False, 'distributed_world_size': 1}, 'generation': {'_name': None, 'beam': 5, 'nbest': 1, 'max_len_a': 0.0, 'max_len_b': 200, 'min_len': 1, 'match_source_len': False, 'unnormalized': False, 'no_early_stop': False, 'no_beamable_mm': False, 'lenpen': 1.0, 'unkpen': 0.0, 'replace_unk': None, 'sacrebleu': False, 'score_reference': False, 'prefix_size': 0, 'no_repeat_ngram_size': 0, 'sampling': False, 'sampling_topk': -1, 'sampling_topp': -1.0, 'constraints': None, 'temperature': 1.0, 'diverse_beam_groups': -1, 'diverse_beam_strength': 0.5, 'diversity_rate': -1.0, 'print_alignment': None, 'print_step': False, 'lm_path': None, 'lm_weight': 0.0, 'iter_decode_eos_penalty': 0.0, 'iter_decode_max_iter': 10, 'iter_decode_force_max_iter': False, 'iter_decode_with_beam': 1, 'iter_decode_with_external_reranker': False, 'retain_iter_history': False, 'retain_dropout': False, 'retain_dropout_modules': None, 'decoding_format': None, 'no_seed_provided': False}, 'eval_lm': {'_name': None, 'output_word_probs': False, 'output_word_stats': False, 'context_window': 0, 'softmax_batch': 9223372036854775807}, 'interactive': {'_name': None, 'buffer_size': 0, 'input': '-'}, 'model': Namespace(_name='ofa_resmo', activation_fn='gelu', adam_betas='(0.9,0.999)', adam_eps=1e-08, adaptive_softmax_cutoff=None, adaptive_softmax_dropout=0, add_type_embedding=True, all_gather_list_size=16384, amp=False, amp_batch_retries=2, amp_init_scale=128, amp_scale_window=None, ans2label_dict='{"maybe": 0, "yes": 1, "no": 2}', arch='ofa_resmo', attention_dropout=0.0, attn_scale_factor=2, azureml_logging=False, batch_size=16, batch_size_valid=16, best_checkpoint_metric='acc', bf16=False, bpe=None, bpe_dir='../../utils/BPE', broadcast_buffers=False, bucket_cap_mb=25, checkpoint_shard_count=1, checkpoint_suffix='', clip_norm=0.0, code_dict_size=8192, code_image_size=128, code_layernorm_embedding=True, combine_valid_subsets=None, constraint_range=None, cpu=False, cpu_offload=False, criterion='adjust_label_smoothed_cross_entropy', cross_self_attention=False, curriculum=0, data='../../dataset/glue_data/mnli_train.tsv,../../dataset/glue_data/mnli_dev.tsv', data_buffer_size=10, dataset_impl=None, ddp_backend='pytorch_ddp', ddp_comm_hook='none', decoder_attention_heads=12, decoder_drop_path_rate=0.1, decoder_embed_dim=768, decoder_embed_path=None, decoder_ffn_embed_dim=3072, decoder_input_dim=768, decoder_layerdrop=0, decoder_layers=6, decoder_layers_to_keep=None, decoder_learned_pos=True, decoder_normalize_before=True, decoder_output_dim=768, device_id=0, disable_entangle=True, disable_validation=False, distributed_backend='nccl', distributed_init_method=None, distributed_no_spawn=False, distributed_num_procs=1, distributed_port=-1, distributed_rank=0, distributed_world_size=1, drop_worst_after=0, drop_worst_ratio=0.0, dropout=0.1, ema_decay=0.9999, ema_fp32=False, ema_seed_model=None, ema_start_update=0, ema_update_freq=1, empty_cache_freq=0, encoder_attention_heads=12, encoder_drop_path_rate=0.1, encoder_embed_dim=768, encoder_embed_path=None, encoder_ffn_embed_dim=3072, encoder_layerdrop=0, encoder_layers=6, encoder_layers_to_keep=None, encoder_learned_pos=True, encoder_normalize_before=True, end_learning_rate=0.0, entangle_position_embedding=False, eos=2, fast_stat_sync=False, find_unused_parameters=True, finetune_from_model=None, fix_batches_to_gpus=False, fixed_validation_seed=7, force_anneal=None, fp16=True, fp16_adam_stats=False, fp16_init_scale=16, fp16_no_flatten_grads=False, fp16_scale_tolerance=0.0, fp16_scale_window=512, fp32_reduce_scatter=False, freeze_decoder_embedding=False, freeze_encoder_embedding=False, gen_subset='test', gradient_as_bucket_view=False, heartbeat_timeout=-1, ignore_eos=False, ignore_prefix_size=0, ignore_unused_valid_subsets=False, image_bucket_size=42, imagenet_default_mean_and_std=False, keep_best_checkpoints=1, keep_interval_updates=-1, keep_interval_updates_pattern=-1, keep_last_epochs=-1, label_smoothing=0.0, layernorm_embedding=True, load_checkpoint_on_all_dp_ranks=False, localsgd_frequency=3, log_file=None, log_format='simple', log_interval=10, lr=[5e-06], lr_scheduler='polynomial_decay', max_epoch=5, max_source_positions=1024, max_src_length=512, max_target_positions=1024, max_tgt_length=30, max_tokens=None, max_tokens_valid=None, max_update=0, max_valid_steps=None, maximize_best_checkpoint_metric=True, memory_efficient_bf16=False, memory_efficient_fp16=False, min_loss_scale=0.0001, min_params_to_wrap=100000000, model_parallel_size=1, moe_gate_loss_combine_method='average', moe_gate_loss_transform='none', moe_gate_loss_wt=1.0, no_cross_attention=False, no_epoch_checkpoints=False, no_last_checkpoints=False, no_progress_bar=False, no_reshard_after_forward=False, no_save=False, no_save_optimizer_state=False, no_scale_embedding=True, no_seed_provided=False, no_token_positional_embeddings=False, nprocs_per_node=1, num_bins=1000, num_shards=1, num_workers=0, on_cpu_convert_precision=False, optimizer='adam', optimizer_overrides='{}', pad=1, patch_image_size=480, patch_layernorm_embedding=True, patience=-1, pipeline_balance=None, pipeline_checkpoint='never', pipeline_chunks=0, pipeline_decoder_balance=None, pipeline_decoder_devices=None, pipeline_devices=None, pipeline_encoder_balance=None, pipeline_encoder_devices=None, pipeline_model_parallel=False, plasma_path='/tmp/plasma', pooler_activation_fn='tanh', pooler_classifier='mlp', pooler_dropout=0.0, power=1.0, profile=False, prompt_type='src', quant_noise_pq=0, quant_noise_pq_block_size=8, quant_noise_scalar=0, quantization_config_path=None, reg_alpha=1.0, relu_dropout=0.0, report_accuracy=False, required_batch_size_multiple=8, required_seq_len_multiple=1, reset_dataloader=True, reset_logging=False, reset_lr_scheduler=False, reset_meters=True, reset_optimizer=True, resnet_drop_path_rate=0.0, resnet_type='resnet101', restore_file='../../checkpoints/ofa_base.pt', sample_patch_num=196, save_dir='./fairseq_checkpoints/mnli/5_5e-6_8', save_interval=1000, save_interval_updates=1000, scale_attn=True, scale_fc=True, scale_heads=True, scale_resids=False, scoring='bleu', seed=1, selected_cols='0,1,2', sentence_avg=False, shard_id=0, share_all_embeddings=True, share_decoder_input_output_embed=True, simul_type=None, skip_invalid_size_inputs_valid_test=False, slowmo_algorithm='LocalSGD', slowmo_momentum=None, stop_min_lr=-1.0, stop_time_hours=0, store_ema=False, suppress_crashes=False, sync_bn=False, task='mnli', tensorboard_logdir=None, threshold_loss_scale=None, token_bucket_size=256, tokenizer=None, total_num_update=1000000, tpu=False, train_subset='train', unk=3, update_freq=[8], use_bmuf=False, use_ema_weights_to_init_param=False, use_latest_weights_to_init_ema=False, use_old_adam=False, use_plasma_view=False, use_rdrop=False, use_sharded_state=False, user_dir='../../ofa_module', valid_subset='valid', validate_after_updates=0, validate_interval=1, validate_interval_updates=100, wandb_project=None, warmup_ratio=0.06, warmup_updates=0, weight_decay=0.01, write_checkpoints_asynchronously=False, zero_sharding='none'), 'task': {'_name': 'mnli', 'data': '../../dataset/glue_data/mnli_train.tsv,../../dataset/glue_data/mnli_dev.tsv', 'selected_cols': '0,1,2', 'bpe_dir': '../../utils/BPE', 'max_source_positions': 1024, 'max_target_positions': 1024, 'max_src_length': 512, 'max_tgt_length': 30, 'code_dict_size': 8192, 'patch_image_size': 480, 'num_bins': 1000, 'imagenet_default_mean_and_std': False, 'constraint_range': None, 'ans2label_dict': '{"maybe": 0, "yes": 1, "no": 2}', 'prompt_type': 'src'}, 'criterion': {'_name': 'adjust_label_smoothed_cross_entropy', 'label_smoothing': 0.0, 'report_accuracy': False, 'ignore_prefix_size': 0, 'ignore_eos': False, 'sentence_avg': False, 'drop_worst_ratio': 0.0, 'drop_worst_after': 0, 'use_rdrop': False, 'reg_alpha': 1.0, 'sample_patch_num': 196, 'constraint_range': None, 'moe_gate_loss_wt': 1.0, 'moe_gate_loss_combine_method': 'average', 'moe_gate_loss_transform': 'none'}, 'optimizer': {'_name': 'adam', 'adam_betas': '(0.9,0.999)', 'adam_eps': 1e-08, 'weight_decay': 0.01, 'use_old_adam': False, 'fp16_adam_stats': False, 'tpu': False, 'lr': [5e-06]}, 'lr_scheduler': {'_name': 'polynomial_decay', 'warmup_updates': 0, 'warmup_ratio': 0.06, 'force_anneal': None, 'end_learning_rate': 0.0, 'power': 1.0, 'total_num_update': 1000000.0, 'lr': [5e-06]}, 'scoring': {'_name': 'bleu', 'pad': 1, 'eos': 2, 'unk': 3}, 'bpe': None, 'tokenizer': None, 'ema': {'_name': None, 'store_ema': False, 'ema_decay': 0.9999, 'ema_start_update': 0, 'ema_seed_model': None, 'ema_update_freq': 1, 'ema_fp32': False}, 'simul_type': None}
+2022-04-27 00:07:10 - ofa_task.py[line:103] - INFO: source dictionary: 59457 types
+2022-04-27 00:07:10 - ofa_task.py[line:104] - INFO: target dictionary: 59457 types
+2022-04-27 00:07:11 - distributed_c10d.py[line:187] - INFO: Added key: store_based_barrier_key:2 to store for rank: 0
+2022-04-27 00:07:12 - distributed_c10d.py[line:187] - INFO: Added key: store_based_barrier_key:3 to store for rank: 0
+2022-04-27 00:07:12 - distributed_c10d.py[line:187] - INFO: Added key: store_based_barrier_key:4 to store for rank: 0
+2022-04-27 00:07:17 - train.py[line:100] - INFO: OFAModel(
+  (encoder): TransformerEncoder(
+    (dropout_module): FairseqDropout()
+    (embed_tokens): Embedding(59457, 768, padding_idx=1)
+    (layernorm_embedding): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (type_embedding): Embedding(2, 768)
+    (embed_images): ResNet(
+      (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (maxpool): MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+      (layer1): Sequential(
+        (0): Bottleneck(
+          (conv1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (downsample): Sequential(
+            (0): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+            (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+          (drop_path): Identity()
+        )
+        (1): Bottleneck(
+          (conv1): Conv2d(256, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (2): Bottleneck(
+          (conv1): Conv2d(256, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+      )
+      (layer2): Sequential(
+        (0): Bottleneck(
+          (conv1): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (downsample): Sequential(
+            (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+            (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+          (drop_path): Identity()
+        )
+        (1): Bottleneck(
+          (conv1): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (2): Bottleneck(
+          (conv1): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (3): Bottleneck(
+          (conv1): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+      )
+      (layer3): Sequential(
+        (0): Bottleneck(
+          (conv1): Conv2d(512, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (downsample): Sequential(
+            (0): Conv2d(512, 1024, kernel_size=(1, 1), stride=(2, 2), bias=False)
+            (1): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+          (drop_path): Identity()
+        )
+        (1): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (2): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (3): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (4): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (5): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (6): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (7): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (8): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (9): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (10): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (11): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (12): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (13): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (14): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (15): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (16): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (17): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (18): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (19): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (20): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (21): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+        (22): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (drop_path): Identity()
+        )
+      )
+    )
+    (image_proj): Linear(in_features=1024, out_features=768, bias=True)
+    (patch_layernorm_embedding): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (embed_positions): Embedding(1026, 768)
+    (embed_image_positions): Embedding(1765, 768)
+    (pos_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (image_pos_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (pos_q_linear): Linear(in_features=768, out_features=768, bias=True)
+    (pos_k_linear): Linear(in_features=768, out_features=768, bias=True)
+    (layers): ModuleList(
+      (0): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): Identity()
+      )
+      (1): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.019999999552965164)
+      )
+      (2): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.03999999910593033)
+      )
+      (3): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.06000000238418579)
+      )
+      (4): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.07999999821186066)
+      )
+      (5): TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (dropout_module): FairseqDropout()
+        (activation_dropout_module): FairseqDropout()
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.10000000149011612)
+      )
+    )
+    (layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (token_rel_pos_table_list): ModuleList(
+      (0): Embedding(511, 12)
+      (1): Embedding(511, 12)
+      (2): Embedding(511, 12)
+      (3): Embedding(511, 12)
+      (4): Embedding(511, 12)
+      (5): Embedding(511, 12)
+    )
+    (image_rel_pos_table_list): ModuleList(
+      (0): Embedding(6892, 12)
+      (1): Embedding(6892, 12)
+      (2): Embedding(6892, 12)
+      (3): Embedding(6892, 12)
+      (4): Embedding(6892, 12)
+      (5): Embedding(6892, 12)
+    )
+  )
+  (decoder): TransformerDecoder(
+    (dropout_module): FairseqDropout()
+    (embed_tokens): Embedding(59457, 768, padding_idx=1)
+    (layernorm_embedding): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (embed_positions): Embedding(1026, 768)
+    (embed_image_positions): Embedding(1765, 768)
+    (pos_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (image_pos_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (self_pos_q_linear): Linear(in_features=768, out_features=768, bias=True)
+    (self_pos_k_linear): Linear(in_features=768, out_features=768, bias=True)
+    (cross_pos_q_linear): Linear(in_features=768, out_features=768, bias=True)
+    (cross_pos_k_linear): Linear(in_features=768, out_features=768, bias=True)
+    (code_layernorm_embedding): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (layers): ModuleList(
+      (0): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): Identity()
+      )
+      (1): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.019999999552965164)
+      )
+      (2): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.03999999910593033)
+      )
+      (3): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.06000000238418579)
+      )
+      (4): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.07999999821186066)
+      )
+      (5): TransformerDecoderLayer(
+        (dropout_module): FairseqDropout()
+        (self_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (self_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (cross_attn_ln): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (activation_dropout_module): FairseqDropout()
+        (self_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (encoder_attn): MultiheadAttention(
+          (dropout_module): FairseqDropout()
+          (k_proj): Linear(in_features=768, out_features=768, bias=True)
+          (v_proj): Linear(in_features=768, out_features=768, bias=True)
+          (q_proj): Linear(in_features=768, out_features=768, bias=True)
+          (out_proj): Linear(in_features=768, out_features=768, bias=True)
+        )
+        (encoder_attn_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (ffn_layernorm): FusedLayerNorm(torch.Size([3072]), eps=1e-05, elementwise_affine=True)
+        (fc1): Linear(in_features=768, out_features=3072, bias=True)
+        (fc2): Linear(in_features=3072, out_features=768, bias=True)
+        (moe_layer): MOELayer(
+          (gate): Top1Gate(
+            (wg): Linear(in_features=768, out_features=4, bias=False)
+          )
+          (experts): ModuleList(
+            (0): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (1): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (2): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+            (3): FeedForwardNetwork(
+              (activation_dropout_module): FairseqDropout()
+              (fc1): Linear(in_features=768, out_features=3072, bias=True)
+              (fc2): Linear(in_features=3072, out_features=768, bias=True)
+              (dropout_module): FairseqDropout()
+            )
+          )
+        )
+        (final_layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+        (drop_path): DropPath(p=0.10000000149011612)
+      )
+    )
+    (layer_norm): FusedLayerNorm(torch.Size([768]), eps=1e-05, elementwise_affine=True)
+    (output_projection): Linear(in_features=768, out_features=59457, bias=False)
+    (token_rel_pos_table_list): ModuleList(
+      (0): Embedding(511, 12)
+      (1): Embedding(511, 12)
+      (2): Embedding(511, 12)
+      (3): Embedding(511, 12)
+      (4): Embedding(511, 12)
+      (5): Embedding(511, 12)
+    )
+    (image_rel_pos_table_list): ModuleList(
+      (0): Embedding(6892, 12)
+      (1): Embedding(6892, 12)
+      (2): Embedding(6892, 12)
+      (3): Embedding(6892, 12)
+      (4): Embedding(6892, 12)
+      (5): Embedding(6892, 12)
+    )
+  )
+  (classification_heads): ModuleDict()
+)
+2022-04-27 00:07:17 - train.py[line:101] - INFO: task: MNLITask
+2022-04-27 00:07:17 - train.py[line:102] - INFO: model: OFAModel
+2022-04-27 00:07:17 - train.py[line:103] - INFO: criterion: AdjustLabelSmoothedCrossEntropyCriterion
+2022-04-27 00:07:17 - train.py[line:104] - INFO: num. shared model params: 182,275,400 (num. trained: 182,275,400)
+2022-04-27 00:07:17 - train.py[line:111] - INFO: num. expert model params: 226676736 (num. trained: 226676736)
+local datafile ../../dataset/glue_data/mnli_dev.tsv slice_id 0 begin to initialize row_count and line_idx-to-offset mapping
+local datafile ../../dataset/glue_data/mnli_dev.tsv slice_id 0 finished initializing row_count and line_idx-to-offset mapping
+file ../../dataset/glue_data/mnli_dev.tsv slice_id 0 row count 19647 total row count 19647
+2022-04-27 00:07:18 - trainer.py[line:110] - INFO: Debugging
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_tokens.weight <- decoder.embed_tokens.weight
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_tokens.weight <- decoder.output_projection.weight
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.0.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.0.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.0.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.0.downsample.0.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.1.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.1.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.1.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.2.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.2.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer1.2.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.0.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.0.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.0.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.0.downsample.0.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.1.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.1.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.1.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.2.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.2.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.2.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.3.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.3.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer2.3.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.0.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.0.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.0.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.0.downsample.0.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.1.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.1.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.1.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.2.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.2.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.2.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.3.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.3.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.3.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.4.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.4.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.4.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.5.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.5.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.5.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.6.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.6.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.6.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.7.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.7.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.7.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.8.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.8.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.8.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.9.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.9.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.9.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.10.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.10.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.10.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.11.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.11.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.11.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.12.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.12.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.12.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.13.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.13.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.13.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.14.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.14.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.14.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.15.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.15.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.15.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.16.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.16.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.16.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.17.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.17.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.17.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.18.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.18.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.18.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.19.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.19.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.19.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.20.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.20.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.20.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.21.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.21.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.21.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.22.conv1.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.22.conv2.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.embed_images.layer3.22.conv3.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.0.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.1.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.2.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.3.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.4.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- encoder.layers.5.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.0.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.1.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.2.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.3.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.4.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.layers.5.moe_layer.gate.wg.bias
+2022-04-27 00:07:19 - trainer.py[line:124] - INFO: detected shared parameter: encoder.embed_images.conv1.bias <- decoder.output_projection.bias
+2022-04-27 00:07:19 - utils.py[line:759] - INFO: ***********************CUDA enviroments for all 1 workers***********************
+2022-04-27 00:07:19 - utils.py[line:761] - INFO: rank   0: capabilities =  8.6  ; total memory = 23.700 GB ; name = NVIDIA GeForce RTX 3090                 
+2022-04-27 00:07:19 - utils.py[line:767] - INFO: ***********************CUDA enviroments for all 1 workers***********************
+2022-04-27 00:07:19 - train.py[line:142] - INFO: training on 1 devices (GPUs/TPUs)
+2022-04-27 00:07:19 - train.py[line:147] - INFO: max tokens per device = None and max sentences per device = 16
+2022-04-27 00:07:19 - trainer.py[line:459] - INFO: Preparing to load checkpoint ../../checkpoints/ofa_base.pt
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+self_attn.c_attn
+self_attn.k_proj.weight
+self_attn.k_proj.bias
+self_attn.v_proj.weight
+self_attn.v_proj.bias
+self_attn.q_proj.weight
+self_attn.q_proj.bias
+self_attn.out_proj.weight
+self_attn.out_proj.bias
+self_attn_layer_norm.weight
+self_attn_layer_norm.bias
+fc1.weight
+fc1.bias
+fc2.weight
+fc2.bias
+attn_ln.weight
+attn_ln.bias
+ffn_layernorm.weight
+ffn_layernorm.bias
+moe_layer.gate.wg.weight
+moe_layer.experts.0.fc1.weight
+moe_layer.experts.0.fc1.bias
+moe_layer.experts.0.fc2.weight
+moe_layer.experts.0.fc2.bias
+moe_layer.experts.1.fc1.weight
+moe_layer.experts.1.fc1.bias
+moe_layer.experts.1.fc2.weight
+moe_layer.experts.1.fc2.bias
+moe_layer.experts.2.fc1.weight
+moe_layer.experts.2.fc1.bias
+moe_layer.experts.2.fc2.weight
+moe_layer.experts.2.fc2.bias
+moe_layer.experts.3.fc1.weight
+moe_layer.experts.3.fc1.bias
+moe_layer.experts.3.fc2.weight
+moe_layer.experts.3.fc2.bias
+final_layer_norm.weight
+final_layer_norm.bias
+2022-04-27 00:07:23 - adam.py[line:68] - INFO: using FusedAdam
+2022-04-27 00:07:23 - trainer.py[line:618] - INFO: Loaded checkpoint ../../checkpoints/ofa_base.pt (epoch 48 @ 0 updates)
+2022-04-27 00:07:23 - trainer.py[line:640] - INFO: loading train data for epoch 1
+local datafile ../../dataset/glue_data/mnli_train.tsv slice_id 0 begin to initialize row_count and line_idx-to-offset mapping
+local datafile ../../dataset/glue_data/mnli_train.tsv slice_id 0 finished initializing row_count and line_idx-to-offset mapping
+file ../../dataset/glue_data/mnli_train.tsv slice_id 0 row count 392702 total row count 392702
+slice_id 0 seek offset 0
+Total steps 15340, warmup steps 920, warmup_factor 0.0010869565217391304
+2022-04-27 00:07:23 - trainer.py[line:704] - INFO: begin training epoch 1
+2022-04-27 00:07:23 - train.py[line:295] - INFO: Start iterating over samples
+2022-04-27 00:08:27 - progress_bar.py[line:272] - INFO: epoch 001:     10 / 3068 loss=2.857, loss_v1=0, loss_v2=0, nll_loss=1.729, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=3.31, wps=23.4, ups=0.18, wpb=128, bsz=128, num_updates=10, lr=5.43478e-08, gnorm=16.195, loss_scale=16, train_wall=62, gb_free=8, wall=68
+2022-04-27 00:08:58 - progress_bar.py[line:272] - INFO: epoch 001:     20 / 3068 loss=3.009, loss_v1=0, loss_v2=0, nll_loss=1.88, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=3.68, wps=40.8, ups=0.32, wpb=128, bsz=128, num_updates=20, lr=1.08696e-07, gnorm=18.552, loss_scale=16, train_wall=31, gb_free=13.6, wall=99
+2022-04-27 00:09:22 - progress_bar.py[line:272] - INFO: epoch 001:     30 / 3068 loss=2.901, loss_v1=0, loss_v2=0, nll_loss=1.771, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=3.41, wps=52.4, ups=0.41, wpb=128, bsz=128, num_updates=30, lr=1.63043e-07, gnorm=16.553, loss_scale=16, train_wall=24, gb_free=13.4, wall=124
+2022-04-27 00:09:45 - progress_bar.py[line:272] - INFO: epoch 001:     40 / 3068 loss=2.94, loss_v1=0, loss_v2=0, nll_loss=1.811, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=3.51, wps=57.8, ups=0.45, wpb=128, bsz=128, num_updates=40, lr=2.17391e-07, gnorm=17.931, loss_scale=16, train_wall=22, gb_free=13.2, wall=146
+2022-04-27 00:10:07 - trainer.py[line:1304] - WARNING: OOM: Ran out of memory with exception: CUDA out of memory. Tried to allocate 1.54 GiB (GPU 0; 23.70 GiB total capacity; 20.68 GiB already allocated; 1.13 GiB free; 21.46 GiB reserved in total by PyTorch)
+2022-04-27 00:10:07 - trainer.py[line:1307] - WARNING: |===========================================================================|
+|                  PyTorch CUDA memory summary, device ID 0                 |
+|---------------------------------------------------------------------------|
+|            CUDA OOMs: 1            |        cudaMalloc retries: 1         |
+|===========================================================================|
+|        Metric         | Cur Usage  | Peak Usage | Tot Alloc  | Tot Freed  |
+|---------------------------------------------------------------------------|
+| Allocated memory      |   19608 MB |   21261 MB |    3137 GB |    3118 GB |
+|       from large pool |   19567 MB |   21220 MB |    3079 GB |    3059 GB |
+|       from small pool |      40 MB |      52 MB |      58 GB |      58 GB |
+|---------------------------------------------------------------------------|
+| Active memory         |   19608 MB |   21261 MB |    3137 GB |    3118 GB |
+|       from large pool |   19567 MB |   21220 MB |    3079 GB |    3059 GB |
+|       from small pool |      40 MB |      52 MB |      58 GB |      58 GB |
+|---------------------------------------------------------------------------|
+| GPU reserved memory   |   21976 MB |   22168 MB |   34370 MB |   12394 MB |
+|       from large pool |   21928 MB |   22080 MB |   34220 MB |   12292 MB |
+|       from small pool |      48 MB |      88 MB |     150 MB |     102 MB |
+|---------------------------------------------------------------------------|
+| Non-releasable memory |     795 MB |    1548 MB |    2842 GB |    2841 GB |
+|       from large pool |     788 MB |    1538 MB |    2782 GB |    2781 GB |
+|       from small pool |       7 MB |      21 MB |      60 GB |      60 GB |
+|---------------------------------------------------------------------------|
+| Allocations           |    2425    |    2462    |    1451 K  |    1448 K  |
+|       from large pool |     843    |     857    |     725 K  |     725 K  |
+|       from small pool |    1582    |    1605    |     725 K  |     723 K  |
+|---------------------------------------------------------------------------|
+| Active allocs         |    2425    |    2462    |    1451 K  |    1448 K  |
+|       from large pool |     843    |     857    |     725 K  |     725 K  |
+|       from small pool |    1582    |    1605    |     725 K  |     723 K  |
+|---------------------------------------------------------------------------|
+| GPU reserved segments |     189    |     212    |     398    |     209    |
+|       from large pool |     165    |     168    |     323    |     158    |
+|       from small pool |      24    |      44    |      75    |      51    |
+|---------------------------------------------------------------------------|
+| Non-releasable allocs |     232    |     232    |     971 K  |     970 K  |
+|       from large pool |     143    |     143    |     565 K  |     565 K  |
+|       from small pool |      89    |     124    |     405 K  |     405 K  |
+|===========================================================================|
+
+2022-04-27 00:10:07 - trainer.py[line:797] - WARNING: attempting to recover from OOM in forward/backward pass
+2022-04-27 00:10:09 - progress_bar.py[line:272] - INFO: epoch 001:     51 / 3068 loss=2.902, loss_v1=0, loss_v2=0, nll_loss=1.773, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=3.42, wps=51.6, ups=0.4, wpb=128, bsz=128, num_updates=50, lr=2.71739e-07, gnorm=16.756, loss_scale=16, train_wall=23, gb_free=2.9, wall=171
+2022-04-27 00:10:30 - progress_bar.py[line:272] - INFO: epoch 001:     61 / 3068 loss=2.856, loss_v1=0, loss_v2=0, nll_loss=1.728, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=3.31, wps=60.8, ups=0.47, wpb=128, bsz=128, num_updates=60, lr=3.26087e-07, gnorm=15.531, loss_scale=16, train_wall=21, gb_free=12.4, wall=192
+2022-04-27 00:10:44 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 8.0
+2022-04-27 00:10:45 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 4.0
+2022-04-27 00:10:54 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 2.0
+2022-04-27 00:10:56 - progress_bar.py[line:272] - INFO: epoch 001:     74 / 3068 loss=2.799, loss_v1=0, loss_v2=0, nll_loss=1.672, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=3.19, wps=49.7, ups=0.39, wpb=128, bsz=128, num_updates=70, lr=3.80435e-07, gnorm=15.943, loss_scale=2, train_wall=26, gb_free=11.9, wall=218
+2022-04-27 00:11:16 - progress_bar.py[line:272] - INFO: epoch 001:     84 / 3068 loss=2.806, loss_v1=0, loss_v2=0, nll_loss=1.678, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=3.2, wps=65.1, ups=0.51, wpb=128, bsz=128, num_updates=80, lr=4.34783e-07, gnorm=13.533, loss_scale=2, train_wall=20, gb_free=12.8, wall=237
+2022-04-27 00:11:34 - progress_bar.py[line:272] - INFO: epoch 001:     94 / 3068 loss=2.613, loss_v1=0, loss_v2=0, nll_loss=1.489, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.81, wps=70.1, ups=0.55, wpb=128, bsz=128, num_updates=90, lr=4.8913e-07, gnorm=9.074, loss_scale=2, train_wall=18, gb_free=13.4, wall=255
+2022-04-27 00:11:54 - progress_bar.py[line:272] - INFO: epoch 001:    104 / 3068 loss=2.592, loss_v1=0, loss_v2=0, nll_loss=1.468, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.77, wps=65.6, ups=0.51, wpb=128, bsz=128, num_updates=100, lr=5.43478e-07, gnorm=8.25, loss_scale=2, train_wall=19, gb_free=13, wall=275
+2022-04-27 00:11:54 - train.py[line:435] - INFO: begin validation on "valid" subset
+slice_id 0 seek offset 0
+slice_id 0 seek offset 0
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:16:42 - progress_bar.py[line:282] - INFO: epoch 001 | valid on 'valid' subset | loss nan | loss_v1 0 | loss_v2 0 | nll_loss nan | ntokens 15.999 | nsentences 15.999 | sample_size 15.999 | sample_size_v1 0 | sample_size_v2 0 | ppl nan | acc 0.3388 | wps 68.1 | wpb 16 | bsz 16 | num_updates 100
+2022-04-27 00:16:59 - progress_bar.py[line:272] - INFO: epoch 001:    114 / 3068 loss=2.545, loss_v1=0, loss_v2=0, nll_loss=1.422, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.68, wps=4.2, ups=0.03, wpb=128, bsz=128, num_updates=110, lr=5.97826e-07, gnorm=7.664, loss_scale=2, train_wall=17, gb_free=13.2, wall=581
+2022-04-27 00:17:19 - progress_bar.py[line:272] - INFO: epoch 001:    124 / 3068 loss=2.56, loss_v1=0, loss_v2=0, nll_loss=1.438, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.71, wps=65, ups=0.51, wpb=128, bsz=128, num_updates=120, lr=6.52174e-07, gnorm=6.356, loss_scale=2, train_wall=20, gb_free=12.6, wall=600
+2022-04-27 00:17:31 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 1.0
+2022-04-27 00:17:40 - progress_bar.py[line:272] - INFO: epoch 001:    135 / 3068 loss=2.525, loss_v1=0, loss_v2=0, nll_loss=1.404, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.65, wps=61.2, ups=0.48, wpb=128, bsz=128, num_updates=130, lr=7.06522e-07, gnorm=6.026, loss_scale=1, train_wall=21, gb_free=13, wall=621
+2022-04-27 00:17:58 - progress_bar.py[line:272] - INFO: epoch 001:    145 / 3068 loss=2.52, loss_v1=0, loss_v2=0, nll_loss=1.402, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.64, wps=72.2, ups=0.56, wpb=128, bsz=128, num_updates=140, lr=7.6087e-07, gnorm=6.427, loss_scale=1, train_wall=18, gb_free=13.4, wall=639
+2022-04-27 00:18:14 - progress_bar.py[line:272] - INFO: epoch 001:    155 / 3068 loss=2.405, loss_v1=0, loss_v2=0, nll_loss=1.288, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.44, wps=79.3, ups=0.62, wpb=128, bsz=128, num_updates=150, lr=8.15217e-07, gnorm=5.094, loss_scale=1, train_wall=16, gb_free=13.9, wall=655
+2022-04-27 00:18:21 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.5
+2022-04-27 00:18:29 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.25
+2022-04-27 00:18:36 - progress_bar.py[line:272] - INFO: epoch 001:    167 / 3068 loss=2.451, loss_v1=0, loss_v2=0, nll_loss=1.335, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.52, wps=58.8, ups=0.46, wpb=128, bsz=128, num_updates=160, lr=8.69565e-07, gnorm=5.314, loss_scale=0.25, train_wall=22, gb_free=13.5, wall=677
+2022-04-27 00:18:53 - progress_bar.py[line:272] - INFO: epoch 001:    177 / 3068 loss=2.449, loss_v1=0, loss_v2=0, nll_loss=1.336, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.52, wps=72.7, ups=0.57, wpb=128, bsz=128, num_updates=170, lr=9.23913e-07, gnorm=4.904, loss_scale=0.25, train_wall=18, gb_free=13.5, wall=695
+2022-04-27 00:19:10 - progress_bar.py[line:272] - INFO: epoch 001:    187 / 3068 loss=2.429, loss_v1=0, loss_v2=0, nll_loss=1.318, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.49, wps=76.5, ups=0.6, wpb=128, bsz=128, num_updates=180, lr=9.78261e-07, gnorm=4.937, loss_scale=0.25, train_wall=17, gb_free=13.1, wall=711
+2022-04-27 00:19:28 - progress_bar.py[line:272] - INFO: epoch 001:    197 / 3068 loss=2.411, loss_v1=0, loss_v2=0, nll_loss=1.303, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.47, wps=72.7, ups=0.57, wpb=128, bsz=128, num_updates=190, lr=1.03261e-06, gnorm=5.112, loss_scale=0.25, train_wall=18, gb_free=10.3, wall=729
+2022-04-27 00:19:45 - progress_bar.py[line:272] - INFO: epoch 001:    207 / 3068 loss=2.403, loss_v1=0, loss_v2=0, nll_loss=1.297, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.46, wps=75.1, ups=0.59, wpb=128, bsz=128, num_updates=200, lr=1.08696e-06, gnorm=5.247, loss_scale=0.25, train_wall=17, gb_free=13.2, wall=746
+2022-04-27 00:19:45 - train.py[line:435] - INFO: begin validation on "valid" subset
+slice_id 0 seek offset 0
+slice_id 0 seek offset 0
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:24:04 - progress_bar.py[line:282] - INFO: epoch 001 | valid on 'valid' subset | loss nan | loss_v1 0 | loss_v2 0 | nll_loss nan | ntokens 15.999 | nsentences 15.999 | sample_size 15.999 | sample_size_v1 0 | sample_size_v2 0 | ppl nan | acc 0.3405 | wps 75.8 | wpb 16 | bsz 16 | num_updates 200
+2022-04-27 00:24:22 - progress_bar.py[line:272] - INFO: epoch 001:    217 / 3068 loss=2.4, loss_v1=0, loss_v2=0, nll_loss=1.296, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.46, wps=4.6, ups=0.04, wpb=128, bsz=128, num_updates=210, lr=1.1413e-06, gnorm=4.879, loss_scale=0.25, train_wall=18, gb_free=14, wall=1023
+2022-04-27 00:24:42 - progress_bar.py[line:272] - INFO: epoch 001:    227 / 3068 loss=2.356, loss_v1=0, loss_v2=0, nll_loss=1.255, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.39, wps=64.3, ups=0.5, wpb=128, bsz=128, num_updates=220, lr=1.19565e-06, gnorm=4.525, loss_scale=0.25, train_wall=20, gb_free=12.2, wall=1043
+2022-04-27 00:24:59 - progress_bar.py[line:272] - INFO: epoch 001:    237 / 3068 loss=2.356, loss_v1=0, loss_v2=0, nll_loss=1.257, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.39, wps=77, ups=0.6, wpb=128, bsz=128, num_updates=230, lr=1.25e-06, gnorm=3.938, loss_scale=0.25, train_wall=17, gb_free=13.4, wall=1060
+2022-04-27 00:25:16 - progress_bar.py[line:272] - INFO: epoch 001:    247 / 3068 loss=2.353, loss_v1=0, loss_v2=0, nll_loss=1.257, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.39, wps=75.1, ups=0.59, wpb=128, bsz=128, num_updates=240, lr=1.30435e-06, gnorm=4.367, loss_scale=0.25, train_wall=17, gb_free=13.5, wall=1077
+2022-04-27 00:25:32 - progress_bar.py[line:272] - INFO: epoch 001:    257 / 3068 loss=2.337, loss_v1=0, loss_v2=0, nll_loss=1.244, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.37, wps=76.2, ups=0.6, wpb=128, bsz=128, num_updates=250, lr=1.3587e-06, gnorm=3.772, loss_scale=0.25, train_wall=17, gb_free=13.2, wall=1094
+2022-04-27 00:25:51 - progress_bar.py[line:272] - INFO: epoch 001:    267 / 3068 loss=2.34, loss_v1=0, loss_v2=0, nll_loss=1.249, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.38, wps=67.7, ups=0.53, wpb=128, bsz=128, num_updates=260, lr=1.41304e-06, gnorm=4.136, loss_scale=0.25, train_wall=19, gb_free=12.9, wall=1113
+2022-04-27 00:25:53 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.125
+2022-04-27 00:25:58 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.0625
+2022-04-27 00:26:12 - progress_bar.py[line:272] - INFO: epoch 001:    279 / 3068 loss=2.312, loss_v1=0, loss_v2=0, nll_loss=1.225, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.34, wps=62.3, ups=0.49, wpb=128, bsz=128, num_updates=270, lr=1.46739e-06, gnorm=3.544, loss_scale=0.0625, train_wall=20, gb_free=12.5, wall=1133
+2022-04-27 00:26:19 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.03125
+2022-04-27 00:26:32 - progress_bar.py[line:272] - INFO: epoch 001:    290 / 3068 loss=2.329, loss_v1=0, loss_v2=0, nll_loss=1.245, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.37, wps=64.3, ups=0.5, wpb=128, bsz=128, num_updates=280, lr=1.52174e-06, gnorm=4.529, loss_scale=0.0312, train_wall=20, gb_free=12.6, wall=1153
+2022-04-27 00:26:50 - progress_bar.py[line:272] - INFO: epoch 001:    300 / 3068 loss=2.3, loss_v1=0, loss_v2=0, nll_loss=1.218, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.33, wps=68.9, ups=0.54, wpb=128, bsz=128, num_updates=290, lr=1.57609e-06, gnorm=4.132, loss_scale=0.0312, train_wall=19, gb_free=12.8, wall=1172
+2022-04-27 00:27:08 - progress_bar.py[line:272] - INFO: epoch 001:    310 / 3068 loss=2.31, loss_v1=0, loss_v2=0, nll_loss=1.231, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.35, wps=72.3, ups=0.56, wpb=128, bsz=128, num_updates=300, lr=1.63043e-06, gnorm=3.899, loss_scale=0.0312, train_wall=18, gb_free=13.9, wall=1190
+2022-04-27 00:27:08 - train.py[line:435] - INFO: begin validation on "valid" subset
+slice_id 0 seek offset 0
+slice_id 0 seek offset 0
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:31:27 - progress_bar.py[line:282] - INFO: epoch 001 | valid on 'valid' subset | loss nan | loss_v1 0 | loss_v2 0 | nll_loss nan | ntokens 15.999 | nsentences 15.999 | sample_size 15.999 | sample_size_v1 0 | sample_size_v2 0 | ppl nan | acc 0.3439 | wps 75.9 | wpb 16 | bsz 16 | num_updates 300
+2022-04-27 00:31:44 - progress_bar.py[line:272] - INFO: epoch 001:    320 / 3068 loss=2.279, loss_v1=0, loss_v2=0, nll_loss=1.203, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.3, wps=4.6, ups=0.04, wpb=128, bsz=128, num_updates=310, lr=1.68478e-06, gnorm=3.648, loss_scale=0.0312, train_wall=17, gb_free=13.6, wall=1465
+2022-04-27 00:32:00 - progress_bar.py[line:272] - INFO: epoch 001:    330 / 3068 loss=2.294, loss_v1=0, loss_v2=0, nll_loss=1.22, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.33, wps=80.5, ups=0.63, wpb=128, bsz=128, num_updates=320, lr=1.73913e-06, gnorm=4.042, loss_scale=0.0312, train_wall=16, gb_free=13.4, wall=1481
+2022-04-27 00:32:16 - progress_bar.py[line:272] - INFO: epoch 001:    340 / 3068 loss=2.25, loss_v1=0, loss_v2=0, nll_loss=1.18, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.27, wps=77.9, ups=0.61, wpb=128, bsz=128, num_updates=330, lr=1.79348e-06, gnorm=3.851, loss_scale=0.0312, train_wall=16, gb_free=13.6, wall=1498
+2022-04-27 00:32:32 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.015625
+2022-04-27 00:32:38 - progress_bar.py[line:272] - INFO: epoch 001:    351 / 3068 loss=2.252, loss_v1=0, loss_v2=0, nll_loss=1.185, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.27, wps=60, ups=0.47, wpb=128, bsz=128, num_updates=340, lr=1.84783e-06, gnorm=3.222, loss_scale=0.0156, train_wall=21, gb_free=13.4, wall=1519
+2022-04-27 00:32:55 - progress_bar.py[line:272] - INFO: epoch 001:    361 / 3068 loss=2.248, loss_v1=0, loss_v2=0, nll_loss=1.183, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.27, wps=75, ups=0.59, wpb=128, bsz=128, num_updates=350, lr=1.90217e-06, gnorm=3.656, loss_scale=0.0156, train_wall=17, gb_free=12, wall=1536
+2022-04-27 00:33:13 - progress_bar.py[line:272] - INFO: epoch 001:    371 / 3068 loss=2.263, loss_v1=0, loss_v2=0, nll_loss=1.202, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.3, wps=71.7, ups=0.56, wpb=128, bsz=128, num_updates=360, lr=1.95652e-06, gnorm=4.357, loss_scale=0.0156, train_wall=18, gb_free=10.2, wall=1554
+2022-04-27 00:33:30 - progress_bar.py[line:272] - INFO: epoch 001:    381 / 3068 loss=2.249, loss_v1=0, loss_v2=0, nll_loss=1.191, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.28, wps=73.1, ups=0.57, wpb=128, bsz=128, num_updates=370, lr=2.01087e-06, gnorm=4.338, loss_scale=0.0156, train_wall=17, gb_free=13.7, wall=1572
+2022-04-27 00:33:47 - progress_bar.py[line:272] - INFO: epoch 001:    391 / 3068 loss=2.225, loss_v1=0, loss_v2=0, nll_loss=1.169, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.25, wps=74.3, ups=0.58, wpb=128, bsz=128, num_updates=380, lr=2.06522e-06, gnorm=3.497, loss_scale=0.0156, train_wall=17, gb_free=11.4, wall=1589
+2022-04-27 00:33:54 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.0078125
+2022-04-27 00:34:05 - progress_bar.py[line:272] - INFO: epoch 001:    402 / 3068 loss=2.255, loss_v1=0, loss_v2=0, nll_loss=1.202, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.3, wps=71.9, ups=0.56, wpb=128, bsz=128, num_updates=390, lr=2.11957e-06, gnorm=3.726, loss_scale=0.0078, train_wall=18, gb_free=13.3, wall=1607
+2022-04-27 00:34:21 - progress_bar.py[line:272] - INFO: epoch 001:    412 / 3068 loss=2.231, loss_v1=0, loss_v2=0, nll_loss=1.181, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.27, wps=79.2, ups=0.62, wpb=128, bsz=128, num_updates=400, lr=2.17391e-06, gnorm=3.508, loss_scale=0.0078, train_wall=16, gb_free=13.3, wall=1623
+2022-04-27 00:34:21 - train.py[line:435] - INFO: begin validation on "valid" subset
+slice_id 0 seek offset 0
+slice_id 0 seek offset 0
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:38:21 - progress_bar.py[line:282] - INFO: epoch 001 | valid on 'valid' subset | loss nan | loss_v1 0 | loss_v2 0 | nll_loss nan | ntokens 15.999 | nsentences 15.999 | sample_size 15.999 | sample_size_v1 0 | sample_size_v2 0 | ppl nan | acc 0.3473 | wps 81.9 | wpb 16 | bsz 16 | num_updates 400
+2022-04-27 00:38:38 - progress_bar.py[line:272] - INFO: epoch 001:    422 / 3068 loss=2.229, loss_v1=0, loss_v2=0, nll_loss=1.182, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.27, wps=5, ups=0.04, wpb=128, bsz=128, num_updates=410, lr=2.22826e-06, gnorm=3.113, loss_scale=0.0078, train_wall=17, gb_free=13.7, wall=1880
+2022-04-27 00:38:55 - progress_bar.py[line:272] - INFO: epoch 001:    432 / 3068 loss=2.234, loss_v1=0, loss_v2=0, nll_loss=1.188, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.28, wps=75.6, ups=0.59, wpb=128, bsz=128, num_updates=420, lr=2.28261e-06, gnorm=3.516, loss_scale=0.0078, train_wall=17, gb_free=12.3, wall=1897
+2022-04-27 00:39:12 - progress_bar.py[line:272] - INFO: epoch 001:    442 / 3068 loss=2.227, loss_v1=0, loss_v2=0, nll_loss=1.184, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.27, wps=76.7, ups=0.6, wpb=128, bsz=128, num_updates=430, lr=2.33696e-06, gnorm=2.982, loss_scale=0.0078, train_wall=17, gb_free=13.2, wall=1913
+2022-04-27 00:39:23 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.00390625
+2022-04-27 00:39:31 - progress_bar.py[line:272] - INFO: epoch 001:    453 / 3068 loss=2.211, loss_v1=0, loss_v2=0, nll_loss=1.17, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.25, wps=66, ups=0.52, wpb=128, bsz=128, num_updates=440, lr=2.3913e-06, gnorm=2.868, loss_scale=0.0039, train_wall=19, gb_free=12.7, wall=1933
+2022-04-27 00:39:49 - progress_bar.py[line:272] - INFO: epoch 001:    463 / 3068 loss=2.207, loss_v1=0, loss_v2=0, nll_loss=1.169, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.25, wps=72.1, ups=0.56, wpb=128, bsz=128, num_updates=450, lr=2.44565e-06, gnorm=3.783, loss_scale=0.0039, train_wall=18, gb_free=12.9, wall=1951
+2022-04-27 00:40:05 - progress_bar.py[line:272] - INFO: epoch 001:    473 / 3068 loss=2.214, loss_v1=0, loss_v2=0, nll_loss=1.177, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.26, wps=79.6, ups=0.62, wpb=128, bsz=128, num_updates=460, lr=2.5e-06, gnorm=3.267, loss_scale=0.0039, train_wall=16, gb_free=13.9, wall=1967
+2022-04-27 00:40:18 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.001953125
+2022-04-27 00:40:25 - progress_bar.py[line:272] - INFO: epoch 001:    484 / 3068 loss=2.218, loss_v1=0, loss_v2=0, nll_loss=1.183, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.27, wps=65.8, ups=0.51, wpb=128, bsz=128, num_updates=470, lr=2.55435e-06, gnorm=3.772, loss_scale=0.002, train_wall=19, gb_free=13.5, wall=1986
+2022-04-27 00:40:43 - progress_bar.py[line:272] - INFO: epoch 001:    494 / 3068 loss=2.183, loss_v1=0, loss_v2=0, nll_loss=1.149, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.22, wps=71.4, ups=0.56, wpb=128, bsz=128, num_updates=480, lr=2.6087e-06, gnorm=3.119, loss_scale=0.002, train_wall=18, gb_free=12, wall=2004
+2022-04-27 00:41:00 - progress_bar.py[line:272] - INFO: epoch 001:    504 / 3068 loss=2.203, loss_v1=0, loss_v2=0, nll_loss=1.171, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.25, wps=73.2, ups=0.57, wpb=128, bsz=128, num_updates=490, lr=2.66304e-06, gnorm=2.879, loss_scale=0.002, train_wall=17, gb_free=13.1, wall=2022
+2022-04-27 00:41:14 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.0009765625
+2022-04-27 00:41:19 - progress_bar.py[line:272] - INFO: epoch 001:    515 / 3068 loss=2.178, loss_v1=0, loss_v2=0, nll_loss=1.147, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.21, wps=69.2, ups=0.54, wpb=128, bsz=128, num_updates=500, lr=2.71739e-06, gnorm=2.751, loss_scale=0.001, train_wall=18, gb_free=12.4, wall=2040
+2022-04-27 00:41:19 - train.py[line:435] - INFO: begin validation on "valid" subset
+slice_id 0 seek offset 0
+slice_id 0 seek offset 0
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:45:29 - progress_bar.py[line:282] - INFO: epoch 001 | valid on 'valid' subset | loss nan | loss_v1 0 | loss_v2 0 | nll_loss nan | ntokens 15.999 | nsentences 15.999 | sample_size 15.999 | sample_size_v1 0 | sample_size_v2 0 | ppl nan | acc 0.3493 | wps 78.6 | wpb 16 | bsz 16 | num_updates 500
+2022-04-27 00:45:45 - progress_bar.py[line:272] - INFO: epoch 001:    525 / 3068 loss=2.189, loss_v1=0, loss_v2=0, nll_loss=1.159, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.23, wps=4.8, ups=0.04, wpb=128, bsz=128, num_updates=510, lr=2.77174e-06, gnorm=3.06, loss_scale=0.001, train_wall=16, gb_free=13.5, wall=2307
+2022-04-27 00:46:02 - progress_bar.py[line:272] - INFO: epoch 001:    535 / 3068 loss=2.162, loss_v1=0, loss_v2=0, nll_loss=1.134, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.19, wps=78, ups=0.61, wpb=128, bsz=128, num_updates=520, lr=2.82609e-06, gnorm=2.665, loss_scale=0.001, train_wall=16, gb_free=12.9, wall=2323
+2022-04-27 00:46:03 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.00048828125
+2022-04-27 00:46:21 - progress_bar.py[line:272] - INFO: epoch 001:    546 / 3068 loss=2.165, loss_v1=0, loss_v2=0, nll_loss=1.138, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.2, wps=65.3, ups=0.51, wpb=128, bsz=128, num_updates=530, lr=2.88043e-06, gnorm=2.775, loss_scale=0.0005, train_wall=20, gb_free=12.1, wall=2343
+2022-04-27 00:46:38 - progress_bar.py[line:272] - INFO: epoch 001:    556 / 3068 loss=2.159, loss_v1=0, loss_v2=0, nll_loss=1.134, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.2, wps=76.4, ups=0.6, wpb=128, bsz=128, num_updates=540, lr=2.93478e-06, gnorm=2.659, loss_scale=0.0005, train_wall=17, gb_free=13.2, wall=2359
+2022-04-27 00:46:55 - progress_bar.py[line:272] - INFO: epoch 001:    566 / 3068 loss=2.179, loss_v1=0, loss_v2=0, nll_loss=1.155, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.23, wps=75.7, ups=0.59, wpb=128, bsz=128, num_updates=550, lr=2.98913e-06, gnorm=2.734, loss_scale=0.0005, train_wall=17, gb_free=12.6, wall=2376
+2022-04-27 00:47:11 - progress_bar.py[line:272] - INFO: epoch 001:    576 / 3068 loss=2.153, loss_v1=0, loss_v2=0, nll_loss=1.13, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.19, wps=78, ups=0.61, wpb=128, bsz=128, num_updates=560, lr=3.04348e-06, gnorm=2.303, loss_scale=0.0005, train_wall=16, gb_free=13.3, wall=2393
+2022-04-27 00:47:28 - progress_bar.py[line:272] - INFO: epoch 001:    586 / 3068 loss=2.183, loss_v1=0, loss_v2=0, nll_loss=1.162, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.24, wps=75.8, ups=0.59, wpb=128, bsz=128, num_updates=570, lr=3.09783e-06, gnorm=2.754, loss_scale=0.0005, train_wall=17, gb_free=12.8, wall=2409
+2022-04-27 00:47:36 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.000244140625
+2022-04-27 00:47:48 - progress_bar.py[line:272] - INFO: epoch 001:    597 / 3068 loss=2.189, loss_v1=0, loss_v2=0, nll_loss=1.169, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.25, wps=64.1, ups=0.5, wpb=128, bsz=128, num_updates=580, lr=3.15217e-06, gnorm=3.125, loss_scale=0.0002, train_wall=20, gb_free=13.5, wall=2429
+2022-04-27 00:48:04 - progress_bar.py[line:272] - INFO: epoch 001:    607 / 3068 loss=2.138, loss_v1=0, loss_v2=0, nll_loss=1.119, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.17, wps=79.4, ups=0.62, wpb=128, bsz=128, num_updates=590, lr=3.20652e-06, gnorm=2.929, loss_scale=0.0002, train_wall=16, gb_free=13.5, wall=2446
+2022-04-27 00:48:20 - progress_bar.py[line:272] - INFO: epoch 001:    617 / 3068 loss=2.14, loss_v1=0, loss_v2=0, nll_loss=1.123, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.18, wps=78.7, ups=0.61, wpb=128, bsz=128, num_updates=600, lr=3.26087e-06, gnorm=3.033, loss_scale=0.0002, train_wall=16, gb_free=13.8, wall=2462
+2022-04-27 00:48:20 - train.py[line:435] - INFO: begin validation on "valid" subset
+slice_id 0 seek offset 0
+slice_id 0 seek offset 0
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:24 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:52:25 - progress_bar.py[line:282] - INFO: epoch 001 | valid on 'valid' subset | loss nan | loss_v1 0 | loss_v2 0 | nll_loss nan | ntokens 15.999 | nsentences 15.999 | sample_size 15.999 | sample_size_v1 0 | sample_size_v2 0 | ppl nan | acc 0.3524 | wps 80.6 | wpb 16 | bsz 16 | num_updates 600
+2022-04-27 00:52:41 - progress_bar.py[line:272] - INFO: epoch 001:    627 / 3068 loss=2.148, loss_v1=0, loss_v2=0, nll_loss=1.131, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.19, wps=4.9, ups=0.04, wpb=128, bsz=128, num_updates=610, lr=3.31522e-06, gnorm=2.462, loss_scale=0.0002, train_wall=17, gb_free=9.4, wall=2723
+2022-04-27 00:52:57 - progress_bar.py[line:272] - INFO: epoch 001:    637 / 3068 loss=2.142, loss_v1=0, loss_v2=0, nll_loss=1.126, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.18, wps=80.8, ups=0.63, wpb=128, bsz=128, num_updates=620, lr=3.36957e-06, gnorm=2.502, loss_scale=0.0002, train_wall=16, gb_free=12.7, wall=2739
+2022-04-27 00:53:14 - progress_bar.py[line:272] - INFO: epoch 001:    647 / 3068 loss=2.148, loss_v1=0, loss_v2=0, nll_loss=1.134, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.19, wps=78.7, ups=0.61, wpb=128, bsz=128, num_updates=630, lr=3.42391e-06, gnorm=2.528, loss_scale=0.0002, train_wall=16, gb_free=12.4, wall=2755
+2022-04-27 00:53:30 - progress_bar.py[line:272] - INFO: epoch 001:    657 / 3068 loss=2.165, loss_v1=0, loss_v2=0, nll_loss=1.151, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.22, wps=78.4, ups=0.61, wpb=128, bsz=128, num_updates=640, lr=3.47826e-06, gnorm=2.482, loss_scale=0.0002, train_wall=16, gb_free=13.6, wall=2771
+2022-04-27 00:53:42 - trainer.py[line:922] - INFO: NOTE: gradient overflow detected, ignoring gradient, setting loss scale to: 0.0001220703125
+2022-04-27 00:53:49 - progress_bar.py[line:272] - INFO: epoch 001:    668 / 3068 loss=2.143, loss_v1=0, loss_v2=0, nll_loss=1.13, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.19, wps=67.4, ups=0.53, wpb=128, bsz=128, num_updates=650, lr=3.53261e-06, gnorm=2.546, loss_scale=0.0001, train_wall=19, gb_free=13.4, wall=2790
+2022-04-27 00:54:05 - progress_bar.py[line:272] - INFO: epoch 001:    678 / 3068 loss=2.155, loss_v1=0, loss_v2=0, nll_loss=1.143, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.21, wps=78.9, ups=0.62, wpb=128, bsz=128, num_updates=660, lr=3.58696e-06, gnorm=2.451, loss_scale=0.0001, train_wall=16, gb_free=13.6, wall=2806
+2022-04-27 00:54:22 - progress_bar.py[line:272] - INFO: epoch 001:    688 / 3068 loss=2.135, loss_v1=0, loss_v2=0, nll_loss=1.122, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.18, wps=73.4, ups=0.57, wpb=128, bsz=128, num_updates=670, lr=3.6413e-06, gnorm=2.574, loss_scale=0.0001, train_wall=17, gb_free=13.3, wall=2824
+2022-04-27 00:54:39 - progress_bar.py[line:272] - INFO: epoch 001:    698 / 3068 loss=2.156, loss_v1=0, loss_v2=0, nll_loss=1.144, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.21, wps=78.9, ups=0.62, wpb=128, bsz=128, num_updates=680, lr=3.69565e-06, gnorm=2.579, loss_scale=0.0001, train_wall=16, gb_free=12.4, wall=2840
+2022-04-27 00:54:55 - progress_bar.py[line:272] - INFO: epoch 001:    708 / 3068 loss=2.141, loss_v1=0, loss_v2=0, nll_loss=1.129, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.19, wps=77.6, ups=0.61, wpb=128, bsz=128, num_updates=690, lr=3.75e-06, gnorm=2.254, loss_scale=0.0001, train_wall=16, gb_free=12.3, wall=2857
+2022-04-27 00:55:13 - progress_bar.py[line:272] - INFO: epoch 001:    718 / 3068 loss=2.155, loss_v1=0, loss_v2=0, nll_loss=1.144, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.21, wps=71.3, ups=0.56, wpb=128, bsz=128, num_updates=700, lr=3.80435e-06, gnorm=3.508, loss_scale=0.0001, train_wall=18, gb_free=13.7, wall=2875
+2022-04-27 00:55:13 - train.py[line:435] - INFO: begin validation on "valid" subset
+slice_id 0 seek offset 0
+slice_id 0 seek offset 0
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 00:59:23 - progress_bar.py[line:282] - INFO: epoch 001 | valid on 'valid' subset | loss nan | loss_v1 0 | loss_v2 0 | nll_loss nan | ntokens 15.999 | nsentences 15.999 | sample_size 15.999 | sample_size_v1 0 | sample_size_v2 0 | ppl nan | acc 0.3629 | wps 78.7 | wpb 16 | bsz 16 | num_updates 700
+2022-04-27 00:59:40 - progress_bar.py[line:272] - INFO: epoch 001:    728 / 3068 loss=2.152, loss_v1=0, loss_v2=0, nll_loss=1.142, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.21, wps=4.8, ups=0.04, wpb=128, bsz=128, num_updates=710, lr=3.8587e-06, gnorm=2.361, loss_scale=0.0001, train_wall=17, gb_free=12.6, wall=3142
+2022-04-27 00:59:57 - progress_bar.py[line:272] - INFO: epoch 001:    738 / 3068 loss=2.152, loss_v1=0, loss_v2=0, nll_loss=1.142, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.21, wps=77.1, ups=0.6, wpb=128, bsz=128, num_updates=720, lr=3.91304e-06, gnorm=2.343, loss_scale=0.0001, train_wall=17, gb_free=13.7, wall=3158
+2022-04-27 01:00:13 - progress_bar.py[line:272] - INFO: epoch 001:    748 / 3068 loss=2.138, loss_v1=0, loss_v2=0, nll_loss=1.128, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.19, wps=77.6, ups=0.61, wpb=128, bsz=128, num_updates=730, lr=3.96739e-06, gnorm=2.629, loss_scale=0.0001, train_wall=16, gb_free=12.2, wall=3175
+2022-04-27 01:00:32 - progress_bar.py[line:272] - INFO: epoch 001:    758 / 3068 loss=2.152, loss_v1=0, loss_v2=0, nll_loss=1.142, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.21, wps=67.4, ups=0.53, wpb=128, bsz=128, num_updates=740, lr=4.02174e-06, gnorm=2.308, loss_scale=0.0001, train_wall=19, gb_free=10.7, wall=3194
+2022-04-27 01:00:48 - progress_bar.py[line:272] - INFO: epoch 001:    768 / 3068 loss=2.146, loss_v1=0, loss_v2=0, nll_loss=1.137, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.2, wps=79.3, ups=0.62, wpb=128, bsz=128, num_updates=750, lr=4.07609e-06, gnorm=2.432, loss_scale=0.0001, train_wall=16, gb_free=12.9, wall=3210
+2022-04-27 01:01:05 - progress_bar.py[line:272] - INFO: epoch 001:    778 / 3068 loss=2.139, loss_v1=0, loss_v2=0, nll_loss=1.13, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.19, wps=76.6, ups=0.6, wpb=128, bsz=128, num_updates=760, lr=4.13043e-06, gnorm=2.008, loss_scale=0.0001, train_wall=17, gb_free=13.5, wall=3227
+2022-04-27 01:01:21 - progress_bar.py[line:272] - INFO: epoch 001:    788 / 3068 loss=2.136, loss_v1=0, loss_v2=0, nll_loss=1.127, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.18, wps=79, ups=0.62, wpb=128, bsz=128, num_updates=770, lr=4.18478e-06, gnorm=2.346, loss_scale=0.0001, train_wall=16, gb_free=12.2, wall=3243
+2022-04-27 01:01:38 - progress_bar.py[line:272] - INFO: epoch 001:    798 / 3068 loss=2.146, loss_v1=0, loss_v2=0, nll_loss=1.136, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.2, wps=77.8, ups=0.61, wpb=128, bsz=128, num_updates=780, lr=4.23913e-06, gnorm=2.072, loss_scale=0.0001, train_wall=16, gb_free=13.3, wall=3259
+2022-04-27 01:01:55 - progress_bar.py[line:272] - INFO: epoch 001:    808 / 3068 loss=2.142, loss_v1=0, loss_v2=0, nll_loss=1.134, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.19, wps=75.6, ups=0.59, wpb=128, bsz=128, num_updates=790, lr=4.29348e-06, gnorm=2.434, loss_scale=0.0001, train_wall=17, gb_free=13.6, wall=3276
+2022-04-27 01:02:11 - progress_bar.py[line:272] - INFO: epoch 001:    818 / 3068 loss=2.141, loss_v1=0, loss_v2=0, nll_loss=1.133, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.19, wps=79.2, ups=0.62, wpb=128, bsz=128, num_updates=800, lr=4.34783e-06, gnorm=1.938, loss_scale=0.0001, train_wall=16, gb_free=13, wall=3292
+2022-04-27 01:02:11 - train.py[line:435] - INFO: begin validation on "valid" subset
+slice_id 0 seek offset 0
+slice_id 0 seek offset 0
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - moe_layer.py[line:118] - WARNING: padding batch with unexpected size 15 (expected: 16)
+2022-04-27 01:06:20 - progress_bar.py[line:282] - INFO: epoch 001 | valid on 'valid' subset | loss nan | loss_v1 0 | loss_v2 0 | nll_loss nan | ntokens 15.999 | nsentences 15.999 | sample_size 15.999 | sample_size_v1 0 | sample_size_v2 0 | ppl nan | acc 0.3647 | wps 78.9 | wpb 16 | bsz 16 | num_updates 800
+2022-04-27 01:06:37 - progress_bar.py[line:272] - INFO: epoch 001:    828 / 3068 loss=2.142, loss_v1=0, loss_v2=0, nll_loss=1.134, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.2, wps=4.8, ups=0.04, wpb=128, bsz=128, num_updates=810, lr=4.40217e-06, gnorm=2.388, loss_scale=0.0001, train_wall=17, gb_free=13.2, wall=3559
+2022-04-27 01:06:54 - progress_bar.py[line:272] - INFO: epoch 001:    838 / 3068 loss=2.127, loss_v1=0, loss_v2=0, nll_loss=1.119, ntokens=128, nsentences=128, sample_size=128, sample_size_v1=0, sample_size_v2=0, ppl=2.17, wps=79.2, ups=0.62, wpb=128, bsz=128, num_updates=820, lr=4.45652e-06, gnorm=2.302, loss_scale=0.0001, train_wall=16, gb_free=12.4, wall=3575
+/opt/conda/lib/python3.8/site-packages/torch/nn/modules/module.py:787: UserWarning: Using a non-full backward hook when the forward contains multiple autograd Nodes is deprecated and will be removed in future versions. This hook will be missing some grad_input. Please use register_full_backward_hook to get the documented behavior.
+  warnings.warn("Using a non-full backward hook when the forward contains multiple autograd Nodes "
+/opt/conda/lib/python3.8/site-packages/torch/nn/modules/module.py:752: UserWarning: Using non-full backward hooks on a Module that does not return a single Tensor or a tuple of Tensors is deprecated and will be removed in future versions. This hook will be missing some of the grad_output. Please use register_full_backward_hook to get the documented behavior.
+  warnings.warn("Using non-full backward hooks on a Module that does not return a "
+/opt/conda/lib/python3.8/site-packages/torch/nn/modules/module.py:777: UserWarning: Using a non-full backward hook when outputs are generated by different autograd Nodes is deprecated and will be removed in future versions. This hook will be missing some grad_output. Please use register_full_backward_hook to get the documented behavior.
+  warnings.warn("Using a non-full backward hook when outputs are generated by different autograd Nodes "
+Traceback (most recent call last):
+  File "/workspace/OFA/trainer.py", line 871, in train_step
+    grad_norm = self.clip_grad_norm(self.cfg.optimization.clip_norm)
+  File "/workspace/OFA/trainer.py", line 1208, in clip_grad_norm
+    return self.optimizer.clip_grad_norm(
+  File "/workspace/OFA/fairseq/fairseq/optim/fp16_optimizer.py", line 200, in clip_grad_norm
+    self.scaler.check_overflow(grad_norm)
+  File "/workspace/OFA/fairseq/fairseq/optim/dynamic_loss_scaler.py", line 61, in check_overflow
+    raise FloatingPointError(
+FloatingPointError: Minimum loss scale reached (0.0001). Your loss is probably exploding. Try lowering the learning rate, using gradient clipping or increasing the batch size.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "../../train.py", line 527, in <module>
+    cli_main()
+  File "../../train.py", line 520, in cli_main
+    distributed_utils.call_main(cfg, main)
+  File "/workspace/OFA/fairseq/fairseq/distributed/utils.py", line 379, in call_main
+    distributed_main(cfg.distributed_training.device_id, main, cfg, kwargs)
+  File "/workspace/OFA/fairseq/fairseq/distributed/utils.py", line 353, in distributed_main
+    main(cfg, **kwargs)
+  File "../../train.py", line 189, in main
+    valid_losses, should_stop = train(cfg, trainer, task, epoch_itr)
+  File "/opt/conda/lib/python3.8/contextlib.py", line 75, in inner
+    return func(*args, **kwds)
+  File "../../train.py", line 300, in train
+    log_output = trainer.train_step(samples)
+  File "/opt/conda/lib/python3.8/contextlib.py", line 75, in inner
+    return func(*args, **kwds)
+  File "/workspace/OFA/trainer.py", line 910, in train_step
+    self.task.train_step(
+  File "/workspace/OFA/tasks/ofa_task.py", line 319, in train_step
+    loss, sample_size, logging_output = criterion(model, sample, update_num=update_num)
+  File "/opt/conda/lib/python3.8/site-packages/torch/nn/modules/module.py", line 881, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/workspace/OFA/criterions/label_smoothed_cross_entropy.py", line 243, in forward
+    net_output = model(**sample["net_input"])
+  File "/opt/conda/lib/python3.8/site-packages/torch/nn/modules/module.py", line 881, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/workspace/OFA/models/ofa/ofa.py", line 89, in forward
+    encoder_out = self.encoder(
+  File "/opt/conda/lib/python3.8/site-packages/torch/nn/modules/module.py", line 897, in _call_impl
+    var = next((v for v in var.values() if isinstance(v, torch.Tensor)))
+StopIteration
+Traceback (most recent call last):
+  File "/opt/conda/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/opt/conda/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/opt/conda/lib/python3.8/site-packages/torch/distributed/launch.py", line 340, in <module>
+    main()
+  File "/opt/conda/lib/python3.8/site-packages/torch/distributed/launch.py", line 326, in main
+    sigkill_handler(signal.SIGTERM, None)  # not coming back
+  File "/opt/conda/lib/python3.8/site-packages/torch/distributed/launch.py", line 301, in sigkill_handler
+    raise subprocess.CalledProcessError(returncode=last_return_code, cmd=cmd)
+subprocess.CalledProcessError: Command '['/opt/conda/bin/python3', '-u', '../../train.py', '--local_rank=0', '../../dataset/glue_data/mnli_train.tsv,../../dataset/glue_data/mnli_dev.tsv', '--selected-cols=0,1,2', '--bpe-dir=../../utils/BPE', '--user-dir=../../ofa_module', '--restore-file=../../checkpoints/ofa_base.pt', '--reset-optimizer', '--reset-dataloader', '--reset-meters', '--save-dir=./fairseq_checkpoints/mnli/5_5e-6_8', '--task=mnli', '--arch=ofa_resmo', '--criterion=adjust_label_smoothed_cross_entropy', '--label-smoothing=0.0', '--batch-size=16', '--update-freq=8', '--encoder-normalize-before', '--decoder-normalize-before', '--share-decoder-input-output-embed', '--share-all-embeddings', '--layernorm-embedding', '--patch-layernorm-embedding', '--code-layernorm-embedding', '--resnet-drop-path-rate=0.0', '--encoder-drop-path-rate=0.1', '--decoder-drop-path-rate=0.1', '--dropout=0.1', '--attention-dropout=0.0', '--weight-decay=0.01', '--optimizer=adam', '--adam-betas=(0.9,0.999)', '--adam-eps=1e-08', '--clip-norm=0.0', '--lr-scheduler=polynomial_decay', '--lr=5e-6', '--max-epoch=5', '--warmup-ratio=0.06', '--log-format=simple', '--log-interval=10', '--fixed-validation-seed=7', '--keep-best-checkpoints=1', '--save-interval=1000', '--validate-interval=1', '--save-interval-updates=1000', '--validate-interval-updates=100', '--best-checkpoint-metric=acc', '--maximize-best-checkpoint-metric', '--max-src-length=512', '--max-tgt-length=30', '--find-unused-parameters', '--add-type-embedding', '--scale-attn', '--scale-fc', '--scale-heads', '--disable-entangle', '--num-bins=1000', '--prompt-type=src', '--fp16', '--fp16-init-scale=16', '--fp16-scale-window=512', '--num-workers=0']' returned non-zero exit status 1.
+Killing subprocess 5056

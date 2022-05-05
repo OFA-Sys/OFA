@@ -5,8 +5,8 @@
 export MASTER_PORT=3052
 
 task=mnli
-log_dir=./tutel_logs/${task}
-save_dir=./tutel_checkpoints/${task}
+log_dir=./fairseq_logs/${task}
+save_dir=./fairseq_checkpoints/${task}
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE
@@ -17,13 +17,13 @@ data=${data_dir}/mnli_train.tsv,${data_dir}/mnli_dev.tsv
 restore_file=../../checkpoints/ofa_base.pt
 selected_cols=0,1,2
 
-arch=ofa_base
+arch=ofa_resmo
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.0
 lr=1e-5
 max_epoch=5
 warmup_ratio=0.06
-batch_size=1
+batch_size=16
 update_freq=8
 resnet_drop_path_rate=0.0
 encoder_drop_path_rate=0.1
@@ -35,18 +35,20 @@ max_tgt_length=30
 num_bins=1000
 prompt_type="src"
 
+NUM_EXPERTS=8
+
 for max_epoch in {5,}; do
   echo "max_epoch "${max_epoch}
-  for lr in {1e-5,}; do
+  for lr in {5e-6,}; do
     echo "lr "${lr}
-    for update_freq in {4,}; do
+    for update_freq in {8,}; do
       echo "update_freq "${update_freq}
 
       log_file=${log_dir}/${max_epoch}"_"${lr}"_"${update_freq}".log"
       save_path=${save_dir}/${max_epoch}"_"${lr}"_"${update_freq}
       mkdir -p $save_path
 
-      CUDA_VISIBLE_DEVICES=0 python3 -m torch.distributed.launch --nproc_per_node=1 --master_port=${MASTER_PORT} ../../train.py \
+      CUDA_VISIBLE_DEVICES=1 python3 -m torch.distributed.launch --nproc_per_node=1 --master_port=${MASTER_PORT} ../../train.py \
           $data \
           --selected-cols=${selected_cols} \
           --bpe-dir=${bpe_dir} \
@@ -72,14 +74,14 @@ for max_epoch in {5,}; do
           --decoder-drop-path-rate=${decoder_drop_path_rate} \
           --dropout=${dropout} \
           --attention-dropout=${attention_dropout} \
-          --weight-decay=0.01 --optimizer=adam --adam-betas="(0.9,0.999)" --adam-eps=1e-08 --clip-norm=1.0 \
+          --weight-decay=0.01 --optimizer=adam --adam-betas="(0.9,0.999)" --adam-eps=1e-08 --clip-norm=0.0 \
           --lr-scheduler=polynomial_decay --lr=${lr} \
           --max-epoch=${max_epoch} --warmup-ratio=${warmup_ratio} \
           --log-format=simple --log-interval=10 \
           --fixed-validation-seed=7 \
           --keep-best-checkpoints=1 \
           --save-interval=1000 --validate-interval=1 \
-          --save-interval-updates=1000 --validate-interval-updates=1000 \
+          --save-interval-updates=1000 --validate-interval-updates=100 \
           --best-checkpoint-metric=acc --maximize-best-checkpoint-metric \
           --max-src-length=${max_src_length} \
           --max-tgt-length=${max_tgt_length} \
@@ -94,7 +96,7 @@ for max_epoch in {5,}; do
           --fp16 \
           --fp16-init-scale=16 \
           --fp16-scale-window=512 \
-          --num-workers=0 > ${log_file} 2>&1
+          --num-workers=0 > ${log_file} 2>&1 
     done
   done
 done

@@ -172,9 +172,13 @@ class MonolingualDataset(FairseqDataset):
 
     def _maybe_add_bos(self, source, target):
         if self.add_bos_token:
-            source = torch.cat([source.new([self.vocab.bos()]), source])
+            # src_lang_idx and tgt_lang_idx are passed in for multilingual LM, with the
+            # first token being an lang_id token.
+            bos = self.src_lang_idx or self.vocab.bos()
+            source = torch.cat([source.new([bos]), source])
             if target is not None:
-                target = torch.cat([target.new([self.tgt_vocab.bos()]), target])
+                tgt_bos = self.tgt_lang_idx or self.tgt_vocab.bos()
+                target = torch.cat([target.new([tgt_bos]), target])
         return source, target
 
     def num_tokens_vec(self, indices):
@@ -218,9 +222,9 @@ class MonolingualDataset(FairseqDataset):
                   on the right.
         """
         return collate(
-            samples,
-            self.vocab.pad(),
-            self.vocab.eos(),
+            samples, 
+            self.vocab.pad(), 
+            self.vocab.eos(), 
             self.fixed_pad_length,
             self.pad_to_bsz,
         )

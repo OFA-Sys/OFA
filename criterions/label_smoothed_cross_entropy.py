@@ -219,8 +219,7 @@ class AdjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
         constraint_masks = None
         if "constraint_masks" in sample and sample["constraint_masks"] is not None:
             constraint_masks = sample["constraint_masks"]
-            net_output = list(net_output)
-            net_output[0] = net_output[0].masked_fill_(~constraint_masks, -math.inf)
+            net_output[0].masked_fill_(~constraint_masks, -math.inf)
         if self.constraint_start is not None and self.constraint_end is not None:
             net_output[0][:, :, 4:self.constraint_start] = -math.inf
             net_output[0][:, :, self.constraint_end:] = -math.inf

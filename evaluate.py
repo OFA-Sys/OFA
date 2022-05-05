@@ -6,8 +6,9 @@
 
 import logging
 import os
+import json
 import sys
-
+from textwrap import indent
 import numpy as np
 import torch
 from fairseq import distributed_utils, options, tasks, utils
@@ -15,9 +16,11 @@ from fairseq.dataclass.utils import convert_namespace_to_omegaconf
 from fairseq.logging import progress_bar
 from fairseq.utils import reset_logging
 from omegaconf import DictConfig
-
+from fairseq.file_io import save_json
+from fairseq.utils import round_safe
 from utils import checkpoint_utils
 from utils.eval_utils import eval_step, merge_results
+import time
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -57,6 +60,15 @@ def main(cfg: DictConfig, **kwargs):
 
     # Load ensemble
     overrides = eval(cfg.common_eval.model_overrides)
+    is_base_moe = model_overrides.get('is_base_moe', False)
+    if cfg.common_eval.is_moe or is_base_moe:
+        rank = distributed_utils.get_data_parallel_rank()
+        cfg.checkpoint.checkpoint_suffix = f"-rank-{rank}"
+        is_moe = True
+        # This is required for making all_to_all work on same sized tensors across gpus.
+        cfg['task']['pad_to_fixed_length'] = True
+    else:
+        is_moe = False
     logger.info("loading model(s) from {}".format(cfg.common_eval.path))
     models, saved_cfg, task = checkpoint_utils.load_model_ensemble_and_task(
         utils.split_paths(cfg.common_eval.path),
@@ -64,6 +76,7 @@ def main(cfg: DictConfig, **kwargs):
         suffix=cfg.checkpoint.checkpoint_suffix,
         strict=(cfg.checkpoint.checkpoint_shard_count == 1),
         num_shards=cfg.checkpoint.checkpoint_shard_count,
+        is_moe=is_moe or is_base_moe,
     )
 
     # loading the dataset should happen after the checkpoint has been loaded so we can give it the saved task config
@@ -79,7 +92,9 @@ def main(cfg: DictConfig, **kwargs):
             model.half()
         if use_cuda and not cfg.distributed_training.pipeline_model_parallel:
             model.cuda()
-        model.prepare_for_inference_(cfg)
+        if is_moe:
+            # For moe models, we want to enable padding in moe layer, so not calling this.
+            model.prepare_for_inference_(cfg)
 
     # Load dataset (possibly sharded)
     itr = task.get_batch_iterator(

@@ -316,6 +316,7 @@ class OFATask(FairseqTask):
         model.set_num_updates(update_num)
         with torch.autograd.profiler.record_function("forward"):
             with torch.cuda.amp.autocast(enabled=(isinstance(optimizer, AMPOptimizer))):
+                # loss, sample_size, logging_output, inner_loss, moe_loss
                 loss, sample_size, logging_output = criterion(model, sample, update_num=update_num)
         if ignore_grad:
             loss *= 0

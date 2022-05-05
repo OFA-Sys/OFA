@@ -2,7 +2,7 @@
 # All rights reserved.
 # This source code is licensed under the Apache 2.0 license 
 # found in the LICENSE file in the root directory.
-
+import functools
 import math
 import random
 from typing import Any, Dict, List, Optional, Tuple
@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from fairseq import utils
-from fairseq.distributed import fsdp_wrap
+from fairseq.distributed import utils as dist_utils, fsdp_wrap
 from fairseq.models import (
     FairseqEncoder,
     FairseqEncoderDecoderModel,
@@ -34,20 +34,43 @@ from torch import Tensor
 
 from .unify_transformer_layer import TransformerEncoderLayer, TransformerDecoderLayer
 from .resnet import ResNet
-
+import logging
+logger = logging.getLogger(__name__)
 
 DEFAULT_MAX_SOURCE_POSITIONS = 1024
 DEFAULT_MAX_TARGET_POSITIONS = 1024
 
-
 DEFAULT_MIN_PARAMS_TO_WRAP = int(1e8)
-
 
 def BatchNorm2d(out_chan, momentum=0.1, eps=1e-3):
     return nn.SyncBatchNorm.convert_sync_batchnorm(
         nn.BatchNorm2d(out_chan, momentum=momentum, eps=eps)
     )
 
+def fsdp_wrap_expert(args, layer, min_num_params=0):
+    # Wrap MoE layer with FSDP using a process group with all replicated ranks
+    process_group = layer.moe_layer.expert_group
+    world_size = dist_utils.get_data_parallel_world_size()
+    pg_size = process_group.size()
+    num_experts = world_size/pg_size
+
+    for i, expert in enumerate(layer.moe_layer.experts):
+        layer.moe_layer.experts[i] = fsdp_wrap(
+            expert, process_group=process_group, min_num_params=0
+        )
+    if getattr(args, "moe_normalize_expert_grad", "world_size") == "sqrt_world_size":
+        expert_normalization_term = math.sqrt(num_experts)
+    else:
+        expert_normalization_term = num_experts
+    for p in layer.moe_layer.experts.parameters():
+        p.expert = True
+        # Scale grads by world_size/pg_size so that grads match the equivalent replicated
+        # world size expected within Trainer
+        p.register_hook(functools.partial(div_by_world_size, expert_normalization_term))
+
+    # Everything else gets wrapped as normal.
+    layer = fsdp_wrap(layer, min_num_params=min_num_params)
+    return layer
 
 def make_token_bucket_position(bucket_size, max_position=DEFAULT_MAX_SOURCE_POSITIONS):
     context_pos = torch.arange(max_position, dtype=torch.long)[:, None]
@@ -251,6 +274,36 @@ class TransformerModel(FairseqEncoderDecoderModel):
                             help='scale heads')
         parser.add_argument('--scale-resids', action='store_true',
                             help='scale resids')
+       
+        # args for mixture-of-expert layers
+        parser.add_argument('--moe-freq', type=int, metavar='D', default=1,
+                            help='Frequency at which we insert MoE Transformer layers')
+        parser.add_argument('--encoder-moe-freq', type=int, metavar='D', default=1,
+                            help='Frequency at which we insert MoE Transformer encoder layers')
+        parser.add_argument('--decoder-moe-freq', type=int, metavar='D', default=1,
+                            help='Frequency at which we insert MoE Transformer decoder layers')
+        parser.add_argument('--moe-expert-count', type=int, metavar='D', default=4,
+                            help='Number of experts in each MoE Layer')
+        parser.add_argument('--moe-gating-use-fp32', default=True, action='store_true',
+                            help="Use FP32 computations in MoE top2 gating function")
+        parser.add_argument('--moe-second-expert-policy', type=str, default='sampling',
+                            help="policy for second expert, options: all/sampling/random")
+        parser.add_argument('--moe-normalize-gate-prob-before-dropping', default=False, action='store_true',
+                            help="whether to normalize gate probs before or after dropping experts for capacity and randomization")
+        parser.add_argument('--moe-expert-ffn-dim', type=int, default=0,
+                            help="MoE Expert FFN dimension")
+        parser.add_argument('--moe-top1-expert', default=True, action='store_true',
+                            help="Use top1 gate instead of top2")
+        parser.add_argument('--moe-eval-capacity-token-fraction', type=float, default=0.25,
+                            help="Fraction of tokens as capacity during validation" + \
+                                 "if set to negative, use same as training. range: (0.0, 1.0].")
+        parser.add_argument('--moe-normalize-expert-grad', type=str, default='world_size',
+                            help="Divide expert gradients by (1) 'world_size' (2) 'sqrt_world_size'")
+        parser.add_argument('--use-moe-pad-mask', default=True, action='store_true',
+                            help="Don't route padding tokens to any expert")
+        # args for pseudo-MoE layers
+        parser.add_argument('--alternate-ffn-embed-dim', type=int, default=0,
+                            help="FFN embed dim of alternate pseudo-MoE blocks")
         # fmt: on
 
     @classmethod
@@ -318,7 +371,13 @@ class TransformerModel(FairseqEncoderDecoderModel):
         num_embeddings = len(dictionary)
         padding_idx = dictionary.pad()
 
-        emb = Embedding(num_embeddings, embed_dim, padding_idx)
+        if getattr(args, 'use_stable_embedding', False):
+            import bitsandbytes as bnb
+            if not args.no_scale_embedding:
+                logger.warning('It is recommended to pass --no-scale-embedding with --use-stable-embedding')
+            emb = bnb.nn.StableEmbedding(num_embeddings, embed_dim, padding_idx)
+        else:
+            emb = Embedding(num_embeddings, embed_dim, padding_idx)
         # if provided, load from preloaded dictionaries
         if path:
             embed_dict = utils.parse_embedding(path)
@@ -383,6 +442,8 @@ class TransformerModel(FairseqEncoderDecoderModel):
         """Get normalized probabilities (or log probs) from a net's output."""
         return self.get_normalized_probs_scriptable(net_output, log_probs, sample)
 
+def div_by_world_size(world_size, tensor):
+    return tensor / world_size
 
 class TransformerEncoder(FairseqEncoder):
     """
@@ -468,9 +529,10 @@ class TransformerEncoder(FairseqEncoder):
             self.layers = nn.ModuleList([])
 
         dpr = [x.item() for x in torch.linspace(0, args.encoder_drop_path_rate, args.encoder_layers)]
-        self.layers.extend(
-            [self.build_encoder_layer(args, drop_path_rate=dpr[i]) for i in range(args.encoder_layers)]
-        )
+        moe_freq = max(getattr(args, 'encoder_moe_freq', 0), getattr(args, 'moe_freq', 0))
+        for i in range(args.encoder_layers):
+            is_moe_layer = moe_freq != 0 and (i + 1) % moe_freq == 0
+            self.layers.append(self.build_encoder_layer(args, is_moe_layer=is_moe_layer))
         self.num_layers = len(self.layers)
 
         if args.encoder_normalize_before:
@@ -505,8 +567,8 @@ class TransformerEncoder(FairseqEncoder):
                     m.weight.requires_grad = False
                     m.bias.requires_grad = False
 
-    def build_encoder_layer(self, args, drop_path_rate=0.0):
-        layer = TransformerEncoderLayer(args, drop_path_rate=drop_path_rate)
+    def build_encoder_layer(self, args, drop_path_rate=0.0, is_moe_layer=False):
+        layer = TransformerEncoderLayer(args, drop_path_rate=drop_path_rate, is_moe_layer=is_moe_layer)
         checkpoint = getattr(args, "checkpoint_activations", False)
         if checkpoint:
             offload_to_cpu = getattr(args, "offload_activations", False)
@@ -517,7 +579,10 @@ class TransformerEncoder(FairseqEncoder):
             getattr(args, "min_params_to_wrap", DEFAULT_MIN_PARAMS_TO_WRAP)
             if not checkpoint else 0
         )
-        layer = fsdp_wrap(layer, min_num_params=min_params_to_wrap)
+        if not is_moe_layer or getattr(args, "ddp_backend", None) != "fully_sharded":
+            layer = fsdp_wrap(layer, min_num_params=min_params_to_wrap)
+        else:
+            layer = fsdp_wrap_expert(args, layer, min_num_params=min_params_to_wrap)
         return layer
 
     def get_rel_pos_bias(self, x, idx):
@@ -761,9 +826,8 @@ class TransformerEncoder(FairseqEncoder):
         if return_all_hiddens:
             encoder_states.append(x)
 
-        # aux_loss = 0
-
-        # encoder layers
+       # encoder layers
+        l_aux = []
         for idx, layer in enumerate(self.layers):
             self_attn_bias = abs_pos_bias.clone()
             self_attn_bias[:, :, -src_tokens.size(1):, -src_tokens.size(1):] += self.get_rel_pos_bias(src_tokens, idx)
@@ -777,14 +841,14 @@ class TransformerEncoder(FairseqEncoder):
                     self.get_image_rel_pos_bias(image_position_ids, idx)
             self_attn_bias = self_attn_bias.reshape(-1, x.size(0), x.size(0))
 
-            x = layer(
+            x, l_aux_i = layer(
                 x, encoder_padding_mask=encoder_padding_mask if has_pads else None, self_attn_bias=self_attn_bias
             )
             if return_all_hiddens:
                 assert encoder_states is not None
                 encoder_states.append(x)
-            # aux_loss += layer.aux_loss
-            # layer.aux_loss = 0
+            l_aux.append(l_aux_i)
+            
 
         if self.layer_norm is not None:
             x = self.layer_norm(x)
@@ -801,7 +865,7 @@ class TransformerEncoder(FairseqEncoder):
             "src_tokens": [],
             "src_lengths": [],
             "position_embeddings": [pos_embed],  # B x T x C
-            # "aux_loss": aux_loss
+            "l_aux": l_aux,
         }
 
     @torch.jit.export
@@ -1001,12 +1065,14 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             self.layers = nn.ModuleList([])
 
         dpr = [x.item() for x in torch.linspace(0, args.decoder_drop_path_rate, args.decoder_layers)]
-        self.layers.extend(
-            [
-                self.build_decoder_layer(args, no_encoder_attn, drop_path_rate=dpr[i])
-                for i in range(args.decoder_layers)
-            ]
-        )
+        moe_freq = max(getattr(args, 'decoder_moe_freq', 0), getattr(args, 'moe_freq', 0))
+        for i in range(args.decoder_layers):
+            is_moe_layer = moe_freq != 0 and (i + 1) % moe_freq == 0
+            self.layers.append(
+                self.build_decoder_layer(
+                    args, no_encoder_attn=no_encoder_attn, is_moe_layer=is_moe_layer,
+                )
+            )
         self.num_layers = len(self.layers)
 
         if args.decoder_normalize_before:
@@ -1047,6 +1113,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         self.register_buffer("image_rp_bucket", image_rp_bucket)
         self.register_buffer("image_position_idx", image_position_idx)
         self.entangle_position_embedding = args.entangle_position_embedding
+        self.aux_loss = 0
 
     def build_output_projection(self, args, dictionary, embed_tokens):
         if args.adaptive_softmax_cutoff is not None:
@@ -1077,8 +1144,8 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         for i in range(num_base_layers):
             self.layers.insert(((i+1) * args.decoder_layers) // (num_base_layers + 1), BaseLayer(args))
 
-    def build_decoder_layer(self, args, no_encoder_attn=False, drop_path_rate=0.0):
-        layer = TransformerDecoderLayer(args, no_encoder_attn, drop_path_rate=drop_path_rate)
+    def build_decoder_layer(self, args, no_encoder_attn=False, drop_path_rate=0.0, is_moe_layer=False):
+        layer = TransformerDecoderLayer(args, no_encoder_attn, drop_path_rate=drop_path_rate, is_moe_layer=is_moe_layer)
         checkpoint = getattr(args, "checkpoint_activations", False)
         if checkpoint:
             offload_to_cpu = getattr(args, "offload_activations", False)
@@ -1089,7 +1156,10 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             getattr(args, "min_params_to_wrap", DEFAULT_MIN_PARAMS_TO_WRAP)
             if not checkpoint else 0
         )
-        layer = fsdp_wrap(layer, min_num_params=min_params_to_wrap)
+        if not is_moe_layer or getattr(args, "ddp_backend", None) != "fully_sharded":
+            layer = fsdp_wrap(layer, min_num_params=min_params_to_wrap)
+        else:
+            layer = fsdp_wrap_expert(args, layer, min_num_params=min_params_to_wrap)
         return layer
 
     def get_rel_pos_bias(self, x, idx):
@@ -1301,7 +1371,11 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         if self.cross_self_attention or prev_output_tokens.eq(self.padding_idx).any():
             self_attn_padding_mask = prev_output_tokens.eq(self.padding_idx)
 
-        # aux_loss = 0
+        if encoder_out is None:
+            l_aux = []
+        else:
+            l_aux = encoder_out["l_aux"] if "l_aux" in encoder_out else []
+        
         # decoder layers
         attn: Optional[Tensor] = None
         inner_states: List[Optional[Tensor]] = [x]
@@ -1323,7 +1397,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             if incremental_state is not None:
                 self_attn_bias = self_attn_bias[:, -1:, :]
 
-            x, layer_attn, _ = layer(
+            x, layer_attn, _, l_aux_i = layer(
                 x,
                 enc,
                 padding_mask,
@@ -1335,14 +1409,10 @@ class TransformerDecoder(FairseqIncrementalDecoder):
                 self_attn_bias=self_attn_bias,
                 cross_attn_bias=cross_abs_pos_bias
             )
+            l_aux.append(l_aux_i)
             inner_states.append(x)
             if layer_attn is not None and idx == alignment_layer:
                 attn = layer_attn.float().to(x)
-            
-        #     aux_loss += layer.aux_loss
-        #     layer.aux_loss = 0
-        
-        # aux_loss += encoder_out["aux_loss"]
 
         if attn is not None:
             if alignment_heads is not None:
@@ -1360,7 +1430,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         if self.project_out_dim is not None:
             x = self.project_out_dim(x)
 
-        return x, {"attn": [attn], "inner_states": inner_states}
+        return x, {"attn": [attn], "inner_states": inner_states, "l_aux": l_aux}
 
     def output_layer(self, features):
         """Project features to the vocabulary size."""
@@ -1519,3 +1589,7 @@ def base_architecture(args):
     args.quant_noise_pq = getattr(args, "quant_noise_pq", 0)
     args.quant_noise_pq_block_size = getattr(args, "quant_noise_pq_block_size", 8)
     args.quant_noise_scalar = getattr(args, "quant_noise_scalar", 0)
+    args.is_moe = getattr(args, "is_moe", False)
+    args.selected_expert_count = getattr(args, "selected_expert_count", 2)
+    args.moe_expert_count = getattr(args, "moe_expert_count", 4)
+    args.moe_gating_use_fp32 = getattr(args, "moe_gating_use_fp32", True)
