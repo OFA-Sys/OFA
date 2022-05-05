@@ -482,7 +482,7 @@ class EncoderDecoderModel(PreTrainedModel):
         kwargs_encoder = {argument: value for argument, value in kwargs.items() if not argument.startswith("decoder_")}
 
         kwargs_decoder = {
-            argument[len("decoder_"):]: value for argument, value in kwargs.items() if argument.startswith("decoder_")
+            argument[len("decoder_") :]: value for argument, value in kwargs.items() if argument.startswith("decoder_")
         }
 
         if encoder_outputs is None:

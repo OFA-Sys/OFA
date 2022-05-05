@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2022 OFA-Sys Team. All rights reserved.
+# Copyright 2022 The OFA-Sys Team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,18 +24,24 @@ VOCAB_FILES_NAMES = {"vocab_file": "vocab.json", "merges_file": "merges.txt", "t
 
 PRETRAINED_VOCAB_FILES_MAP = {
     "vocab_file": {
-        "ofa-base": "https://huggingface.co/ofa-base/resolve/main/vocab.json",
+        "OFA-Sys/OFA-tiny": "https://huggingface.co/OFA-Sys/OFA-tiny/blob/main/vocab.json",
+        "OFA-Sys/OFA-medium": "https://huggingface.co/OFA-Sys/OFA-medium/blob/main/vocab.json",
+        "OFA-Sys/OFA-base": "https://huggingface.co/OFA-Sys/OFA-base/blob/main/vocab.json",
+        "OFA-Sys/OFA-large": "https://huggingface.co/OFA-Sys/OFA-large/blob/main/vocab.json",
     },
     "merges_file": {
-        "ofa-base": "https://huggingface.co/ofa-base/resolve/main/merges.txt",
-    },
-    "tokenizer_file": {
-        "ofa-base": "https://huggingface.co/ofa-base/resolve/main/tokenizer.json",
+        "OFA-Sys/OFA-tiny": "https://huggingface.co/OFA-Sys/OFA-tiny/blob/main/merges.txt",
+        "OFA-Sys/OFA-medium": "https://huggingface.co/OFA-Sys/OFA-medium/blob/main/merges.txt",
+        "OFA-Sys/OFA-base": "https://huggingface.co/OFA-Sys/OFA-base/blob/main/merges.txt",
+        "OFA-Sys/OFA-large": "https://huggingface.co/OFA-Sys/OFA-large/blob/main/merges.txt",
     },
 }
 
 PRETRAINED_POSITIONAL_EMBEDDINGS_SIZES = {
-    "ofa-base": 1024,
+    "OFA-Sys/OFA-tiny": 1024,
+    "OFA-Sys/OFA-medium": 1024,
+    "OFA-Sys/OFA-base": 1024,
+    "OFA-Sys/OFA-large": 1024,
 }
 
 

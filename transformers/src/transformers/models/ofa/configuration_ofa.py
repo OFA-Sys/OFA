@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2022 Alibaba Group and The HuggingFace Inc. team. All rights reserved.
+# Copyright 2022 The OFA-Sys Team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@ from ...utils import logging
 logger = logging.get_logger(__name__)
 
 OFA_PRETRAINED_CONFIG_ARCHIVE_MAP = {
-    "ofa-medium": "https://huggingface.co/ofa-base/resolve/main/config.json",
+    "OFA-Sys/OFA-tiny": "https://huggingface.co/OFA-Sys/OFA-tiny/blob/main/config.json",
+    "OFA-Sys/OFA-medium": "https://huggingface.co/OFA-Sys/OFA-medium/blob/main/config.json",
+    "OFA-Sys/OFA-base": "https://huggingface.co/OFA-Sys/OFA-base/blob/main/config.json",
+    "OFA-Sys/OFA-large": "https://huggingface.co/OFA-Sys/OFA-large/blob/main/config.json",
     # See all OFA models at https://huggingface.co/models?filter=ofa
 }
 
@@ -91,10 +94,10 @@ class OFAConfig(PretrainedConfig):
         vocab_size=59457,
         max_position_embeddings=1024,
         encoder_layers=4,
-        encoder_ffn_dim=512*4,
+        encoder_ffn_dim=512 * 4,
         encoder_attention_heads=8,
         decoder_layers=4,
-        decoder_ffn_dim=512*4,
+        decoder_ffn_dim=512 * 4,
         decoder_attention_heads=8,
         encoder_layerdrop=0.0,
         decoder_layerdrop=0.0,
@@ -126,7 +129,7 @@ class OFAConfig(PretrainedConfig):
         image_bucket_size=42,
         add_type_embedding=True,
         share_decoder_input_output_embed=True,
-        attn_scale_factor=2.,
+        attn_scale_factor=2.0,
         code_layernorm_embedding=True,
         code_image_size=128,
         entangle_position_embedding=False,
