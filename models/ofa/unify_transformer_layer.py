@@ -338,7 +338,7 @@ class TransformerEncoderLayer(nn.Module):
 
     def moe_checkpoint_loader(self, name, state_dict, noise_coef=0):
 
-        n_experts = self.args.moe_expert_count
+        n_experts = self.args.moe_expert_count // torch.distributed.get_world_size()
         # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
         fc1_weights = state_dict["{}.fc1.weight".format(name)]
         fc2_weights = state_dict["{}.fc2.weight".format(name)]
@@ -353,6 +353,14 @@ class TransformerEncoderLayer(nn.Module):
             state_dict["{}.moe_layer.experts.{}.fc2.weight".format(name, i)] = fc2_weights + torch.randn(fc2_weights.size()) * noise_coef
             state_dict["{}.moe_layer.experts.{}.fc1.bias".format(name, i)] = fc1_bias
             state_dict["{}.moe_layer.experts.{}.fc2.bias".format(name, i)] = fc2_bias
+        
+        del state_dict["{}.fc1.weight".format(name)]
+        del state_dict["{}.fc2.weight".format(name)]
+        del state_dict["{}.fc1.bias".format(name)]
+        del state_dict["{}.fc2.bias".format(name)]
+        del state_dict["{}.ffn_layernorm.weight".format(name)]
+        del state_dict["{}.ffn_layernorm.bias".format(name)]
+
         
     def upgrade_state_dict_named(self, state_dict, name):
         """
@@ -374,7 +382,6 @@ class TransformerEncoderLayer(nn.Module):
 
         moe_checker = "{}.moe_layer.gate.wg.weight".format(name)
         if moe_checker not in state_dict and "moe_layer.gate.wg.weight" in self.state_dict():
-            print("Loading Pre-trained checkpoints to MoE")
             self.moe_checkpoint_loader(name, state_dict)
         # if "{}.doe.fc1.weight".format(name) not in state_dict and "doe.fc1.weight" in self.state_dict():
         #     self.doe_checkpoint_loader(name, state_dict)
@@ -825,7 +832,7 @@ class TransformerDecoderLayer(nn.Module):
 
     def moe_checkpoint_loader(self, name, state_dict, noise_coef=0):
 
-        n_experts = self.args.moe_expert_count
+        n_experts = self.args.moe_expert_count // torch.distributed.get_world_size()
         # get fc1_weights, fc2_weights, fc1_bias, fc2_bias
         fc1_weights = state_dict["{}.fc1.weight".format(name)]
         fc2_weights = state_dict["{}.fc2.weight".format(name)]
@@ -840,7 +847,15 @@ class TransformerDecoderLayer(nn.Module):
             state_dict["{}.moe_layer.experts.{}.fc2.weight".format(name, i)] = fc2_weights + torch.randn(fc2_weights.size()) * noise_coef
             state_dict["{}.moe_layer.experts.{}.fc1.bias".format(name, i)] = fc1_bias
             state_dict["{}.moe_layer.experts.{}.fc2.bias".format(name, i)] = fc2_bias
-      
+
+        del state_dict["{}.fc1.weight".format(name)]
+        del state_dict["{}.fc2.weight".format(name)]
+        del state_dict["{}.fc1.bias".format(name)]
+        del state_dict["{}.fc2.bias".format(name)]
+        del state_dict["{}.ffn_layernorm.weight".format(name)]
+        del state_dict["{}.ffn_layernorm.bias".format(name)]
+
+
     def upgrade_state_dict_named(self, state_dict, name):
         """
         Rename layer norm states from `...layer_norms.0.weight` to

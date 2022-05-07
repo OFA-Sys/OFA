@@ -274,7 +274,7 @@ class OFATask(FairseqTask):
         return seq_gen_cls(
             models,
             self.target_dictionary,
-            beam_size=getattr(args, "beam", 5),
+            beam_size=getattr(args, "beam", 1),
             max_len_a=getattr(args, "max_len_a", 0),
             max_len_b=getattr(args, "max_len_b", 200),
             min_len=getattr(args, "min_len", 1),

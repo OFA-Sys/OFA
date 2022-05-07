@@ -960,7 +960,7 @@ class Trainer(object):
             )
 
         overflow = False
-        logger.debug(f"[{self.get_num_updates()}] done with fwd, bwd")
+        logger.info(f"[{self.get_num_updates()}] done with fwd, bwd")
         try:
             with torch.autograd.profiler.record_function("reduce-grads"):
                 # reduce gradients across workers
@@ -1023,7 +1023,7 @@ class Trainer(object):
                         self._amp_retries += 1
                         return self.train_step(samples, raise_oom)  # recursion to feed in same batch
                         
-            logger.debug(f"[{self.get_num_updates()}] done with optimizer step")
+            logger.info(f"[{self.get_num_updates()}] done with optimizer step")
 
         except FloatingPointError:
             # re-run the forward and backward pass with hooks attached to print
@@ -1186,6 +1186,7 @@ class Trainer(object):
                 _loss, sample_size, logging_output = self.task.valid_step(
                     sample, self.model, self.criterion, **extra_kwargs
                 )
+                logger.info('model eval finished')
             except RuntimeError as e:
                 if "out of memory" in str(e):
                     self._log_oom(e)
@@ -1208,6 +1209,7 @@ class Trainer(object):
                 else:
                     sample_size *= 0.0
 
+        logger.info('before gather dp')
         # gather logging outputs from all replicas
         if self.data_parallel_world_size > 1:
             logging_outputs, (sample_size,) = self._aggregate_logging_outputs(
@@ -1216,10 +1218,12 @@ class Trainer(object):
                 ignore=is_dummy_batch,
             )
 
+        logger.info('after gather dp')
         # log validation stats
         if self.tpu:
             logging_outputs = self._xla_markstep_and_send_to_cpu(logging_outputs)
         logging_output = self._reduce_and_log_stats(logging_outputs, sample_size)
+        logger.info('after _reduce_and_log_stats dp')
 
         return logging_output
 
@@ -1540,6 +1544,7 @@ class Trainer(object):
                 )
 
     def _reduce_and_log_stats(self, logging_outputs, sample_size, grad_norm=None):
+        logger.info('DEBUG: enter _reduce_and_log_stats')
         if grad_norm is not None and (
             not torch.is_tensor(grad_norm) or torch.isfinite(grad_norm)
         ):
@@ -1556,12 +1561,12 @@ class Trainer(object):
                     priority=500,
                     round=1,
                 )
-
+        logger.info('_reduce_and_log_stats before metrics.aggregate()')
         with metrics.aggregate() as agg:
             if logging_outputs is not None:
                 self.task.reduce_metrics(logging_outputs, self.get_criterion())
                 del logging_outputs
-
+            logger.info('_reduce_and_log_stats after task.reduce_metrics()')
             # extra warning for criterions that don't properly log a loss value
             if "loss" not in agg:
                 if "loss" not in self._warn_once:
@@ -1582,9 +1587,10 @@ class Trainer(object):
                     if key_to_delete in logging_output:
                         del logging_output[key_to_delete]
             return logging_output
+        logger.info('_reduce_and_log_stats after metrics.aggregate()')
 
     def _check_xla_compilation(self):
-        import torch_xla.debug.metrics as met
+        import torch_xla.info.metrics as met
 
         compile_stats = met.metric_data("CompileTime")
         if compile_stats is None:

@@ -133,7 +133,6 @@ def main(cfg: FairseqConfig) -> None:
             sum(p.numel() for p in model.parameters() if getattr(p, "expert", False) and p.requires_grad),
         )
     )
-    logger.info(metrics.get_nvidia_smi_gpu_memory_stats_str())
 
     # Load valid dataset (we load training data below, based on the latest checkpoint)
     # We load the valid dataset AFTER building the model
@@ -515,7 +514,7 @@ def validate(
                 if cfg.dataset.max_valid_steps is not None and i > cfg.dataset.max_valid_steps:
                     break
                 trainer.valid_step(sample)
-
+        logger.info('valid_step finished')
         # log validation stats
         if hasattr(task, 'get_valid_stats'):
             stats = task.get_valid_stats(cfg, trainer, agg.get_smoothed_values())

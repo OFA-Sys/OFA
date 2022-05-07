@@ -282,7 +282,7 @@ class TransformerModel(FairseqEncoderDecoderModel):
                             help='Frequency at which we insert MoE Transformer encoder layers')
         parser.add_argument('--decoder-moe-freq', type=int, metavar='D', default=1,
                             help='Frequency at which we insert MoE Transformer decoder layers')
-        parser.add_argument('--moe-expert-count', type=int, metavar='D', default=4,
+        parser.add_argument('--moe-expert-count', type=int, metavar='D', default=2,
                             help='Number of experts in each MoE Layer')
         parser.add_argument('--moe-gating-use-fp32', default=True, action='store_true',
                             help="Use FP32 computations in MoE top2 gating function")
@@ -1591,5 +1591,5 @@ def base_architecture(args):
     args.quant_noise_scalar = getattr(args, "quant_noise_scalar", 0)
     args.is_moe = getattr(args, "is_moe", False)
     args.selected_expert_count = getattr(args, "selected_expert_count", 2)
-    args.moe_expert_count = getattr(args, "moe_expert_count", 4)
+    args.moe_expert_count = getattr(args, "moe_expert_count", 2)
     args.moe_gating_use_fp32 = getattr(args, "moe_gating_use_fp32", True)

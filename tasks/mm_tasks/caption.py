@@ -135,6 +135,7 @@ class CaptionTask(OFATask):
         loss, sample_size, logging_output = criterion(model, sample)
 
         model.eval()
+        logger.info('inside task.valid_step check0')
         if self.cfg.eval_bleu or self.cfg.eval_cider:
             hyps, refs = self._inference(self.sequence_generator, sample, model)
             if self.cfg.eval_bleu:
@@ -158,8 +159,9 @@ class CaptionTask(OFATask):
         return loss, sample_size, logging_output
 
     def reduce_metrics(self, logging_outputs, criterion):
+        logger.info("DEBUG: enter task.reduce_metrics 0")
         super().reduce_metrics(logging_outputs, criterion)
-
+        logger.info("DEBUG: enter task.reduce_metrics")
         def sum_logs(key):
             import torch
             result = sum(log.get(key, 0) for log in logging_outputs)
@@ -168,6 +170,7 @@ class CaptionTask(OFATask):
             return result
 
         if self.cfg.eval_bleu:
+            logger.info("DEBUG: enter task.reduce_metrics -> eval_bleu")
             counts, totals = [], []
             for i in range(EVAL_BLEU_ORDER):
                 counts.append(sum_logs("_bleu_counts_" + str(i)))
@@ -201,6 +204,7 @@ class CaptionTask(OFATask):
                 metrics.log_derived("bleu", compute_bleu)
 
         if self.cfg.eval_cider:
+            logger.info("DEBUG: enter task.reduce_metrics -> eval_cider")
             def compute_cider(meters):
                 cider = meters["_cider_score_sum"].sum / meters["_cider_cnt"].sum
                 cider = cider if isinstance(cider, float) else cider.item()
