@@ -26,8 +26,9 @@ data_dir=../../dataset/vizwiz_data
 data=${data_dir}/vizwiz_train.tsv,${data_dir}/vizwiz_val.tsv
 # Note: If you have shuffled the data in advance, please uncomment the line below.
 # data=${data_dir}/vqa_train_1.tsv,${data_dir}/vqa_train_2.tsv,${data_dir}/vqa_train_3.tsv,${data_dir}/vqa_train_4.tsv,${data_dir}/vqa_train_5.tsv,${data_dir}/vqa_train_6.tsv,${data_dir}/vqa_train_7.tsv,${data_dir}/vqa_train_8.tsv,${data_dir}/vqa_train_9.tsv,${data_dir}/vqa_train_10.tsv,${data_dir}/vqa_val.tsv
-ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
-restore_file=../../checkpoints/ofa_medium.pt
+# ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
+# --ans2label-file=${ans2label_file} \
+restore_file=../../checkpoints/ofa_tiny.pt
 selected_cols=0,5,2,3,4
 
 log_dir=./vqa_logs
@@ -38,7 +39,7 @@ bpe_dir=../../utils/BPE
 user_dir=../../ofa_module
 
 task=vqa_gen
-arch=ofa_medium
+arch=ofa_tiny
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.1
 batch_size=4
@@ -127,7 +128,6 @@ for total_num_updates in {40000,}; do
             --find-unused-parameters \
             --freeze-encoder-embedding \
             --freeze-decoder-embedding \
-            --ans2label-file=${ans2label_file} \
             --valid-batch-size=20 \
             --add-type-embedding \
             --scale-attn \

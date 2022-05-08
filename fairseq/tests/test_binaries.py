@@ -1614,7 +1614,7 @@ def train_legacy_masked_language_model(data_dir, arch, extra_args=()):
         ]
         + list(extra_args),
     )
-    train.main(train_args)
+    train.create_tsv_files(train_args)
 
 
 class TestOptimizers(unittest.TestCase):
@@ -1807,7 +1807,7 @@ def train_masked_lm(data_dir, arch, extra_flags=None):
         ]
         + (extra_flags or []),
     )
-    train.main(train_args)
+    train.create_tsv_files(train_args)
 
 
 def train_roberta_head(data_dir, arch, num_classes=2, extra_flags=None):
@@ -1850,7 +1850,7 @@ def train_roberta_head(data_dir, arch, num_classes=2, extra_flags=None):
         ]
         + (extra_flags or []),
     )
-    train.main(train_args)
+    train.create_tsv_files(train_args)
 
 
 def eval_lm_main(data_dir, extra_flags=None):
@@ -1867,7 +1867,7 @@ def eval_lm_main(data_dir, extra_flags=None):
         ]
         + (extra_flags or []),
     )
-    eval_lm.main(eval_lm_args)
+    eval_lm.create_tsv_files(eval_lm_args)
 
 
 if __name__ == "__main__":

@@ -12,8 +12,8 @@ Author: Jan Willruth
 import base64
 import glob
 import json
+import _pickle as pickle
 import sys
-import pandas as pd
 from io import BytesIO
 from PIL import Image
 from tqdm import tqdm
@@ -35,18 +35,19 @@ def img2base64(fn):
     return base64.b64encode(byte_data).decode('utf-8')
 
 
-def main():
+def create_tsv_files():
     # Dict to map answer confidence to value
     conf = {'yes': '1.0', 'maybe': '0.5', 'no': '0.0'}
     # Iterate over subsets
-    for subset in ['train', 'val', 'test']:
-        print(f'Creating tsv file for {subset} subset...')
+    for subset in ['train']:
+        print(f'Generating rows for {subset} tsv file...')
         # Load corresponding json file
         annotations = json.load(open(f'vizwiz_data/Annotations/{subset}.json', encoding='utf-8'))
         # Create empty set to store data
         tsv_set = set()
         # Iterate over all images in subset
-        for fn in tqdm(glob.glob(f'vizwiz_data/{subset}/*.jpg'), file=sys.stdout):
+        file_names = glob.glob(f'vizwiz_data/{subset}/*.jpg')
+        for fn in tqdm(file_names[:1000], file=sys.stdout):
             # Some string manipulation to get img_id
             fn = fn.replace('\\', '/')
             img_id = int(fn.split('/')[-1].split('_')[-1][3:-4])
@@ -63,11 +64,20 @@ def main():
                     ans_conf = f'{conf[ans["answer_confidence"]]}|!+{ans["answer"]}'
                     tsv_set.add((img_id, img_id, question, ans_conf, '', img2base64(fn)))
         # Write to tsv file
+        print(f'Writing {subset} tsv file...')
         with open(f'vizwiz_data/vizwiz_{subset}.tsv', 'w', encoding='utf-8') as f:
-            for line in tsv_set:
+            for line in tqdm(tsv_set, file=sys.stdout):
                 f.write('\t'.join(map(str, line)) + '\n')
-    return 'All done!'
+    return 'Finished creating tsv files!'
+
+
+def create_ans2label_file():
+    with open('vqa_data/trainval_ans2label.pkl', 'rb') as f:
+        ans2label = pickle.load(f)
+        print("")
 
 
 if __name__ == '__main__':
-    main()
+    print(create_tsv_files())
+    # print(create_ans2label_file())
+    print('All done!')

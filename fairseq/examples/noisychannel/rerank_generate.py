@@ -159,7 +159,7 @@ def gen_and_reprocess_nbest(args):
             print(input_args)
             with open(predictions_bpe_file, "w") as f:
                 with redirect_stdout(f):
-                    generate.main(input_args)
+                    generate.create_tsv_files(input_args)
 
     gen_output = rerank_utils.BitextOutputFromGen(
         predictions_bpe_file,
@@ -345,7 +345,7 @@ def gen_and_reprocess_nbest(args):
                 ]
                 preprocess_parser = options.get_preprocessing_parser()
                 input_args = preprocess_parser.parse_args(bw_preprocess_param)
-                preprocess.main(input_args)
+                preprocess.create_tsv_files(input_args)
 
             preprocess_param = [
                 "--source-lang",
@@ -363,7 +363,7 @@ def gen_and_reprocess_nbest(args):
             ]
             preprocess_parser = options.get_preprocessing_parser()
             input_args = preprocess_parser.parse_args(preprocess_param)
-            preprocess.main(input_args)
+            preprocess.create_tsv_files(input_args)
 
         if args.right_to_left1 or args.right_to_left2:
             preprocess_param = [
@@ -382,7 +382,7 @@ def gen_and_reprocess_nbest(args):
             ]
             preprocess_parser = options.get_preprocessing_parser()
             input_args = preprocess_parser.parse_args(preprocess_param)
-            preprocess.main(input_args)
+            preprocess.create_tsv_files(input_args)
 
     return gen_output
 

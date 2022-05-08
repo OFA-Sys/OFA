@@ -21,7 +21,7 @@ def main():
         engine.runAndWait()
 
     # JW: Let user know that the program is starting up
-    tts("Hello, I am OFA. I am starting up.")
+    tts('I am starting up. Please give me a second.')
 
     # Register VQA task
     tasks.register_task('vqa_gen', VqaGenTask)
@@ -140,19 +140,17 @@ def main():
 
     # JW: Add loop to ask multiple questions
     while True:
-        tts("Please ask a question.")
         try:
             with m as source:
                 r.adjust_for_ambient_noise(source)
+                tts('Please ask a question.')
                 audio = r.listen(source)
                 question = r.recognize_google(audio).lower()
         except sr.RequestError as e:
-            tts("Sorry, I couldn't understand your question.")
+            tts('Sorry, I could not understand your question.')
             continue
         except sr.UnknownValueError:
-            return tts("No question detected, exiting...")
-        if question in ['quit', 'exit']:
-            return tts('Exiting...')
+            return tts('No question detected, exiting...')
 
         # Construct input sample & preprocess for GPU if cuda available
         sample = construct_sample(image, question)
@@ -166,6 +164,23 @@ def main():
         # Answer question
         tts(f'Your question was: {question}')
         tts(f'OFA\'s Answer is: {result[0]["answer"]}\n')
+
+        # Ask if user wants to ask another question
+        with m as source:
+            r.adjust_for_ambient_noise(source)
+            tts('Would you like to ask another question?')
+            while True:
+                audio = r.listen(source)
+                try:
+                    response = r.recognize_google(audio).lower()
+                    if 'yes' in response:
+                        break
+                    elif 'no' in response:
+                        return tts('Exiting...')
+                    else:
+                        tts('Sorry, I could not understand your response.')
+                except sr.UnknownValueError:
+                    tts('Sorry, I could not understand your response.')
 
 
 if __name__ == "__main__":
