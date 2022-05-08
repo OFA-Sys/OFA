@@ -59,7 +59,7 @@ def main():
     )
     parser.add_argument(
         "--model-file",
-        default="checkpoint_best.pt",
+        default="vqa_medium_best.pt",
         help="where in model_dir are weights saved",
     )
     parser.add_argument(

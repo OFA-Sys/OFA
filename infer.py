@@ -14,13 +14,15 @@ import pyttsx3
 import speech_recognition as sr
 
 
-def tts(text):
-    engine = pyttsx3.init()
-    engine.say(text)
-    engine.runAndWait()
-
-
 def main():
+    def tts(text):
+        engine = pyttsx3.init()
+        engine.say(text)
+        engine.runAndWait()
+
+    # JW: Let user know that the program is starting up
+    tts("Hello, I am OFA. I am starting up.")
+
     # Register VQA task
     tasks.register_task('vqa_gen', VqaGenTask)
 
@@ -31,7 +33,7 @@ def main():
 
     # specify some options for evaluation
     parser = options.get_generation_parser()
-    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/ofa_medium.pt",
+    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/ofa_tiny.pt",
                   "--bpe-dir=utils/BPE"]
     args = options.parse_args_and_arch(parser, input_args)
     cfg = convert_namespace_to_omegaconf(args)
@@ -125,7 +127,7 @@ def main():
     eos_item = torch.LongTensor([task.src_dict.eos()])
     pad_idx = task.src_dict.pad()
 
-    # reproduce the VQA cases provided in our paper (you can use other images with wget)
+    # JW: Open any image file
     image = Image.open('test_images/test.jpg')
 
     # JW: Show image via PIL
@@ -133,16 +135,17 @@ def main():
     plt.show()
 
     # JW Initialize speech recognizer
-    rec = sr.Recognizer()
+    r = sr.Recognizer()
+    m = sr.Microphone(0)
 
     # JW: Add loop to ask multiple questions
     while True:
         tts("Please ask a question.")
         try:
-            with sr.Microphone() as source:
-                # rec.adjust_for_ambient_noise(source, duration=0.2)
-                audio = rec.listen(source)
-                question = rec.recognize_google(audio).lower()
+            with m as source:
+                r.adjust_for_ambient_noise(source)
+                audio = r.listen(source)
+                question = r.recognize_google(audio).lower()
         except sr.RequestError as e:
             tts("Sorry, I couldn't understand your question.")
             continue
@@ -159,9 +162,6 @@ def main():
         # Run eval step for open-domain VQA
         with torch.no_grad():
             result, scores = zero_shot_step(task, generator, models, sample)
-
-        """print(f'Question: {question}')
-        print(f'OFA\'s Answer: {result[0]["answer"]}\n')"""
 
         # Answer question
         tts(f'Your question was: {question}')

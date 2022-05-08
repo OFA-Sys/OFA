@@ -56,7 +56,7 @@ a wait-3 policy model. Assuming the save directory is `${ST_SAVE_DIR}`
         --optimizer adam --lr 0.0001 --lr-scheduler inverse_sqrt --clip-norm 10.0 \
         --criterion label_smoothed_cross_entropy \
         --warmup-updates 4000 --max-update 100000 --max-tokens 40000 --seed 2 \
-        --load-pretrained-encoder-from ${ASR_SAVE_DIR}/checkpoint_best.pt \
+        --load-pretrained-encoder-from ${ASR_SAVE_DIR}/vqa_medium_best.pt \
         --task speech_to_text  \
         --arch convtransformer_simul_trans_espnet  \
         --simul-type waitk_fixed_pre_decision  \

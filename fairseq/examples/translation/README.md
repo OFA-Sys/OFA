@@ -58,7 +58,7 @@ Loading custom models:
 from fairseq.models.transformer import TransformerModel
 zh2en = TransformerModel.from_pretrained(
   '/path/to/checkpoints',
-  checkpoint_file='checkpoint_best.pt',
+  checkpoint_file='vqa_medium_best.pt',
   data_name_or_path='data-bin/wmt17_zh_en_full',
   bpe='subword_nmt',
   bpe_codes='data-bin/wmt17_zh_en_full/zh.code'
@@ -139,7 +139,7 @@ CUDA_VISIBLE_DEVICES=0 fairseq-train \
 Finally we can evaluate our trained model:
 ```bash
 fairseq-generate data-bin/iwslt14.tokenized.de-en \
-    --path checkpoints/checkpoint_best.pt \
+    --path checkpoints/vqa_medium_best.pt \
     --batch-size 128 --beam 5 --remove-bpe
 ```
 
@@ -184,7 +184,7 @@ fairseq-train \
 
 # Evaluate
 fairseq-generate data-bin/wmt17_en_de \
-    --path checkpoints/fconv_wmt_en_de/checkpoint_best.pt \
+    --path checkpoints/fconv_wmt_en_de/vqa_medium_best.pt \
     --beam 5 --remove-bpe
 ```
 
@@ -218,7 +218,7 @@ fairseq-train \
 # Evaluate
 fairseq-generate \
     data-bin/fconv_wmt_en_fr \
-    --path checkpoints/fconv_wmt_en_fr/checkpoint_best.pt \
+    --path checkpoints/fconv_wmt_en_fr/vqa_medium_best.pt \
     --beam 5 --remove-bpe
 ```
 
@@ -285,7 +285,7 @@ cat iwslt17.test.${SRC}-en.${SRC}.bpe \
     | fairseq-interactive data-bin/iwslt17.de_fr.en.bpe16k/ \
       --task multilingual_translation --lang-pairs de-en,fr-en \
       --source-lang ${SRC} --target-lang en \
-      --path checkpoints/multilingual_transformer/checkpoint_best.pt \
+      --path checkpoints/multilingual_transformer/vqa_medium_best.pt \
       --buffer-size 2000 --batch-size 128 \
       --beam 5 --remove-bpe=sentencepiece \
     > iwslt17.test.${SRC}-en.en.sys

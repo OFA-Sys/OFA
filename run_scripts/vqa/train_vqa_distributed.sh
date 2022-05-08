@@ -9,7 +9,7 @@
 
 # JW: epoch length and number of epochs
 epoch_length=114280
-num_epochs=10
+num_epochs=4
 
 # Number of GPUs per GPU worker
 GPUS_PER_NODE=1
@@ -22,12 +22,12 @@ export MASTER_PORT=8214
 # The rank of this worker, should be in {0, ..., WORKER_CNT-1}, for single-worker training, please set to 0
 export RANK=0 
 
-data_dir=../../dataset/vqa_data
-data=${data_dir}/vqa_train.tsv,${data_dir}/vqa_val.tsv
+data_dir=../../dataset/vizwiz_data
+data=${data_dir}/vizwiz_train.tsv,${data_dir}/vizwiz_val.tsv
 # Note: If you have shuffled the data in advance, please uncomment the line below.
 # data=${data_dir}/vqa_train_1.tsv,${data_dir}/vqa_train_2.tsv,${data_dir}/vqa_train_3.tsv,${data_dir}/vqa_train_4.tsv,${data_dir}/vqa_train_5.tsv,${data_dir}/vqa_train_6.tsv,${data_dir}/vqa_train_7.tsv,${data_dir}/vqa_train_8.tsv,${data_dir}/vqa_train_9.tsv,${data_dir}/vqa_train_10.tsv,${data_dir}/vqa_val.tsv
 ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
-restore_file=../../checkpoints/ofa_tiny.pt
+restore_file=../../checkpoints/ofa_medium.pt
 selected_cols=0,5,2,3,4
 
 log_dir=./vqa_logs
@@ -38,7 +38,7 @@ bpe_dir=../../utils/BPE
 user_dir=../../ofa_module
 
 task=vqa_gen
-arch=ofa_tiny
+arch=ofa_medium
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.1
 batch_size=4
@@ -65,7 +65,8 @@ ema_start_update=0
 val_inference_type=beamsearch
 
 # JW: Calculate total_num_updates from epoch "length" and number of epochs
-for total_num_updates in {$((epoch_length * num_epochs)),}; do
+# $((epoch_length * num_epochs))
+for total_num_updates in {40000,}; do
   echo "total_num_updates ""${total_num_updates}"
   for warmup_updates in {1000,}; do
     echo "warmup_updates ""${warmup_updates}"

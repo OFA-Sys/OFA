@@ -110,7 +110,7 @@ from fairseq.models.roberta import RobertaModel
 
 roberta = RobertaModel.from_pretrained(
     'checkpoints/',
-    checkpoint_file='checkpoint_best.pt',
+    checkpoint_file='vqa_medium_best.pt',
     data_name_or_path='PAWS-bin'
 )
 

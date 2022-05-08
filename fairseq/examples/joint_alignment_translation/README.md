@@ -63,7 +63,7 @@ If you want to train the above model with big batches (assuming your machine has
 fairseq-generate \
     binarized --gen-subset test --print-alignment \
     --source-lang en --target-lang de \
-    --path checkpoints/checkpoint_best.pt --beam 5 --nbest 1
+    --path checkpoints/vqa_medium_best.pt --beam 5 --nbest 1
 ```
 
 ##### 6. Other resources.

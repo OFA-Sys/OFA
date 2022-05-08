@@ -72,7 +72,7 @@ results on a single GPU by adding `--update-freq=4`.
 ```python
 from fairseq.models.roberta import RobertaModel
 from examples.roberta.wsc import wsc_utils  # also loads WSC task and criterion
-roberta = RobertaModel.from_pretrained('checkpoints', 'checkpoint_best.pt', 'WSC/')
+roberta = RobertaModel.from_pretrained('checkpoints', 'vqa_medium_best.pt', 'WSC/')
 roberta.cuda()
 nsamples, ncorrect = 0, 0
 for sentence, label in wsc_utils.jsonl_iterator('WSC/val.jsonl', eval=True):

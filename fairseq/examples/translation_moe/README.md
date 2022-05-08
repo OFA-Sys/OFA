@@ -35,7 +35,7 @@ Once a model is trained, we can generate translations from different experts usi
 For example, to generate from expert 0:
 ```bash
 fairseq-generate data-bin/wmt17_en_de \
-    --path checkpoints/checkpoint_best.pt \
+    --path checkpoints/vqa_medium_best.pt \
     --beam 1 --remove-bpe \
     --task translation_moe --user-dir examples/translation_moe/translation_moe_src \
     --method hMoElp --mean-pool-gating-network \
@@ -57,7 +57,7 @@ for EXPERT in $(seq 0 2); do \
     cat wmt14-en-de.extra_refs.tok \
     | grep ^S | cut -f 2 \
     | fairseq-interactive data-bin/wmt17_en_de \
-        --path checkpoints/checkpoint_best.pt \
+        --path checkpoints/vqa_medium_best.pt \
         --beam 1 \
         --bpe subword_nmt --bpe-codes $BPE_CODE \
         --buffer-size 500 --max-tokens 6000 \

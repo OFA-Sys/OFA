@@ -12,7 +12,7 @@ split=$1
 
 data=../../dataset/vqa_data/vqa_${split}.tsv
 ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
-path=../../checkpoints/checkpoint_best.pt
+path=../../checkpoints/vqa_medium_best.pt
 result_path=../../results/vqa_${split}_beam
 selected_cols=0,5,2,3,4
 

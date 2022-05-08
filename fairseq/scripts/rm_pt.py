@@ -43,7 +43,7 @@ def main():
     parser = argparse.ArgumentParser(
         description=(
             "Recursively delete checkpoint files from `root_dir`, "
-            "but preserve checkpoint_best.pt and checkpoint_last.pt"
+            "but preserve vqa_medium_best.pt and checkpoint_last.pt"
         )
     )
     parser.add_argument("root_dirs", nargs="*")
@@ -59,7 +59,7 @@ def main():
         help="preserve checkpoints in dirs that start with test_ prefix (default: delete them)",
     )
     parser.add_argument(
-        "--delete-best", action="store_true", help="delete checkpoint_best.pt"
+        "--delete-best", action="store_true", help="delete vqa_medium_best.pt"
     )
     parser.add_argument(
         "--delete-last", action="store_true", help="delete checkpoint_last.pt"
@@ -88,7 +88,7 @@ def main():
                     not os.path.basename(root).startswith("test_") or args.preserve_test
                 ) and (
                     (file == "checkpoint_last.pt" and not args.delete_last)
-                    or (file == "checkpoint_best.pt" and not args.delete_best)
+                    or (file == "vqa_medium_best.pt" and not args.delete_best)
                     or file in to_save
                 ):
                     if os.path.islink(full_path) and not args.no_dereference:

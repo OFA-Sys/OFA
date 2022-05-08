@@ -69,7 +69,7 @@ fairseq-generate \
     data-bin/wmt14_en_de_distill \
     --gen-subset test \
     --task translation_lev \
-    --path checkpoints/checkpoint_best.pt \
+    --path checkpoints/vqa_medium_best.pt \
     --iter-decode-max-iter 9 \
     --iter-decode-eos-penalty 0 \
     --beam 1 --remove-bpe \
@@ -110,7 +110,7 @@ fairseq-generate \
     data-bin/wmt14_en_de_distill \
     --gen-subset test \
     --task translation_lev \
-    --path checkpoints/checkpoint_best.pt:at_checkpoints/checkpoint_best.pt \
+    --path checkpoints/vqa_medium_best.pt:at_checkpoints/vqa_medium_best.pt \
     --iter-decode-max-iter 9 \
     --iter-decode-eos-penalty 0 \
     --iter-decode-with-beam 9 \

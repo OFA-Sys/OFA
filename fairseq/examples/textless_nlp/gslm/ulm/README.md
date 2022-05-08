@@ -59,7 +59,7 @@ Once an ULM was trained, we can use it for generating new utterances. Suppose, t
 
 ```bash
     python sample.py  data-bin/ \
-        --path=checkpoints/checkpoint_best.pt --task=language_modeling --sampling --temperature=0.7 \
+        --path=checkpoints/vqa_medium_best.pt --task=language_modeling --sampling --temperature=0.7 \
         --seed=1  --prompts=prompts.txt  --output=samples.txt --max-len-a=0 --max-len-b=500 \
         --prefix-size=-1 --batch-size=16 --fp16 --samples-per-prompt=10
 ```

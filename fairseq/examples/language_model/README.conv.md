@@ -23,7 +23,7 @@ fairseq-train --task language_modeling \
 
 And evaluate with:
 ```bash
-fairseq-eval-lm data-bin/wikitext-103 --path checkpoints/fconv_wiki103/checkpoint_best.pt
+fairseq-eval-lm data-bin/wikitext-103 --path checkpoints/fconv_wiki103/vqa_medium_best.pt
 ```
 
 ## Citation
