@@ -1,6 +1,5 @@
 .idea/*
 .DS_Store
-/fairseq/*
 /checkpoints/*
 /dataset/vqa_data/*
 /test_images/*
