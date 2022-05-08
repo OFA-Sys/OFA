@@ -51,14 +51,17 @@ def main():
             fn = fn.replace('\\', '/')
             img_id = int(fn.split('/')[-1].split('_')[-1][3:-4])
             # Get corresponding question
-            question = annotations[img_id]['question'].lower()
+            try:
+                question = annotations[img_id]['question'].lower()
+            except IndexError:
+                continue
             # If test subset, use placeholder answer, else iterate over all questions
             if subset == 'test':
-                tsv_set.add((img_id, img_id, question, "1.0|!+no", "", img2base64(fn)))
+                tsv_set.add((img_id, img_id, question, '1.0|!+no', '', img2base64(fn)))
             else:
                 for ans in annotations[img_id]['answers']:
                     ans_conf = f'{conf[ans["answer_confidence"]]}|!+{ans["answer"]}'
-                    tsv_set.add((img_id, img_id, question, ans_conf, "", img2base64(fn)))
+                    tsv_set.add((img_id, img_id, question, ans_conf, '', img2base64(fn)))
         # Write to tsv file
         with open(f'vizwiz_data/vizwiz_{subset}.tsv', 'w', encoding='utf-8') as f:
             for line in tsv_set:

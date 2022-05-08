@@ -8,7 +8,7 @@ user_dir=../../ofa_module
 bpe_dir=../../utils/BPE
 
 # val or test
-split=$1
+split=test
 
 data=../../dataset/vqa_data/vqa_${split}.tsv
 ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
@@ -17,15 +17,15 @@ result_path=../../results/vqa_${split}_beam
 selected_cols=0,5,2,3,4
 
 CUDA_VISIBLE_DEVICES=0 python3 -m torch.distributed.launch --nproc_per_node=1 --master_port=${MASTER_PORT} ../../evaluate.py \
-    ${data} \
+    "${data}" \
     --path=${path} \
     --user-dir=${user_dir} \
     --task=vqa_gen \
     --batch-size=16 \
     --log-format=simple --log-interval=10 \
     --seed=7 \
-    --gen-subset=${split} \
-    --results-path=${result_path} \
+    --gen-subset="${split}" \
+    --results-path="${result_path}" \
     --fp16 \
     --ema-eval \
     --beam-search-vqa-eval \
