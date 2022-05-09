@@ -69,7 +69,7 @@ import json
 import torch
 from fairseq.models.roberta import RobertaModel
 from examples.roberta import commonsense_qa  # load the Commonsense QA task
-roberta = RobertaModel.from_pretrained('checkpoints', 'vqa_medium_best.pt', 'data/CommonsenseQA')
+roberta = RobertaModel.from_pretrained('checkpoints', 'checkpoint_best.pt', 'data/CommonsenseQA')
 roberta.eval()  # disable dropout
 roberta.cuda()  # use the GPU (optional)
 nsamples, ncorrect = 0, 0

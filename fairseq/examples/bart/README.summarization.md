@@ -86,7 +86,7 @@ After training the model as mentioned in previous step, you can perform inferenc
 cp data-bin/cnn_dm/dict.source.txt  checkpoints/
 python examples/bart/summarize.py \
   --model-dir checkpoints \
-  --model-file vqa_medium_best.pt \
+  --model-file checkpoint_best.pt \
   --src cnn_dm/test.source \
   --out cnn_dm/test.hypo
 ```
@@ -95,7 +95,7 @@ For XSUM, which uses beam=6, lenpen=1.0, max_len_b=60, min_len=10:
 cp data-bin/cnn_dm/dict.source.txt  checkpoints/
 python examples/bart/summarize.py \
   --model-dir checkpoints \
-  --model-file vqa_medium_best.pt \
+  --model-file checkpoint_best.pt \
   --src cnn_dm/test.source \
   --out cnn_dm/test.hypo \
   --xsum-kwargs

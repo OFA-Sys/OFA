@@ -31,8 +31,8 @@ data=${data_dir}/vizwiz_train.tsv,${data_dir}/vizwiz_val.tsv
 restore_file=../../checkpoints/ofa_tiny.pt
 selected_cols=0,5,2,3,4
 
-log_dir=./vqa_logs
-save_dir=./vqa_checkpoints
+log_dir=vqa_logs
+save_dir=vqa_checkpoints
 mkdir -p $log_dir $save_dir
 
 bpe_dir=../../utils/BPE

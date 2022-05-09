@@ -49,7 +49,7 @@ and simulate training on 4 GPUs.
 
 ```bash
 fairseq-eval-lm data-bin/wikitext-103/ \
-    --path checkpoints/vqa_medium_best.pt \
+    --path checkpoints/checkpoint_best.pt \
     --user-dir examples/truncated_bptt/ \
     --task truncated_bptt_lm \
     --batch-size 1 --required-batch-size-multiple 1 \

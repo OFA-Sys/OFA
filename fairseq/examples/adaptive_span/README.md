@@ -71,13 +71,13 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 fairseq-train \
 ##### 2. Evaluate
 For Adaptive Span:
 ```bash
-fairseq-eval-lm ~/data/enwik8/data-bin/ --path model/vqa_medium_best.pt \
+fairseq-eval-lm ~/data/enwik8/data-bin/ --path model/checkpoint_best.pt \
  --user-dir examples/adaptive_span \
  --task truncated_bptt_lm --batch-size 8 --tokens-per-sample 512 --gen-subset test
 ```
 For Transformer-XL evaluation:
 ```bash
-fairseq-eval-lm ~/data/enwik8/data-bin/ --path model/vqa_medium_best.pt \
+fairseq-eval-lm ~/data/enwik8/data-bin/ --path model/checkpoint_best.pt \
     --user-dir examples/truncated_bptt/ --task truncated_bptt_lm --batch-size 8 \
     --tokens-per-sample 80 \
     --model-overrides '{"mem_len":2100,"clamp_len":820,"same_length":True}' \

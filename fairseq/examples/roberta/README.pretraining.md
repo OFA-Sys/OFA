@@ -79,6 +79,6 @@ batch size | peak learning rate
 ### 3) Load your pretrained model
 ```python
 from fairseq.models.roberta import RobertaModel
-roberta = RobertaModel.from_pretrained('checkpoints', 'vqa_medium_best.pt', 'path/to/data')
+roberta = RobertaModel.from_pretrained('checkpoints', 'checkpoint_best.pt', 'path/to/data')
 assert isinstance(roberta.model, torch.nn.Module)
 ```

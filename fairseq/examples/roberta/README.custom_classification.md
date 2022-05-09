@@ -145,7 +145,7 @@ Assuming your checkpoints are stored in `checkpoints/`:
 from fairseq.models.roberta import RobertaModel
 roberta = RobertaModel.from_pretrained(
     'checkpoints',
-    checkpoint_file='vqa_medium_best.pt',
+    checkpoint_file='checkpoint_best.pt',
     data_name_or_path='IMDB-bin'
 )
 roberta.eval()  # disable dropout

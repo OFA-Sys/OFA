@@ -79,7 +79,7 @@ Loading custom models:
 from fairseq.models.lightconv import LightConvModel
 en2fr = LightConvModel.from_pretrained(
   '/path/to/checkpoints',
-  checkpoint_file='vqa_medium_best.pt',
+  checkpoint_file='checkpoint_best.pt',
   data_name_or_path='data-bin/wmt14_en_fr',
   bpe='subword_nmt',
   bpe_codes='data-bin/wmt14_en_fr/en.code'

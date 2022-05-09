@@ -98,7 +98,7 @@ number of GPUs.
 
 ```bash
 fairseq-eval-lm data-bin/wikitext-103 \
-    --path checkpoints/transformer_wiki103/vqa_medium_best.pt \
+    --path checkpoints/transformer_wiki103/checkpoint_best.pt \
     --batch-size 2 \
     --tokens-per-sample 512 \
     --context-window 400
