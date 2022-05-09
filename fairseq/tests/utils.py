@@ -218,7 +218,7 @@ def preprocess_lm_data(data_dir):
             data_dir,
         ]
     )
-    preprocess.create_tsv_files(preprocess_args)
+    preprocess.main(preprocess_args)
 
 
 def preprocess_translation_data(data_dir, extra_flags=None):
@@ -244,7 +244,7 @@ def preprocess_translation_data(data_dir, extra_flags=None):
         ]
         + (extra_flags or []),
     )
-    preprocess.create_tsv_files(preprocess_args)
+    preprocess.main(preprocess_args)
 
 
 def preprocess_summarization_data(data_dir, extra_flags=None):
@@ -271,7 +271,7 @@ def preprocess_summarization_data(data_dir, extra_flags=None):
         ]
         + (extra_flags or []),
     )
-    preprocess.create_tsv_files(preprocess_args)
+    preprocess.main(preprocess_args)
 
 
 def create_laser_data_and_config_json(data_dir):
@@ -358,7 +358,7 @@ def train_translation_model(
     )
 
     cfg = convert_namespace_to_omegaconf(train_args)
-    distributed_utils.call_main(cfg, train.create_tsv_files)
+    distributed_utils.call_main(cfg, train.main)
 
     if run_validation:
         # test validation
@@ -382,7 +382,7 @@ def train_translation_model(
             + lang_flags
             + (extra_valid_flags or []),
         )
-        validate.create_tsv_files(validate_args)
+        validate.main(validate_args)
 
 
 def generate_main(data_dir, extra_flags=None, path=None):
@@ -415,7 +415,7 @@ def generate_main(data_dir, extra_flags=None, path=None):
     )
 
     # evaluate model in batch mode
-    generate.create_tsv_files(generate_args)
+    generate.main(generate_args)
 
     # evaluate model interactively
     generate_args.buffer_size = 0
@@ -423,7 +423,7 @@ def generate_main(data_dir, extra_flags=None, path=None):
     generate_args.batch_size = None
     orig_stdin = sys.stdin
     sys.stdin = StringIO("h e l l o\n")
-    interactive.create_tsv_files(generate_args)
+    interactive.main(generate_args)
     sys.stdin = orig_stdin
 
 
@@ -691,7 +691,7 @@ def train_language_model(
         + (extra_flags or []),
     )
     cfg = convert_namespace_to_omegaconf(train_args)
-    distributed_utils.call_main(cfg, train.create_tsv_files)
+    distributed_utils.call_main(cfg, train.main)
 
     if run_validation:
         # test validation
@@ -714,4 +714,4 @@ def train_language_model(
             ]
             + (extra_valid_flags or []),
         )
-        validate.create_tsv_files(validate_args)
+        validate.main(validate_args)

@@ -287,7 +287,7 @@ def _quantize_language_model(data_dir, arch, extra_flags=None, run_validation=Fa
         ]
         + (extra_flags or []),
     )
-    train.create_tsv_files(train_args)
+    train.main(train_args)
 
     # try scalar quantization
     scalar_quant_train_parser = options.get_training_parser()
@@ -327,7 +327,7 @@ def _quantize_language_model(data_dir, arch, extra_flags=None, run_validation=Fa
         ]
         + (extra_flags or []),
     )
-    train.create_tsv_files(scalar_quant_train_args)
+    train.main(scalar_quant_train_args)
 
     # try iterative PQ quantization
     quantize_parser = options.get_training_parser()
@@ -370,7 +370,7 @@ def _quantize_language_model(data_dir, arch, extra_flags=None, run_validation=Fa
         ]
         + (extra_flags or []),
     )
-    train.create_tsv_files(quantize_args)
+    train.main(quantize_args)
 
 
 @unittest.skipIf(not torch.cuda.is_available(), "test requires a GPU")

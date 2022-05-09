@@ -690,7 +690,7 @@ def lm_scoring(
         ]
         preprocess_parser = options.get_preprocessing_parser()
         input_args = preprocess_parser.parse_args(preprocess_lm_param)
-        preprocess.create_tsv_files(input_args)
+        preprocess.main(input_args)
 
         eval_lm_param = [
             preprocess_directory,
@@ -712,7 +712,7 @@ def lm_scoring(
 
         with open(lm_score_file, "w") as f:
             with redirect_stdout(f):
-                eval_lm.create_tsv_files(input_args)
+                eval_lm.main(input_args)
 
     elif bpe_status == "shared":
         preprocess_lm_param = [
@@ -726,7 +726,7 @@ def lm_scoring(
         ]
         preprocess_parser = options.get_preprocessing_parser()
         input_args = preprocess_parser.parse_args(preprocess_lm_param)
-        preprocess.create_tsv_files(input_args)
+        preprocess.main(input_args)
 
         eval_lm_param = [
             preprocess_directory,
@@ -746,7 +746,7 @@ def lm_scoring(
 
         with open(lm_score_file, "w") as f:
             with redirect_stdout(f):
-                eval_lm.create_tsv_files(input_args)
+                eval_lm.main(input_args)
 
     elif bpe_status == "different":
         rescore_file = pre_gen + "/rescore_data_no_bpe"
@@ -801,7 +801,7 @@ def lm_scoring(
         ]
         preprocess_parser = options.get_preprocessing_parser()
         input_args = preprocess_parser.parse_args(preprocess_lm_param)
-        preprocess.create_tsv_files(input_args)
+        preprocess.main(input_args)
 
         eval_lm_param = [
             preprocess_dir,
@@ -823,7 +823,7 @@ def lm_scoring(
 
         with open(lm_score_file, "w") as f:
             with redirect_stdout(f):
-                eval_lm.create_tsv_files(input_args)
+                eval_lm.main(input_args)
 
 
 def rescore_file_name(

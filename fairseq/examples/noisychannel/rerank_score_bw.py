@@ -99,7 +99,7 @@ def score_bw(args):
 
         with open(score1_file, "w") as f:
             with redirect_stdout(f):
-                generate.create_tsv_files(input_args)
+                generate.main(input_args)
 
     if (
         args.score_model2 is not None
@@ -130,7 +130,7 @@ def score_bw(args):
 
         with open(score2_file, "w") as f:
             with redirect_stdout(f):
-                generate.create_tsv_files(input_args)
+                generate.main(input_args)
 
 
 def cli_main():

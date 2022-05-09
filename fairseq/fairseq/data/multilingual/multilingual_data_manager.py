@@ -228,7 +228,7 @@ class MultilingualDatasetManager(object):
                             e.g. "main,dae,mined". There will be a set of language tokens added to the vocab to \
                             distinguish languages in different training data types. If not specified, default language \
                             tokens per languages will be added',
-            default=LangTokSpec.create_tsv_files.value,
+            default=LangTokSpec.main.value,
             type=csv_str_list,
         )
         parser.add_argument(
