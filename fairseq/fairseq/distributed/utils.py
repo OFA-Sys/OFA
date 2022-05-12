@@ -337,10 +337,10 @@ def distributed_init(cfg: FairseqConfig):
     if hasattr(cfg,  "model") and getattr(cfg.model, "base_layers", 0) > 0:
         cfg.checkpoint.checkpoint_suffix = f"-rank-{cfg.distributed_training.distributed_rank}"
 
-    if ((getattr(cfg.model, "moe_freq", 0) > 0 and
-        getattr(cfg.model, "moe_expert_count", 0) > 0) or
-       getattr(cfg.model, "base_layers", 0) > 0):
-        cfg.checkpoint.checkpoint_suffix = f"-rank-{cfg.distributed_training.distributed_rank}"
+    # if ((getattr(cfg.model, "moe_freq", 0) > 0 and
+    #     getattr(cfg.model, "moe_expert_count", 0) > 0) or
+    #    getattr(cfg.model, "base_layers", 0) > 0):
+    #     cfg.checkpoint.checkpoint_suffix = f"-rank-{cfg.distributed_training.distributed_rank}"
 
     return cfg.distributed_training.distributed_rank
 
@@ -890,4 +890,3 @@ def _put_tensors_in_obj(obj: Any, tensors: List[torch.Tensor]) -> Any:
         return {_put_tensors_in_obj(v, tensors) for v in obj}
     else:
         return obj
-

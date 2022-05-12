@@ -95,6 +95,12 @@ class PathManager:
         return os.path.isfile(path)
 
     @staticmethod
+    def islink(path: str) -> Optional[bool]:
+        if not PathManager.path_requires_pathmanager(path):
+            return os.path.islink(path)
+        return None
+
+    @staticmethod
     def ls(path: str) -> List[str]:
         if IOPathManager:
             return IOPathManager.ls(path)

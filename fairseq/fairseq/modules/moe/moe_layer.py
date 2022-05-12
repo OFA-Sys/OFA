@@ -33,7 +33,6 @@ except ModuleNotFoundError:
 
 logger = logging.getLogger(__name__)
 
-
 # einsum dimensions: (g)roup, (s)equence, (e)xpert, (m)odel, (c)apacity
 # See https://arxiv.org/pdf/2006.16668.pdf for details.
 
@@ -115,7 +114,7 @@ class MOELayer(Base):
         # because all DDP workers process the same batch. Also, batch size at generation time
         # can be different from that present in the checkpoint state
         if not self.in_generation and expected_bsz != 0 and input_shape[0] != expected_bsz:
-            logger.warning(f"padding batch with unexpected size {input_shape[0]} (expected: {expected_bsz})")
+            # logger.warning(f"padding batch with unexpected size {input_shape[0]} (expected: {expected_bsz})")
             assert input_shape[0] < expected_bsz, f"{input_shape[0]} < {expected_bsz}"
             padded_input = torch.zeros(
                 (expected_bsz, input_shape[1], input_shape[2]),
@@ -161,7 +160,7 @@ class MOELayer(Base):
                 padded_input_padding_mask[:reshaped_input_shape[0]] = False
             reshaped_input_padding_mask = padded_input_padding_mask
 
-        logger.info('Model moe Debug: -> tutel before check')
+        # logger.info('Model moe Debug: -> tutel before check')
         if has_tutel:
             l_aux, self.metadata, C, E, indices_, locations_, gates_ = self.gate(reshaped_input, reshaped_input_padding_mask)
             S, M = reshaped_input.size(0), reshaped_input.size(1)
@@ -179,10 +178,10 @@ class MOELayer(Base):
             assert reshaped_input.size() == (S, M)
             # einsum("sec,sm->ecm")
             dispatched_input = torch.mm(dispatch_mask.view(E*C, S), reshaped_input)  # -> (E*C),M
-        logger.info('Model moe Debug: -> tutel dispatcher check')
+        # logger.info('Model moe Debug: -> tutel dispatcher check')
         if self.all2all_size > 1:
             dispatched_input = self.all_to_all_wrapper(dispatched_input)
-        logger.info('Model moe Debug: -> tutel alltoall check')
+        # logger.info('Model moe Debug: -> tutel alltoall check')
         # Re-shape after all-to-all: ecm -> gecm
         dispatched_input = dispatched_input.reshape(self.all2all_size, self.num_local_experts, -1, d_model)
         chunks = dispatched_input.chunk(self.num_local_experts, dim=1)
@@ -190,10 +189,10 @@ class MOELayer(Base):
         for chunk, expert in zip(chunks, self.experts):
             expert_outputs += [expert(chunk)]
         expert_output = torch.cat(expert_outputs, dim=1)
-        logger.info('Model moe Debug: -> tutel expert_out check')
+        # logger.info('Model moe Debug: -> tutel expert_out check')
         if self.all2all_size > 1:
             expert_output = self.all_to_all_wrapper(expert_output)
-        logger.info('Model moe Debug: -> tutel all_to_all_wrapper check')
+        # logger.info('Model moe Debug: -> tutel all_to_all_wrapper check')
         # Re-shape back: gecm -> ecm
         expert_output = expert_output.reshape(self.all2all_size * self.num_local_experts, -1, d_model)
 
@@ -202,14 +201,14 @@ class MOELayer(Base):
         else:
             # einsum("sec,ecm->sm")
             combined_output = combine_weights.view(S, E*C).mm(expert_output.view(E*C, M))
-        logger.info('Model moe Debug: -> tutel function check')
+        # logger.info('Model moe Debug: -> tutel function check')
         # Remove padding here when --max-tokens is specified and not --batch-size or --max-sentences
         combined_output = combined_output[:reshaped_input_shape[0], :]
         combined_output = combined_output.reshape(input.shape)
         combined_output = combined_output[:input_shape[0], :, :]
 
         self.record_all_to_all_stats()
-        logger.info('Model moe Debug: -> tutel record_all_to_all_stats check')
+        # logger.info('Model moe Debug: -> tutel record_all_to_all_stats check')
 
         return combined_output, l_aux
 

@@ -15,7 +15,7 @@ from argparse import Namespace
 from itertools import chain
 from typing import Any, Dict, List
 import torch
-from fairseq import models, optim, utils, moe_checkpoint_utils
+from fairseq import models, optim, utils
 from fairseq.dataclass.configs import FairseqConfig
 from fairseq.dataclass.utils import convert_namespace_to_omegaconf
 from fairseq.distributed import utils as distributed_utils
@@ -112,7 +112,7 @@ class Trainer(object):
             # so only handle cases which don't use the wrapper
             and not self.use_distributed_wrapper
         ):
-            logger.info("Debugging")
+            # logger.info("Debugging")
             self._criterion = self._criterion.to(device=self.device)
             self._model = self._model.to(device=self.device)
         self.pipeline_model_parallel = cfg.distributed_training.pipeline_model_parallel
@@ -214,13 +214,13 @@ class Trainer(object):
     @property
     def should_save_checkpoint_on_current_rank(self) -> bool:
         """Indicates whether to save checkpoints on the current DDP rank."""
-        has_alt_ffn_dim = getattr(self.cfg.model, "alternate_decoder_ffn_embed_dim", 0) != 0
-        if (self.is_fsdp and (self.cfg.distributed_training.use_sharded_state)
-         or (self.is_moe and not has_alt_ffn_dim)
-         or getattr(self.cfg.model, "base_layers", 0) > 0):
+        if (
+            self.is_fsdp and self.cfg.distributed_training.use_sharded_state
+        ) or getattr(self.cfg.model, "base_layers", 0) > 0:
             return True
         else:
             return self.is_data_parallel_master
+
 
     @property
     def always_call_state_dict_during_save_checkpoint(self) -> bool:
@@ -233,9 +233,7 @@ class Trainer(object):
     @property
     def checkpoint_suffix(self) -> str:
         """Suffix to add to the checkpoint file name."""
-        if (self.is_moe or self.is_base_moe) and not self.cfg.distributed_training.use_sharded_state:
-            return self.cfg.checkpoint.checkpoint_suffix 
-        elif self.is_fsdp and self.cfg.distributed_training.use_sharded_state:
+        if self.is_fsdp and self.cfg.distributed_training.use_sharded_state:
             return self.cfg.checkpoint.checkpoint_suffix + "-shard{0}".format(
                 self.data_parallel_rank
             )
@@ -389,7 +387,6 @@ class Trainer(object):
 
     def consolidate_optimizer(self):
         """For OSS, we need to consolidate the state dict."""
-        self._gathered_optim_state = None
         if self.cfg.checkpoint.no_save_optimizer_state:
             return
         self._gathered_optim_state = None
@@ -399,132 +396,68 @@ class Trainer(object):
             st = self.model.gather_full_optim_state_dict(
                 self.optimizer
             )  # only returns on rank 0
-            if st is None:
-                st = -1  # sentinel so that workers do not save optimizer.state_dict()
             self._gathered_optim_state = st
-            assert self._gathered_optim_state is not None
 
-    def state_dict(self, filename, training_finished=False) -> Dict[str, Dict]:
-        if self.is_moe or self.is_base_moe:
-            (
-                (shared_model_state_dict, shared_optimizer_state_dict),
-                (expert_model_state_dict, expert_optimizer_state_dict),
-            ) = moe_checkpoint_utils.split_shared_and_expert_states(
-                self.model,
-                self.optimizer,
-            )
-            model_save_list = [(
-                filename,
-                expert_model_state_dict,
-                expert_optimizer_state_dict,
-            )]
-            if self.is_data_parallel_master:
-                if self.is_fsdp and not self.use_sharded_state:
-                    assert self._gathered_optim_state is not None
-                    if 'loss_scale' in expert_model_state_dict:
-                        self._gathered_optim_state['loss_scale'] = expert_model_state_dict['loss_scale']
-                    model_save_list.append((
-                        filename.replace('rank-0', 'shared'),
-                        shared_model_state_dict,
-                        self._gathered_optim_state
-                    ))
-                    self._gathered_optim_state = None  # let it get garbage collected
-                else:
-                    model_save_list.append((
-                        filename.replace('rank-0', 'shared'),
-                        shared_model_state_dict,
-                        shared_optimizer_state_dict,  # local
-                    ))
-            elif self.is_fsdp and self.use_sharded_state:
-                model_save_list.append((
-                    filename.replace(f'rank-{self.data_parallel_rank}', 'shared'),
-                    shared_model_state_dict,
-                    shared_optimizer_state_dict,
-                ))
-        else:
-            model_state_dict = self.model.state_dict()
-            optim_state = None
-            if not self.cfg.checkpoint.no_save_optimizer_state:
-                optim_state = self._gathered_optim_state or self.optimizer.state_dict()
-            model_save_list = [(
-                filename,
-                model_state_dict,
-                optim_state,
-            )]
-        state_dicts = {}
-        for filename, model_state_dict, optimizer_state_dict in model_save_list:
-            state_dict = {
-                "args": None,  # legacy
-                "cfg": OmegaConf.to_container(self.cfg) if OmegaConf.is_config(self.cfg) else self.cfg,
-                "model": model_state_dict,
-                "criterion": (
-                    self.criterion.state_dict()
-                    if utils.has_parameters(self.criterion) else None
-                ),
-                "optimizer_history": (self._optim_history or [])
-                + [
-                    {
-                        "criterion_name": self.get_criterion().__class__.__name__,
-                        "optimizer_name": self.optimizer.__class__.__name__,
-                        "lr_scheduler_state": self.lr_scheduler.state_dict(),
-                        "num_updates": self.get_num_updates(),
-                    }
-                ],
-                "task_state": self.task.state_dict() if self.task is not None else {},
-                "extra_state": {
-                    "metrics": metrics.state_dict(),
-                    "previous_training_time": self.cumulative_training_time(),
+
+    def state_dict(self):
+        state_dict = {
+            "args": None,  # legacy
+            "cfg": (
+                OmegaConf.to_container(self.cfg, resolve=True, enum_to_str=True)
+                if OmegaConf.is_config(self.cfg)
+                else self.cfg
+            ),
+            "model": self.model.state_dict(),
+            "criterion": (
+                self.criterion.state_dict()
+                if utils.has_parameters(self.criterion)
+                else None
+            ),
+            "optimizer_history": (self._optim_history or [])
+            + [
+                {
+                    "criterion_name": self.get_criterion().__class__.__name__,
+                    "optimizer_name": self.optimizer.__class__.__name__,
+                    "lr_scheduler_state": self.lr_scheduler.state_dict(),
+                    "num_updates": self.get_num_updates(),
                 }
-            }
-            if (
-                not self.cfg.checkpoint.no_save_optimizer_state or
-                (
-                    self.cfg.checkpoint.no_save_optimizer_state_on_training_finished
-                    and training_finished
-                )
-            ):
-                state_dict["last_optimizer_state"] = optimizer_state_dict
-            if self.is_fsdp and self.use_sharded_state:
-                state_dict['shard_metadata'] = self.model.local_metadata_dict()  # save FSDP flattening and padding info
-            if self.cfg.ema.store_ema:
-                # Save EMA model state as extra state
-                state_dict["extra_state"]["ema"] = self.ema.get_model().state_dict()
-                if self.cfg.ema.ema_fp32:
-                    # Save EMA params in fp32
-                    state_dict["extra_state"]["ema_fp32_params"] = self.ema.fp32_params
-            if not self.cfg.checkpoint.no_save_optimizer_state:
-                if self._gathered_optim_state is not None:
-                    state_dict["last_optimizer_state"] = self._gathered_optim_state
-                    self._gathered_optim_state = None
-                else:
-                    state_dict["last_optimizer_state"] = self.optimizer.state_dict()
-            if self.is_fsdp:
-                # save meta data for recombining checkpoint upon loading
-                state_dict["fsdp_metadata"] = self.model.local_metadata_dict()
-            state_dicts[filename] = state_dict
-        return state_dicts
+            ],
+            "task_state": self.task.state_dict() if self.task is not None else {},
+            "extra_state": {
+                "metrics": metrics.state_dict(),
+                "previous_training_time": self.cumulative_training_time(),
+            },
+        }
+        if self.cfg.ema.store_ema:
+            # Save EMA model state as extra state
+            state_dict["extra_state"]["ema"] = self.ema.get_model().state_dict()
+            if self.cfg.ema.ema_fp32:
+                # Save EMA params in fp32
+                state_dict["extra_state"]["ema_fp32_params"] = self.ema.fp32_params
+        if not self.cfg.checkpoint.no_save_optimizer_state:
+            if self._gathered_optim_state is not None:
+                state_dict["last_optimizer_state"] = self._gathered_optim_state
+                self._gathered_optim_state = None
+            else:
+                state_dict["last_optimizer_state"] = self.optimizer.state_dict()
+        if self.is_fsdp:
+            # save meta data for recombining checkpoint upon loading
+            state_dict["fsdp_metadata"] = self.model.local_metadata_dict()
+        return state_dict
 
     def save_checkpoint(self, filename, extra_state, training_finished=False, async_callback_fn=None):
         """Save all training state in a checkpoint file."""
         logger.info(f"Saving checkpoint to {filename}")
         # call state_dict on all ranks in case it needs internal communication
-        state_dicts = self.state_dict(filename, training_finished)
-        for filename, state_dict in state_dicts.items():
-            logger.info(f"Saving checkpoint to {filename}")
-            state_dict = utils.move_to_cpu(
+        state_dict = utils.move_to_cpu(self.state_dict())
+        state_dict["extra_state"].update(extra_state)
+        if self.should_save_checkpoint_on_current_rank:
+            checkpoint_utils.torch_persistent_save(
                 state_dict,
-                # keep params in FP16 when training with --memory-efficient-fp16
-                cast_to_fp32=not self.cfg.common.memory_efficient_fp16,
+                filename,
+                async_write=self.cfg.checkpoint.write_checkpoints_asynchronously,
             )
-            state_dict["extra_state"].update(extra_state)
-            if self.should_save_checkpoint_on_current_rank:
-                checkpoint_utils.torch_persistent_save(
-                    state_dict,
-                    filename,
-                    async_write=self.cfg.checkpoint.write_checkpoints_asynchronously,
-                    async_callback_fn=async_callback_fn,
-                )
-            logger.info(f"Finished saving checkpoint to {filename}")
+        logger.info(f"Finished saving checkpoint to {filename}")
 
     def load_checkpoint(
         self,
@@ -541,10 +474,10 @@ class Trainer(object):
         """
         extra_state, self._optim_history, last_optim_state = None, [], None
 
+        logger.info(f"Preparing to load checkpoint {filename}")
         is_distributed = self.data_parallel_world_size > 1
         bexists = PathManager.isfile(filename)
         if bexists:
-            logger.info(f"Preparing to load checkpoint {filename}")
             load_on_all_ranks = (
                 self.cfg.checkpoint.load_checkpoint_on_all_dp_ranks
                 # TPUs don't support broadcast yet, so load checkpoints
@@ -555,18 +488,11 @@ class Trainer(object):
                 or getattr(self.cfg.model, "base_layers", 0) > 0
             )
 
-            if load_on_all_ranks or self.is_data_parallel_master or self.is_moe or self.is_base_moe:
+            if load_on_all_ranks or self.data_parallel_rank == 0:
                 state = checkpoint_utils.load_checkpoint_to_cpu(
-                    filename,
-                    load_on_all_ranks=load_on_all_ranks,
-                    is_moe=self.is_moe or self.is_base_moe,
+                    filename, load_on_all_ranks=load_on_all_ranks
                 )
                 last_optim_state = state.get("last_optimizer_state", None)
-                if last_optim_state == -1:
-                    master_path = re.sub("shard[0-9]+", "shard0", filename)
-                    last_optim_state = torch.load(master_path, map_location='cpu')['last_optimizer_state']
-
-                logger.info(f"Loaded state for {filename}")
 
                 # If doing zero_sharding, do not broadcast global optimizer
                 # state. Later we will broadcast sharded states to each rank
@@ -582,14 +508,7 @@ class Trainer(object):
                 last_optim_state = None
                 state = None
 
-            if (
-                self.data_parallel_world_size > 1
-                and not load_on_all_ranks
-                # disable on TPUs until they support broadcast
-                and not self.tpu
-                and not self.is_moe
-                and not self.is_base_moe
-            ):
+            if is_distributed and not load_on_all_ranks:
                 state = distributed_utils.broadcast_object(
                     state,
                     src_rank=0,
@@ -653,12 +572,8 @@ class Trainer(object):
                 last_optim_state = self.optimizer.broadcast_global_state_dict(
                     last_optim_state
                 )
-            elif self.is_fsdp and not self.use_sharded_state:
-                last_optim_state = self.model.get_shard_from_optim_state_dict(last_optim_state)
-                logger.info(f"FSDP got shard from optim_state for {filename}")
-            
+
             self.optimizer.load_state_dict(last_optim_state, optimizer_overrides)
-            logger.info(f"Loaded optim_state for {filename}")
 
             self.set_num_updates(last_optim["num_updates"])
 
@@ -791,7 +706,7 @@ class Trainer(object):
             seed=self.cfg.common.seed,
             num_shards=self.data_parallel_world_size,
             shard_id=self.data_parallel_rank,
-            num_workers=self.cfg.dataset.num_workers_valid,
+            num_workers=self.cfg.dataset.num_workers,
             # always pass a fixed "epoch" to keep validation data consistent
             # across training epochs
             epoch=1,
@@ -850,23 +765,6 @@ class Trainer(object):
         logging_outputs, sample_size, ooms = [], 0, 0
         for i, sample in enumerate(samples):  # delayed update loop
             sample, is_dummy_batch = self._prepare_sample(sample)
-
-            # MoE training with --batch-size or --max-sentences set
-            # if self.is_moe and getattr(self.cfg.dataset, 'batch_size', None) is not None:
-            #     try:
-            #         fixed_src_seq_length = getattr(self.cfg.task, 'tokens_per_sample', None) or self.cfg.task.max_source_positions
-            #         assert sample['net_input']['src_tokens'].shape[1] == fixed_src_seq_length
-            #     except:
-            #         logger.warning(str(sample.keys()))
-            #         logger.warning(str(sample['net_input'].keys()))
-            #         logger.warning(is_dummy_batch)
-            #         logger.warning(
-            #             "wrong seq len {} on rank {}".format(
-            #                     sample['net_input']['src_tokens'].shape[1],
-            #                     torch.distributed.get_rank(),
-            #             )
-            #         )
-            #         raise AssertionError
 
             def maybe_no_sync():
                 """
@@ -960,7 +858,7 @@ class Trainer(object):
             )
 
         overflow = False
-        logger.info(f"[{self.get_num_updates()}] done with fwd, bwd")
+        # logger.info(f"[{self.get_num_updates()}] done with fwd, bwd")
         try:
             with torch.autograd.profiler.record_function("reduce-grads"):
                 # reduce gradients across workers
@@ -1023,7 +921,7 @@ class Trainer(object):
                         self._amp_retries += 1
                         return self.train_step(samples, raise_oom)  # recursion to feed in same batch
                         
-            logger.info(f"[{self.get_num_updates()}] done with optimizer step")
+            # logger.info(f"[{self.get_num_updates()}] done with optimizer step")
 
         except FloatingPointError:
             # re-run the forward and backward pass with hooks attached to print
@@ -1186,7 +1084,7 @@ class Trainer(object):
                 _loss, sample_size, logging_output = self.task.valid_step(
                     sample, self.model, self.criterion, **extra_kwargs
                 )
-                logger.info('model eval finished')
+                # logger.info('model eval finished')
             except RuntimeError as e:
                 if "out of memory" in str(e):
                     self._log_oom(e)
@@ -1209,7 +1107,7 @@ class Trainer(object):
                 else:
                     sample_size *= 0.0
 
-        logger.info('before gather dp')
+        # logger.info('before gather dp')
         # gather logging outputs from all replicas
         if self.data_parallel_world_size > 1:
             logging_outputs, (sample_size,) = self._aggregate_logging_outputs(
@@ -1218,12 +1116,12 @@ class Trainer(object):
                 ignore=is_dummy_batch,
             )
 
-        logger.info('after gather dp')
+        # logger.info('after gather dp')
         # log validation stats
         if self.tpu:
             logging_outputs = self._xla_markstep_and_send_to_cpu(logging_outputs)
         logging_output = self._reduce_and_log_stats(logging_outputs, sample_size)
-        logger.info('after _reduce_and_log_stats dp')
+        # logger.info('after _reduce_and_log_stats dp')
 
         return logging_output
 
@@ -1322,7 +1220,23 @@ class Trainer(object):
         metrics.log_scalar("num_updates", self._num_updates, weight=0, priority=200)
 
     def clip_grad_norm(self, clip_norm):
-        return self.optimizer.clip_grad_norm(clip_norm, aggregate_norm_fn=None)
+        def agg_norm_fn(total_norm):
+            total_norm = total_norm.cuda().float() ** 2
+            total_norm = distributed_utils.all_reduce(
+                total_norm, group=self.data_parallel_process_group
+            )
+            return total_norm ** 0.5
+
+        should_agg_norm = (
+            self.is_fsdp
+            and (
+                self.data_parallel_process_group is not None
+                or torch.distributed.is_initialized()
+            )
+        )
+        return self.optimizer.clip_grad_norm(
+            clip_norm, aggregate_norm_fn=agg_norm_fn if should_agg_norm else None
+        )
 
     def cumulative_training_time(self):
         if self._cumulative_training_time is None:
@@ -1544,7 +1458,7 @@ class Trainer(object):
                 )
 
     def _reduce_and_log_stats(self, logging_outputs, sample_size, grad_norm=None):
-        logger.info('DEBUG: enter _reduce_and_log_stats')
+        # logger.info('DEBUG: enter _reduce_and_log_stats')
         if grad_norm is not None and (
             not torch.is_tensor(grad_norm) or torch.isfinite(grad_norm)
         ):
@@ -1561,12 +1475,12 @@ class Trainer(object):
                     priority=500,
                     round=1,
                 )
-        logger.info('_reduce_and_log_stats before metrics.aggregate()')
+        # logger.info('_reduce_and_log_stats before metrics.aggregate()')
         with metrics.aggregate() as agg:
             if logging_outputs is not None:
                 self.task.reduce_metrics(logging_outputs, self.get_criterion())
                 del logging_outputs
-            logger.info('_reduce_and_log_stats after task.reduce_metrics()')
+            # logger.info('_reduce_and_log_stats after task.reduce_metrics()')
             # extra warning for criterions that don't properly log a loss value
             if "loss" not in agg:
                 if "loss" not in self._warn_once:
@@ -1587,7 +1501,7 @@ class Trainer(object):
                     if key_to_delete in logging_output:
                         del logging_output[key_to_delete]
             return logging_output
-        logger.info('_reduce_and_log_stats after metrics.aggregate()')
+        # logger.info('_reduce_and_log_stats after metrics.aggregate()')
 
     def _check_xla_compilation(self):
         import torch_xla.info.metrics as met

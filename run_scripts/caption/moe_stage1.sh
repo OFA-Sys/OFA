@@ -2,7 +2,7 @@
 
 # The port for communication. Note that if you want to run multiple tasks on the same machine,
 # you need to specify different port numbers.
-export MASTER_PORT=1051
+export MASTER_PORT=4051
 
 log_dir=./moe_stage1_logs
 save_dir=./moe_stage1_checkpoints
@@ -23,8 +23,8 @@ label_smoothing=0.1
 lr=1e-5
 max_epoch=5
 warmup_ratio=0.06
-batch_size=1
-update_freq=1
+batch_size=8
+update_freq=4
 resnet_drop_path_rate=0.0
 encoder_drop_path_rate=0.1
 decoder_drop_path_rate=0.1
@@ -41,18 +41,18 @@ moe_combine_method="sum"
 moe_second_expert_policy="all"
 moe_normalize_expert_grad="sqrt_world_size"
 
-for max_epoch in {2,}; do
+for max_epoch in {10,}; do
   echo "max_epoch "${max_epoch}
   for warmup_ratio in {0.06,}; do
     echo "warmup_ratio "${warmup_ratio}
     for drop_worst_after in {2500,}; do
       echo "drop_worst_after "${drop_worst_after}
 
-      log_file=${log_dir}/${max_epoch}"_"${warmup_ratio}"_"${drop_worst_after}".log"
-      save_path=${save_dir}/${max_epoch}"_"${warmup_ratio}"_"${drop_worst_after}
+      log_file=${log_dir}/${max_epoch}"_"${warmup_ratio}"_"${drop_worst_after}"_"${moe_gate_loss_wt}"_"${lr}".log"
+      save_path=${save_dir}/${max_epoch}"_"${warmup_ratio}"_"${drop_worst_after}"_"${moe_gate_loss_wt}"_"${lr}
       mkdir -p $save_path
 
-      CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../train.py \
+      CUDA_VISIBLE_DEVICES=1 python3 -m torch.distributed.launch --nproc_per_node=1 --master_port=${MASTER_PORT} ../../train.py \
           $data \
           --selected-cols=${selected_cols} \
           --bpe-dir=${bpe_dir} \
@@ -85,7 +85,7 @@ for max_epoch in {2,}; do
           --fixed-validation-seed=7 \
           --no-epoch-checkpoints --keep-best-checkpoints=1 \
           --save-interval=1 --validate-interval=1 \
-          --save-interval-updates=5000 --validate-interval-updates=1 \
+          --save-interval-updates=5000 --validate-interval-updates=5000 \
           --eval-cider \
           --eval-cider-cached-tokens=${eval_cider_cached} \
           --eval-args='{"beam":1,"max_len_b":16,"no_repeat_ngram_size":3}' \
@@ -93,8 +93,6 @@ for max_epoch in {2,}; do
           --max-src-length=${max_src_length} \
           --max-tgt-length=${max_tgt_length} \
           --find-unused-parameters \
-          --freeze-encoder-embedding \
-          --freeze-decoder-embedding \
           --add-type-embedding \
           --scale-attn \
           --scale-fc \

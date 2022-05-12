@@ -372,7 +372,7 @@ class AdjustLabelSmoothedMOECrossEntropyCriterion(FairseqCriterion):
     @classmethod
     def reduce_metrics(cls, logging_outputs) -> None:
         """Aggregate logging outputs from data parallel training."""
-        logger.info('DEBUG: Enter criterion reduce metrix')
+        # logger.info('DEBUG: Enter criterion reduce metrix')
         loss_sum = sum(log.get("loss", 0) for log in logging_outputs)
         loss_sum_v1 = sum(log.get("loss_v1", 0) for log in logging_outputs)
         loss_sum_v2 = sum(log.get("loss_v2", 0) for log in logging_outputs)
@@ -382,16 +382,11 @@ class AdjustLabelSmoothedMOECrossEntropyCriterion(FairseqCriterion):
         sample_size = sum(log.get("sample_size", 0) for log in logging_outputs)
         sample_size_v1 = sum(log.get("sample_size_v1", 0) for log in logging_outputs)
         sample_size_v2 = sum(log.get("sample_size_v2", 0) for log in logging_outputs)
-        logger.info('DEBUG: Pass criterion reduce metrix OFA mingming part')
+        # logger.info('DEBUG: Pass criterion reduce metrix OFA mingming part')
         # MoE Adaptation
-        moe_loss_v1 = sum(log.get("moe_loss_v1", 0) for log in logging_outputs)
-        moe_loss_v2 = sum(log.get("moe_loss_v2", 0) for log in logging_outputs)
-        inner_loss_v1 = sum(log.get("inner_loss_v1", 0) for log in logging_outputs)
-        inner_loss_v2 = sum(log.get("inner_loss_v2", 0) for log in logging_outputs)
-        inner_loss_sum = sum(log.get("inner_loss", 0) for log in logging_outputs)
         moe_loss_sum = sum(log.get("moe_loss", 0) for log in logging_outputs)
 
-        logger.info('DEBUG: Pass criterion reduce metrix MoE mingming part')
+        # logger.info('DEBUG: Pass criterion reduce metrix MoE mingming part')
 
         metrics.log_scalar(
             "loss", loss_sum / sample_size, sample_size, round=3
@@ -406,13 +401,13 @@ class AdjustLabelSmoothedMOECrossEntropyCriterion(FairseqCriterion):
             "nll_loss", nll_loss_sum / sample_size, ntokens, round=3
         )
 
-        logger.info('DEBUG: Pass criterion reduce metrix log_scalar part 1')
+        # logger.info('DEBUG: Pass criterion reduce metrix log_scalar part 1')
 
         metrics.log_derived(
             "ppl", lambda meters: utils.get_perplexity(meters["nll_loss"].avg)
         )
 
-        logger.info('DEBUG: Pass criterion reduce metrix log_scalar part 2')
+        # logger.info('DEBUG: Pass criterion reduce metrix log_scalar part 2')
 
         metrics.log_scalar(
             "ntokens", ntokens, 1, round=3
@@ -429,27 +424,12 @@ class AdjustLabelSmoothedMOECrossEntropyCriterion(FairseqCriterion):
         metrics.log_scalar(
             "sample_size_v2", sample_size_v2, 1, round=3
         )
-        logger.info('DEBUG: Pass criterion reduce metrix OFA Part')
+        # logger.info('DEBUG: Pass criterion reduce metrix OFA Part')
 
-        metrics.log_scalar(
-            "moe_gate_loss_v1", moe_loss_v1 / max(sample_size_v1, 1), max(sample_size_v1, 1), round=8
-        )
-        metrics.log_scalar(
-            "moe_gate_loss_v2", moe_loss_v2 / max(sample_size_v2, 1), max(sample_size_v2, 1), round=8
-        )
         metrics.log_scalar(
             "moe_gate_loss", moe_loss_sum / sample_size, sample_size, round=8
         )
-        metrics.log_scalar(
-            "inner_loss_v1", inner_loss_v1 / max(sample_size_v1, 1), max(sample_size_v1, 1), round=3
-        )
-        metrics.log_scalar(
-            "inner_loss_v2", inner_loss_v2 / max(sample_size_v2, 1), max(sample_size_v2, 1), round=3
-        )
-        metrics.log_scalar(
-            "inner_loss", inner_loss_sum / sample_size, sample_size, round=3
-        )
-        logger.info('DEBUG: Pass criterion reduce metrix FIRST chunk')
+        # logger.info('DEBUG: Pass criterion reduce metrix FIRST chunk')
         total = utils.item(sum(log.get("total", 0) for log in logging_outputs))
         if total > 0:
             metrics.log_scalar("total", total)
@@ -465,7 +445,7 @@ class AdjustLabelSmoothedMOECrossEntropyCriterion(FairseqCriterion):
                 if meters["total"].sum > 0
                 else float("nan"),
             )
-        logger.info('DEBUG: Pass criterion reduce metrix SECOND chunk')
+        # logger.info('DEBUG: Pass criterion reduce metrix SECOND chunk')
         batch_count = sum(log.get("batch_count", 0) for log in logging_outputs)
         for key in AdjustLabelSmoothedMOECrossEntropyCriterion.moe_logging_keys:
             val = sum(log.get(key, 0) for log in logging_outputs)

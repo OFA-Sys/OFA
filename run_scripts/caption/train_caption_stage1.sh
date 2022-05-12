@@ -2,7 +2,7 @@
 
 # The port for communication. Note that if you want to run multiple tasks on the same machine,
 # you need to specify different port numbers.
-export MASTER_PORT=1051
+export MASTER_PORT=2051
 
 log_dir=./stage1_logs
 save_dir=./stage1_checkpoints
@@ -48,7 +48,7 @@ for max_epoch in {2,}; do
       save_path=${save_dir}/${max_epoch}"_"${warmup_ratio}"_"${drop_worst_after}
       mkdir -p $save_path
 
-      CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m torch.distributed.launch --nproc_per_node=4 --master_port=${MASTER_PORT} ../../train.py \
+      CUDA_VISIBLE_DEVICES=1,2 python3 -m torch.distributed.launch --nproc_per_node=2 --master_port=${MASTER_PORT} ../../train.py \
           $data \
           --selected-cols=${selected_cols} \
           --bpe-dir=${bpe_dir} \
@@ -77,11 +77,14 @@ for max_epoch in {2,}; do
           --weight-decay=0.01 --optimizer=adam --adam-betas="(0.9,0.999)" --adam-eps=1e-08 --clip-norm=1.0 \
           --lr-scheduler=polynomial_decay --lr=${lr} \
           --max-epoch=${max_epoch} --warmup-ratio=${warmup_ratio} \
+          --moe-freq=0 \
+          --encoder-moe-freq=0 \
+          --decoder-moe-freq=0 \
           --log-format=simple --log-interval=10 \
           --fixed-validation-seed=7 \
           --no-epoch-checkpoints --keep-best-checkpoints=1 \
           --save-interval=1 --validate-interval=1 \
-          --save-interval-updates=500 --validate-interval-updates=500 \
+          --save-interval-updates=5000 --validate-interval-updates=500 \
           --eval-cider \
           --eval-cider-cached-tokens=${eval_cider_cached} \
           --eval-args='{"beam":5,"max_len_b":16,"no_repeat_ngram_size":3}' \

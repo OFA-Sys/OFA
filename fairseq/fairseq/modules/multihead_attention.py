@@ -335,10 +335,6 @@ class MultiheadAttention(nn.Module):
         assert list(attn_weights.size()) == [bsz * self.num_heads, tgt_len, src_len]
 
         if attn_mask is not None:
-            # Replace any non-finite values with finite equivalents, since otherwise
-            # we may get NaN when adding attn_mask or computing softmax.
-            attn_weights = torch.nan_to_num(attn_weights)
-
             attn_mask = attn_mask.unsqueeze(0)
             if self.onnx_trace:
                 attn_mask = attn_mask.repeat(attn_weights.size(0), 1, 1)

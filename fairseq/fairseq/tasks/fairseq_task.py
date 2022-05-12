@@ -538,38 +538,38 @@ class FairseqTask(object):
 
     def aggregate_logging_outputs(self, logging_outputs, criterion):
         """[deprecated] Aggregate logging outputs from data parallel training."""
-        logger.info("DEBUG: enter FairTask aggregate_logging_outputs 0")
+        # logger.info("DEBUG: enter FairTask aggregate_logging_outputs 0")
         utils.deprecation_warning(
             "The aggregate_logging_outputs API is deprecated. "
             "Please use the reduce_metrics API instead."
         )
-        logger.info("DEBUG: enter FairTask aggregate_logging_outputs")
+        # logger.info("DEBUG: enter FairTask aggregate_logging_outputs")
         with metrics.aggregate() as agg:
             self.reduce_metrics(logging_outputs, criterion)
-            logger.info("DEBUG: after FairTask aggregate_logging_outputs")
+            # logger.info("DEBUG: after FairTask aggregate_logging_outputs")
             return agg.get_smoothed_values()
 
     def reduce_metrics(self, logging_outputs, criterion):
         """Aggregate logging outputs from data parallel training."""
         # backward compatibility for tasks that override aggregate_logging_outputs
-        logger.info("DEBUG: enter FairTask reduce_metrics()")
+        # logger.info("DEBUG: enter FairTask reduce_metrics()")
         base_func = FairseqTask.aggregate_logging_outputs
-        logger.info("DEBUG: enter FairTask reduce_metrics() 1")
+        # logger.info("DEBUG: enter FairTask reduce_metrics() 1")
         self_func = getattr(self, "aggregate_logging_outputs").__func__
-        logger.info("DEBUG: enter FairTask reduce_metrics() 2")
+        # logger.info("DEBUG: enter FairTask reduce_metrics() 2")
         if self_func is not base_func:
             utils.deprecation_warning(
                 "Tasks should implement the reduce_metrics API. "
                 "Falling back to deprecated aggregate_logging_outputs API."
             )
-            logger.info("DEBUG: enter FairTask reduce_metrics() 3")
+            # logger.info("DEBUG: enter FairTask reduce_metrics() 3")
             agg_logging_outputs = self.aggregate_logging_outputs(
                 logging_outputs, criterion
             )
             for k, v in agg_logging_outputs.items():
                 metrics.log_scalar(k, v)
             return
-        logger.info("DEBUG: enter FairTask reduce_metrics() first chunk")
+        # logger.info("DEBUG: enter FairTask reduce_metrics() first chunk")
         if not any("ntokens" in log for log in logging_outputs):
             warnings.warn(
                 "ntokens not found in Criterion logging outputs, cannot log wpb or wps"
@@ -578,7 +578,7 @@ class FairseqTask(object):
             ntokens = sum(log.get("ntokens", 0) for log in logging_outputs)
             metrics.log_scalar("wpb", ntokens, priority=180, round=1)
             metrics.log_speed("wps", ntokens, priority=90, round=1)
-        logger.info("DEBUG: enter FairTask reduce_metrics() second chunk")
+        # logger.info("DEBUG: enter FairTask reduce_metrics() second chunk")
         if not any("nsentences" in log for log in logging_outputs):
             warnings.warn(
                 "nsentences not found in Criterion logging outputs, cannot log bsz"
@@ -586,7 +586,7 @@ class FairseqTask(object):
         else:
             nsentences = sum(log.get("nsentences", 0) for log in logging_outputs)
             metrics.log_scalar("bsz", nsentences, priority=190, round=1)
-        logger.info("DEBUG: enter FairTask reduce_metrics() third chunk")
+        # logger.info("DEBUG: enter FairTask reduce_metrics() third chunk")
         criterion.__class__.reduce_metrics(logging_outputs)
 
     def state_dict(self):

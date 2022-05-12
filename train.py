@@ -43,11 +43,9 @@ from fairseq.distributed import fsdp_enable_wrap, fsdp_wrap, utils as distribute
 from fairseq.file_io import PathManager
 from fairseq.logging import meters, metrics, progress_bar
 from fairseq.model_parallel.megatron_trainer import MegatronTrainer
-# from fairseq.trainer import Trainer
 from omegaconf import DictConfig, OmegaConf
 
 from utils import checkpoint_utils
-# from data import data_utils
 from trainer import Trainer
 
 def main(cfg: FairseqConfig) -> None:
@@ -72,10 +70,8 @@ def main(cfg: FairseqConfig) -> None:
     np.random.seed(cfg.common.seed)
     utils.set_torch_seed(cfg.common.seed)
 
-    checkpoint_utils.verify_checkpoint_directory(cfg.checkpoint.save_dir)
-
-    # Print nvidia smi stats
-    logger.info(metrics.get_nvidia_smi_gpu_memory_stats_str())
+    if distributed_utils.is_master(cfg.distributed_training):
+        checkpoint_utils.verify_checkpoint_directory(cfg.checkpoint.save_dir)
 
     # Print args
     logger.info(cfg)
@@ -95,18 +91,11 @@ def main(cfg: FairseqConfig) -> None:
 
     assert cfg.criterion, "Please specify criterion to train a model"
 
-    if getattr(cfg.model, "moe_freq", 0) > 0 and getattr(cfg.model, "moe_expert_count", 0) < distributed_utils.get_global_world_size():
-        assert cfg.distributed_training.ddp_backend == 'fully_sharded', 'num_experts < num_gpus only supported by FSDP'
-
-
     # Build model and criterion
     if cfg.distributed_training.ddp_backend == "fully_sharded":
-        #if cfg.distributed_training.use_sharded_state: assert cfg.checkpoint.no_save_optimizer_state, f'--use-sharded-state requires --no-save-optimizer-state'
         extra = {
             "is_moe": getattr(cfg.model, "moe_freq", 0) > 0,
-            "use_sharded_state": cfg.distributed_training.use_sharded_state,
         }
-
         with fsdp_enable_wrap(cfg.distributed_training, **extra):
             model = fsdp_wrap(task.build_model(cfg.model))
     else:
@@ -169,7 +158,6 @@ def main(cfg: FairseqConfig) -> None:
             cfg.dataset.batch_size,
         )
     )
-    logger.info(metrics.get_nvidia_smi_gpu_memory_stats_str())
 
     # Load the latest checkpoint if one is available and restore the
     # corresponding train iterator
@@ -425,11 +413,9 @@ def validate_and_save(
     # Save checkpoint
     if do_save or should_stop:
         checkpoint_utils.save_checkpoint(
-            cfg.checkpoint, trainer, epoch_itr, valid_losses[0], training_finished=should_stop,
-            async_callback_fn=functools.partial(post_checkpoint_callback, cfg) if cfg.checkpoint.s3_upload_path else None,
+            cfg.checkpoint, trainer, epoch_itr, valid_losses[0]
         )
 
-    trainer.reset_dummy_batch(epoch_itr.first_batch)
     return valid_losses, should_stop
 
 def post_checkpoint_callback(cfg, filename):

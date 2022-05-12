@@ -128,14 +128,14 @@ def log_scalar(
         priority (int): smaller values are logged earlier in the output
         round (Optional[int]): number of digits to round to when displaying
     """
-    logger.info('Enter Log_Scalar')
+    # logger.info('Enter Log_Scalar')
     for agg in get_active_aggregators():
-        logger.info('Enter Log_Scalar Loop')
+        # logger.info('Enter Log_Scalar Loop')
         if key not in agg:
             agg.add_meter(key, AverageMeter(round=round), priority)
-        logger.info('Enter Log_Scalar Loop 1')
+        # logger.info('Enter Log_Scalar Loop 1')
         agg[key].update(value, weight)
-        logger.info('Enter Log_Scalar Loop 2')
+        # logger.info('Enter Log_Scalar Loop 2')
 
 def log_scalar_sum(
     key: str,

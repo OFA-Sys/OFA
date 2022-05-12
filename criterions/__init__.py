@@ -1,4 +1,5 @@
 from .scst_loss import ScstRewardCriterion
+from .scst_moe_loss import ScstRewardMOECriterion
 from .label_smoothed_cross_entropy import AdjustLabelSmoothedCrossEntropyCriterion
 from .label_smoothed_moe_cross_entropy import AdjustLabelSmoothedMOECrossEntropyCriterion
 from .clip_scst_loss import ClipScstRewardCriterion
