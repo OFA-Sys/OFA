@@ -43,7 +43,7 @@ def create_tsv_files():
     # Dict to map answer confidence to value
     conf = {'yes': '1.0', 'maybe': '0.5', 'no': '0.0'}
     # Iterate over subsets
-    for subset in ['train']:
+    for subset in ['train', 'val', 'test']:
         print(f'Generating rows for {subset} tsv file...')
         # Load corresponding json file
         annotations = json.load(open(f'vizwiz_data/Annotations/{subset}.json', encoding='utf-8'))
@@ -51,7 +51,7 @@ def create_tsv_files():
         tsv_set = set()
         # Iterate over all images in subset
         file_names = glob.glob(f'vizwiz_data/{subset}/*.jpg')
-        for fn in tqdm(file_names, file=sys.stdout):
+        for fn in tqdm(file_names[:100], file=sys.stdout):
             # Some string manipulation to get img_id
             fn = fn.replace('\\', '/')
             img_id = int(fn.split('/')[-1].split('_')[-1][3:-4])
@@ -64,9 +64,10 @@ def create_tsv_files():
             if subset == 'test':
                 tsv_set.add((img_id, img_id, question, '1.0|!+no', '', img2base64(fn)))
             else:
+                ans_conf = ''
                 for ans in annotations[img_id]['answers']:
-                    ans_conf = f'{conf[ans["answer_confidence"]]}|!+{ans["answer"]}'
-                    tsv_set.add((img_id, img_id, question, ans_conf, '', img2base64(fn)))
+                    ans_conf += f'{conf[ans["answer_confidence"]]}|!+{ans["answer"]}&&'
+                tsv_set.add((img_id, img_id, question, ans_conf[:-2], '', img2base64(fn)))
         # Write to tsv file
         print(f'Writing {subset} tsv file...')
         with open(f'vizwiz_data/vizwiz_{subset}.tsv', 'w', encoding='utf-8') as f:
@@ -95,7 +96,7 @@ def create_ans2label_file():
         else:
             answer_counts[ans] += 1
     # Get most frequent 3129 answers as per the OFA authors
-    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)
+    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)[:3129]
     # Create dict to map answers to labels
     trainval_ans2label = {answer: i for i, answer in enumerate(freq_answers)}
     # Save to file
@@ -106,6 +107,6 @@ def create_ans2label_file():
 
 
 if __name__ == '__main__':
-    # print(create_tsv_files())
+    print(create_tsv_files())
     print(create_ans2label_file())
     print('All done!')
