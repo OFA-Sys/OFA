@@ -333,7 +333,7 @@ class SequenceGenerator(nn.Module):
             original_batch_idxs = torch.arange(0, bsz).type_as(tokens)
 
         # JW: Remove one step to avoid assertion error - absolutely no clue about the implications of this...
-        for step in range(max_len):  # one extra step for EOS marker
+        for step in range(max_len + 1):  # one extra step for EOS marker
             # reorder decoder internal states based on the prev choice of beams
             if reorder_state is not None:
                 if batch_idxs is not None:
