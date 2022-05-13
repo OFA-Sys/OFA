@@ -1,3 +1,4 @@
+import glob
 import re
 import torch
 from matplotlib import pyplot as plt
@@ -12,6 +13,9 @@ from utils.zero_shot_utils import zero_shot_step
 # JW: imports for TTS and Speech Recognition
 import pyttsx3
 import speech_recognition as sr
+
+# JW: imports for random selection of VizWiz images
+import random
 
 
 def main():
@@ -33,7 +37,7 @@ def main():
 
     # specify some options for evaluation
     parser = options.get_generation_parser()
-    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/ofa_tiny.pt",
+    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/ofa_large.pt",
                   "--bpe-dir=utils/BPE"]
     args = options.parse_args_and_arch(parser, input_args)
     cfg = convert_namespace_to_omegaconf(args)
@@ -128,7 +132,10 @@ def main():
     pad_idx = task.src_dict.pad()
 
     # JW: Open any image file
-    image = Image.open('test_images/test.jpg')
+    random.seed(420)
+    path = random.choice(glob.glob('dataset/vizwiz_data/val/*.jpg'))
+    print(path.split('/')[-1][:-4])
+    image = Image.open(path)
 
     # JW: Show image via PIL
     plt.imshow(image)

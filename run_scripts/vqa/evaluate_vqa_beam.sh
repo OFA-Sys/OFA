@@ -10,9 +10,9 @@ bpe_dir=../../utils/BPE
 # val or test
 split=test
 
-data=../../dataset/vqa_data/vqa_${split}.tsv
+data=../../dataset/vizwiz_data/vizwiz_${split}.tsv
 ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
-path=../../checkpoints/vqa_medium_best.pt
+path=../../checkpoints/ofa_tiny.pt
 result_path=../../results/vqa_${split}_beam
 selected_cols=0,5,2,3,4
 
