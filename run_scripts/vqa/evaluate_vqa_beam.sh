@@ -11,7 +11,7 @@ bpe_dir=../../utils/BPE
 split=test
 
 data=../../dataset/vizwiz_data/vizwiz_${split}.tsv
-ans2label_file=../../dataset/vqa_data/trainval_ans2label.pkl
+ans2label_file=../../dataset/vizwiz_data/trainval_ans2label.pkl
 path=../../checkpoints/ofa_tiny.pt
 result_path=../../results/vqa_${split}_beam
 selected_cols=0,5,2,3,4
@@ -33,6 +33,4 @@ CUDA_VISIBLE_DEVICES=0 python3 -m torch.distributed.launch --nproc_per_node=1 --
     --unnormalized \
     --temperature=1.0 \
     --num-workers=0 \
-    --model-overrides="{\"data\":\"${data}\",\"bpe_dir\":\"${bpe_dir}\",\"selected_cols\":\"${selected_cols}\"}"
-
-# ,\"ans2label_file\":\"${ans2label_file}\"
+    --model-overrides="{\"data\":\"${data}\",\"bpe_dir\":\"${bpe_dir}\",\"selected_cols\":\"${selected_cols}\",\"ans2label_file\":\"${ans2label_file}\"}"
