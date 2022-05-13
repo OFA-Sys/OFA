@@ -3,8 +3,8 @@ A script to transform the VizWiz dataset into the format of the VQA dataset.
 The format is a csv file with the following columns:
 question-id, image-id, question text (lowercase), answer with confidence (like 1.0|!+no),
 object label (can be blank), image as base64 encoded string
-For all-candidate inference, a trainval_ans2label.pkl file has to be generated,
-which is just a pickled mapping of answers to their label; not necessary for beam-search inference.
+Further, a trainval_ans2label.pkl file has to be generated which is simply a pickled dict,
+mapping the most frequent answers to a (random) label.
 
 Author: Jan Willruth
 """
@@ -36,6 +36,10 @@ def img2base64(fn):
 
 
 def create_tsv_files():
+    """
+    Create tsv files for the VizWiz dataset.
+    """
+
     # Dict to map answer confidence to value
     conf = {'yes': '1.0', 'maybe': '0.5', 'no': '0.0'}
     # Iterate over subsets
@@ -72,12 +76,36 @@ def create_tsv_files():
 
 
 def create_ans2label_file():
-    with open('vqa_data/trainval_ans2label.pkl', 'rb') as f:
-        ans2label = pickle.load(f)
-        print("")
+    """
+    Create trainval_ans2label.pkl file for the VizWiz dataset.
+    """
+
+    print('Generating trainval_ans2label.pkl file...')
+    # Load annotations
+    train = json.load(open('vizwiz_data/Annotations/train.json', encoding='utf-8'))
+    val = json.load(open('vizwiz_data/Annotations/val.json', encoding='utf-8'))
+    annotations = train + val
+    # Extract answers
+    answers = [ans['answer'] for question in annotations for ans in question['answers']]
+    # Count occurrences of answers
+    answer_counts = {}
+    for ans in answers:
+        if ans not in answer_counts:
+            answer_counts[ans] = 1
+        else:
+            answer_counts[ans] += 1
+    # Get most frequent 3129 answers as per the OFA authors
+    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)[:3129]
+    # Create dict to map answers to labels
+    trainval_ans2label = {answer: i for i, answer in enumerate(freq_answers)}
+    # Save to file
+    with open('vizwiz_data/trainval_ans2label.pkl', 'wb') as f:
+        pickle.dump(trainval_ans2label, f)
+
+    return 'Finished creating trainval_ans2label.pkl file!'
 
 
 if __name__ == '__main__':
-    print(create_tsv_files())
-    # print(create_ans2label_file())
+    # print(create_tsv_files())
+    print(create_ans2label_file())
     print('All done!')
