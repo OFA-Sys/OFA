@@ -51,7 +51,7 @@ def create_tsv_files():
         tsv_set = set()
         # Iterate over all images in subset
         file_names = glob.glob(f'vizwiz_data/{subset}/*.jpg')
-        for fn in tqdm(file_names[:100], file=sys.stdout):
+        for fn in tqdm(file_names, file=sys.stdout):
             # Some string manipulation to get img_id
             fn = fn.replace('\\', '/')
             img_id = int(fn.split('/')[-1].split('_')[-1][3:-4])
