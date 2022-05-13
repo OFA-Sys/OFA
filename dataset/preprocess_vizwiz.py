@@ -95,7 +95,7 @@ def create_ans2label_file():
         else:
             answer_counts[ans] += 1
     # Get most frequent 3129 answers as per the OFA authors
-    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)[:3129]
+    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)[:10000]
     # Create dict to map answers to labels
     trainval_ans2label = {answer: i for i, answer in enumerate(freq_answers)}
     # Save to file
