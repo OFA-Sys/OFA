@@ -1,6 +1,8 @@
 import json
 import os
 
+print('Fixing vizwiz results...')
+
 # Open results file and sort by question_id
 results_file = 'test_predict_vizwiz.json'
 with open(results_file, 'r') as f:
@@ -15,3 +17,5 @@ results = [{'image': img_name, 'answer': answer} for img_name, answer in zip(img
 # Save updated results
 with open('test_predict_vizwiz_fixed.json', 'w') as f:
     json.dump(results, f)
+
+print('Finished fixing vizwiz results!')
