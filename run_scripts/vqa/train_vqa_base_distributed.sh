@@ -8,11 +8,11 @@
 # To use the shuffled data (if exists), please uncomment the Line 24.
 
 # Number of GPUs per GPU worker
-GPUS_PER_NODE=8 
+GPUS_PER_NODE=1
 # Number of GPU workers, for single-worker training, please set to 1
-WORKER_CNT=4 
+WORKER_CNT=1
 # The ip address of the rank-0 worker, for single-worker training, please set to localhost
-export MASTER_ADDR=XX.XX.XX.XX
+export MASTER_ADDR=localhost
 # The port for communication
 export MASTER_PORT=8314
 # The rank of this worker, should be in {0, ..., WORKER_CNT-1}, for single-worker training, please set to 0
@@ -58,16 +58,16 @@ ema_start_update=0
 
 # Specify the inference type in validation after each fine-tuning epoch
 # As mentioned in the readme, you can choose from allcand or beamsearch evaluation, default to allcand
-val_inference_type=allcand
+val_inference_type=beamsearch
 
-for max_epoch in {15,}; do
-  echo "max_epoch "${max_epoch}
+for max_epoch in {42,}; do
+  echo "max_epoch ""${max_epoch}"
   for warmup_ratio in {0.04,}; do
-    echo "warmup_updates "${warmup_updates}  
+    echo "warmup_ratio ""${warmup_ratio}"
     for lr in {5e-5,}; do
-      echo "lr "${lr}
+      echo "lr ""${lr}"
       for patch_image_size in {480,}; do
-        echo "patch_image_size "${patch_image_size}
+        echo "patch_image_size ""${patch_image_size}"
 
         log_file=${log_dir}/${max_epoch}"_"${warmup_ratio}"_"${lr}"_"${patch_image_size}"_rank"${RANK}".log"
         save_path=${save_dir}/${max_epoch}"_"${warmup_ratio}"_"${lr}"_"${patch_image_size}
@@ -105,9 +105,9 @@ for max_epoch in {15,}; do
             --adam-eps=1e-08 \
             --clip-norm=1.0 \
             --lr-scheduler=polynomial_decay \
-            --lr=${lr} \
-            --max-epoch=${max_epoch} \
-            --warmup-ratio=${warmup_ratio} \
+            --lr="${lr}" \
+            --max-epoch="${max_epoch}" \
+            --warmup-ratio="${warmup_ratio}" \
             --log-format=simple \
             --log-interval=10 \
             --fixed-validation-seed=7 \
@@ -128,7 +128,7 @@ for max_epoch in {15,}; do
             --scale-heads \
             --disable-entangle \
             --num-bins=${num_bins} \
-            --patch-image-size=${patch_image_size} \
+            --patch-image-size="${patch_image_size}" \
             --prompt-type=prev_output \
             --fp16 \
             --fp16-scale-window=512 \

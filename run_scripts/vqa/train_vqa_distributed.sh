@@ -65,8 +65,7 @@ ema_start_update=0
 val_inference_type=beamsearch
 
 # JW: Calculate total_num_updates from epoch "length" and number of epochs
-# $((epoch_length * num_epochs))
-for total_num_updates in {40000,}; do
+for total_num_updates in {$((epoch_length * num_epochs)),}; do
   echo "total_num_updates ""${total_num_updates}"
   for warmup_updates in {1000,}; do
     echo "warmup_updates ""${warmup_updates}"
