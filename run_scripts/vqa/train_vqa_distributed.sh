@@ -8,8 +8,8 @@
 # To use the shuffled data (if exists), please uncomment the Line 24.
 
 # JW: epoch length and number of epochs
-epoch_length=114280
-num_epochs=12
+epoch_length=1283
+num_epochs=42
 
 # Number of GPUs per GPU worker
 GPUS_PER_NODE=1
