@@ -13,7 +13,7 @@ split=test
 data=../../dataset/vizwiz_data/vizwiz_${split}.tsv
 ans2label_file=../../dataset/vizwiz_data/trainval_ans2label.pkl
 path=../../checkpoints/vizwiz_medium_best.pt
-result_path=../../results/vqa_${split}_beam
+result_path=../../results/vizwiz_${split}_beam
 selected_cols=0,5,2,3,4
 
 CUDA_VISIBLE_DEVICES=0 python3 -m torch.distributed.launch --nproc_per_node=1 --master_port=${MASTER_PORT} ../../evaluate.py \

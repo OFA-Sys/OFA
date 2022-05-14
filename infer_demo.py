@@ -13,6 +13,9 @@ from utils.zero_shot_utils import zero_shot_step
 # JW: imports for demo
 import json
 import random
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def main():
@@ -120,26 +123,31 @@ def main():
     eos_item = torch.LongTensor([task.src_dict.eos()])
     pad_idx = task.src_dict.pad()
 
-    # JW: Open "random" image file
-    random.seed(14)
-    path = random.choice(glob.glob('dataset/vizwiz_data/val/*.jpg'))
-    name = path.replace('\\', '/').split('/')[-1]
-    image = Image.open(path)
+    # Set seeds and iterate over different images
+    seeds = [random.randint(0, 10000) for _ in range(10)]
+    for s in seeds:
+        random.seed(s)
+        path = random.choice(glob.glob('dataset/vizwiz_data/val/*.jpg'))
+        name = path.replace('\\', '/').split('/')[-1]
+        image = Image.open(path)
 
-    # Open corresponding questions
-    annotations = json.load(open(f'dataset/vizwiz_data/Annotations/val.json'))
-    questions = [ann['question'] for ann in annotations if ann['image'] == name]
-    questions = {i+1: q for i, q in enumerate(questions)}
+        # Open corresponding questions
+        annotations = json.load(open(f'dataset/vizwiz_data/Annotations/val.json'))
+        questions = [ann['question'] for ann in annotations if ann['image'] == name]
+        questions = {i+1: q for i, q in enumerate(questions)}
 
-    # Print name of image and questions
-    print(name)
-    print(questions)
+        # Skip if no questions
+        if not questions:
+            continue
 
-    # JW: Show image via PIL
-    plt.imshow(image)
-    plt.show()
+        # Print name of image and questions
+        print(name)
+        print(questions)
 
-    while True:
+        # JW: Show image via PIL
+        plt.imshow(image)
+        plt.show()
+
         number = input('Please select your question entering its number: ')
         question = questions[int(number)]
 
@@ -156,7 +164,7 @@ def main():
         print(f'Your question was: {question}')
         print(f'OFA\'s Answer is: {result[0]["answer"]}')
         gt_answers = [ann["answers"] for ann in annotations if ann["image"] == name and ann["question"] == question]
-        print(f'Ground truth answers are: {gt_answers}\n')
+        print(f'Ground truth answers are: {gt_answers}\n\n')
 
 
 if __name__ == "__main__":
