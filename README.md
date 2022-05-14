@@ -304,7 +304,7 @@ Here we provide the finetuning and inference codes to reproduce the VQAv2 result
 79459   79459   is this person wearing shorts?  0.6|!+no    house&&short&&...&&sky  /9j/4AAQS...tigZ/9k=
 </pre>
     <p>
-        For fine-tuning on customed VQA-formulated tasks, please refer to issue <a href="https://github.com/OFA-Sys/OFA/issues/73">#73</a>, <a href="https://github.com/OFA-Sys/OFA/issues/76">#76</a> and <a href="https://github.com/OFA-Sys/OFA/issues/105">#105</a> for more information.
+        For fine-tuning on customed VQA-formulated tasks, please refer to issue <a href="https://github.com/OFA-Sys/OFA/issues/76">#76</a>, <a href="https://github.com/OFA-Sys/OFA/issues/105">#105</a> and <a href="https://github.com/OFA-Sys/OFA/issues/73">#73</a> for more information.
     </p>
 </details>
 <details>
