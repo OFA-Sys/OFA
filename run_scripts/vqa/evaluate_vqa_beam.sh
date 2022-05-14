@@ -12,7 +12,7 @@ split=test
 
 data=../../dataset/vizwiz_data/vizwiz_${split}.tsv
 ans2label_file=../../dataset/vizwiz_data/trainval_ans2label.pkl
-path=../../checkpoints/ofa_tiny.pt
+path=../../checkpoints/vizwiz_medium_best.pt
 result_path=../../results/vqa_${split}_beam
 selected_cols=0,5,2,3,4
 
