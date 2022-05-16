@@ -99,6 +99,9 @@ We list the parameters and pretrained checkpoints of OFAs below. For finetuned c
     <tr align="center">
         <td>OFA<sub>Large</sub></td><td><a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_large.pt">Download</a></td><td>470M</td><td>ResNet152</td><td>1024</td></td><td>4096</td><td>16</td><td>12</td><td>12</td>
     </tr>
+    <tr align="center">
+        <td>OFA<sub>Huge</sub></td><td>-</td><td>930M</td><td>ResNet152</td><td>1280</td></td><td>5120</td><td>16</td><td>24</td><td>12</td>
+    </tr>
 </table>
 <br></br>
 
@@ -113,22 +116,25 @@ Below we demonstrate the results of OFAs on cross-modal understanding and genera
         <td>Dataset</td><td>COCO</td><td colspan="3">COCO</td><td colspan="2">VQA v2</td><td colspan="2">SNLI-VE</td><td colspan="3">RefCOCO</td><td colspan="3">RefCOCO+</td><td colspan="2">RefCOCOg</td>
     </tr>
     <tr align="center">
-        <td>Split</td><td>Kaparthy test</td><td colspan="3">test</td><td>test-dev</td><td>test-std</td><td>val</td><td>test</td><td>val</td><td>test-a</td><td>test-b</td><td>val</td><td>test-a</td><td>test-b</td><td>val-u</td><td>test-u</td>
+        <td>Split</td><td>Kaparthy test (CE/CIDEr)</td><td colspan="3">test</td><td>test-dev</td><td>test-std</td><td>val</td><td>test</td><td>val</td><td>test-a</td><td>test-b</td><td>val</td><td>test-a</td><td>test-b</td><td>val-u</td><td>test-u</td>
     </tr>
     <tr align="center">
         <td>Metric</td><td>CIDEr</td><td>FID</td><td>CLIPSIM</td><td>IS</td><td colspan="2">Acc.</td><td colspan="2">Acc.</td><td colspan="8">Acc.</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Tiny</sub></td><td>128.4</td><td>-</td><td>-</td><td>-</td><td>70.25</td><td>70.41</td><td>85.3</td><td>85.2</td><td>80.20</td><td>84.07</td><td>75.00</td><td>68.22</td><td>75.13</td><td>57.66</td><td>72.02</td><td>69.74</td>
+        <td>OFA<sub>Tiny</sub></td><td>117.5/128.4</td><td>-</td><td>-</td><td>-</td><td>70.25</td><td>70.41</td><td>85.3</td><td>85.2</td><td>80.20</td><td>84.07</td><td>75.00</td><td>68.22</td><td>75.13</td><td>57.66</td><td>72.02</td><td>69.74</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Medium</sub></td><td>140.3</td><td>-</td><td>-</td><td>-</td><td>75.35</td><td>75.45</td><td>86.6</td><td>87.0</td><td>85.34</td><td>87.68</td><td>77.92</td><td>76.09</td><td>83.04</td><td>66.25</td><td>78.76</td><td>78.58</td>
+        <td>OFA<sub>Medium</sub></td><td>132.4/140.3</td><td>-</td><td>-</td><td>-</td><td>75.35</td><td>75.45</td><td>86.6</td><td>87.0</td><td>85.34</td><td>87.68</td><td>77.92</td><td>76.09</td><td>83.04</td><td>66.25</td><td>78.76</td><td>78.58</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Base</sub></td><td>146.4</td><td>20.8</td><td>31.6</td><td>21.8</td><td>77.98</td><td>78.07</td><td>89.3</td><td>89.2</td><td>88.48</td><td>90.67</td><td>83.30</td><td>81.39</td><td>87.15</td><td>74.29</td><td>82.29</td><td>82.31</td>
+        <td>OFA<sub>Base</sub></td><td>136.8/146.4</td><td>20.8</td><td>31.6</td><td>21.8</td><td>77.98</td><td>78.07</td><td>89.3</td><td>89.2</td><td>88.48</td><td>90.67</td><td>83.30</td><td>81.39</td><td>87.15</td><td>74.29</td><td>82.29</td><td>82.31</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Large</sub></td><td>150.2</td><td>10.5</td><td>34.4</td><td>31.1</td><td>80.43</td><td>80.67</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>85.80</td><td>89.87</td><td>79.22</td><td>85.89</td><td>86.55</td>
+        <td>OFA<sub>Large</sub></td><td>140.3/150.2</td><td>10.5</td><td>34.4</td><td>31.1</td><td>80.43</td><td>80.67</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>85.80</td><td>89.87</td><td>79.22</td><td>85.89</td><td>86.55</td>
+    </tr>
+    <tr align="center">
+        <td>OFA<sub>Huge</sub></td><td>145.3/154.0</td><td>-</td><td>-</td><td>-</td><td>82.00</td><td>81.98</td><td>91.1</td><td>91.0</td><td>91.62</td><td>93.87</td><td>87.60</td><td>87.29</td><td>91.65</td><td>80.24</td><td>88.15</td><td>88.13</td>
     </tr>
 </table>
 <br></br>
