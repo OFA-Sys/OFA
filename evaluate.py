@@ -62,13 +62,24 @@ def main(cfg: DictConfig, **kwargs):
         overrides['val_inference_type'] = "beamsearch" if kwargs['beam_search_vqa_eval'] else "allcand"
 
     logger.info("loading model(s) from {}".format(cfg.common_eval.path))
-    models, saved_cfg, task = checkpoint_utils.load_model_ensemble_and_task(
-        utils.split_paths(cfg.common_eval.path),
-        arg_overrides=overrides,
-        suffix=cfg.checkpoint.checkpoint_suffix,
-        strict=(cfg.checkpoint.checkpoint_shard_count == 1),
-        num_shards=cfg.checkpoint.checkpoint_shard_count,
-    )
+    if kwargs["zero_shot"]:
+        task = tasks.setup_task(cfg.task)
+        models, saved_cfg = checkpoint_utils.load_model_ensemble(
+            utils.split_paths(cfg.common_eval.path),
+            arg_overrides=overrides,
+            task=task,
+            suffix=cfg.checkpoint.checkpoint_suffix,
+            strict=(cfg.checkpoint.checkpoint_shard_count == 1),
+            num_shards=cfg.checkpoint.checkpoint_shard_count,
+        )
+    else:
+        models, saved_cfg, task = checkpoint_utils.load_model_ensemble_and_task(
+            utils.split_paths(cfg.common_eval.path),
+            arg_overrides=overrides,
+            suffix=cfg.checkpoint.checkpoint_suffix,
+            strict=(cfg.checkpoint.checkpoint_shard_count == 1),
+            num_shards=cfg.checkpoint.checkpoint_shard_count,
+        )
 
     # loading the dataset should happen after the checkpoint has been loaded so we can give it the saved task config
     task.load_dataset(cfg.dataset.gen_subset, task_cfg=saved_cfg.task)
@@ -133,9 +144,12 @@ def cli_main():
     parser = options.get_generation_parser()
     parser.add_argument("--ema-eval", action='store_true', help="Use EMA weights to make evaluation.")
     parser.add_argument("--beam-search-vqa-eval", action='store_true', help="Use beam search for vqa evaluation (faster inference speed but sub-optimal result), if not specified, we compute scores for each answer in the candidate set, which is slower but can obtain best result.")
+    parser.add_argument("--zero-shot", action='store_true')
     args = options.parse_args_and_arch(parser)
     cfg = convert_namespace_to_omegaconf(args)
-    distributed_utils.call_main(cfg, main, ema_eval=args.ema_eval, beam_search_vqa_eval=args.beam_search_vqa_eval)
+    distributed_utils.call_main(
+        cfg, main, ema_eval=args.ema_eval, beam_search_vqa_eval=args.beam_search_vqa_eval, zero_shot=args.zero_shot
+    )
 
 
 if __name__ == "__main__":
