@@ -95,8 +95,10 @@ def create_ans2label_file():
             answer_counts[ans] = 1
         else:
             answer_counts[ans] += 1
-    # Get most frequent (3129) answers as per the OFA authors
-    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)
+    # Pick top x most frequent answers - test different x values (current x = 10000?)
+    # NOTE: Taking 3129 most frequent answers as done for the VQA dataset results in gradient overflow
+    x = 10000
+    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)[:x]
     # Create dict to map answers to labels
     trainval_ans2label = {answer: i for i, answer in enumerate(freq_answers)}
     # Save to file

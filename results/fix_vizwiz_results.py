@@ -5,6 +5,7 @@ print('Fixing vizwiz results...')
 
 # Open results file and sort by question_id
 results_file = 'test_predict'
+assert os.path.exists(results_file), f'Results file not found: {results_file}'
 with open(f'{results_file}.json', 'r') as f:
     results = sorted(json.load(f), key=lambda x: x['question_id'])
 

@@ -29,7 +29,7 @@ def main():
 
     # specify some options for evaluation
     parser = options.get_generation_parser()
-    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/vizwiz_medium_best.pt",
+    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/vizwiz_base_best.pt",
                   "--bpe-dir=utils/BPE"]
     args = options.parse_args_and_arch(parser, input_args)
     cfg = convert_namespace_to_omegaconf(args)
