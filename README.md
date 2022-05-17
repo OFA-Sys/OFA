@@ -537,11 +537,10 @@ cd run_scripts/gigaword ; sh evaluate_gigaword.sh  # inference & evaluate for gi
 # Gallery
 Below we provide examples of OFA in text-to-image generation and open-ended VQA. Also, we demonstrate its performance in unseen task (Grounded QA) as well as unseen domain (Visual Grounding on images from unseen domains). 
 
-## Text-to-Image Generation (normal query)
-![t2i_normal](examples/normal_images.png)
+## Text-to-Image Generation
+![t2i_normal](examples/showcase1.jpg)
 
-## Text-to-Image Generation (counterfactual query)
-![t2i_counterfactual](examples/counterfactual_images.png)
+![t2i_style](examples/showcase2.jpg)
 
 ## Open-Ended VQA
 ![open_vqa](examples/open_vqa.png)
