@@ -1,5 +1,7 @@
 .idea/*
 .DS_Store
 /checkpoints/*
+/dataset/vizwiz_data/*
 /dataset/vqa_data/*
 /test_images/*
+/bot
