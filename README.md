@@ -56,7 +56,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 
 
 # News 
-* 2022.5.15: OFA was accepted by **ICML 2022** .
+* 2022.5.15: OFA was accepted by **ICML 2022**
 * 2022.4.28: Add support of inference on **huggingface transformers**. For how to use it, please refer to the doc [transformers.md](transformers.md) and our [huggingface models](https://huggingface.co/OFA-Sys). 
 * 2022.4.16: Released lightweight pretrained models **OFA-Medium** (~93M params) and **OFA-Tiny** (~33M params) in [checkpoints.md](checkpoints.md). To use them, you just need to load the corresponding checkpoint and set `--arch=ofa_medium` or `--arch=ofa_tiny` in the scripts.
 * 2022.3.23: Added [Encouraging Loss](https://arxiv.org/pdf/2110.06537.pdf) as a feature. See [README_EncouragingLoss.md](README_EncouragingLoss.md). Leveraging this feature, OFA-Large has achieved improved results in both VQA (**test-std acc: 80.67**) and Image Classification (**test acc: 85.6**) recently.
@@ -128,10 +128,10 @@ Below we demonstrate the results of OFAs on cross-modal understanding and genera
         <td>OFA<sub>Medium</sub></td><td>132.4/140.3</td><td>-</td><td>-</td><td>-</td><td>75.35</td><td>75.45</td><td>86.6</td><td>87.0</td><td>85.34</td><td>87.68</td><td>77.92</td><td>76.09</td><td>83.04</td><td>66.25</td><td>78.76</td><td>78.58</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Base</sub></td><td>136.8/146.4</td><td>20.8</td><td>31.6</td><td>21.8</td><td>77.98</td><td>78.07</td><td>89.3</td><td>89.2</td><td>88.48</td><td>90.67</td><td>83.30</td><td>81.39</td><td>87.15</td><td>74.29</td><td>82.29</td><td>82.31</td>
+        <td>OFA<sub>Base</sub></td><td>138.2/146.7</td><td>20.8</td><td>31.6</td><td>21.8</td><td>77.98</td><td>78.07</td><td>89.3</td><td>89.2</td><td>88.48</td><td>90.67</td><td>83.30</td><td>81.39</td><td>87.15</td><td>74.29</td><td>82.29</td><td>82.31</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Large</sub></td><td>140.3/150.2</td><td>10.5</td><td>34.4</td><td>31.1</td><td>80.43</td><td>80.67</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>85.80</td><td>89.87</td><td>79.22</td><td>85.89</td><td>86.55</td>
+        <td>OFA<sub>Large</sub></td><td>142.2/150.7</td><td>10.5</td><td>34.4</td><td>31.1</td><td>80.43</td><td>80.67</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>85.80</td><td>89.87</td><td>79.22</td><td>85.89</td><td>86.55</td>
     </tr>
     <tr align="center">
         <td>OFA<sub>Huge</sub></td><td>145.3/154.0</td><td>-</td><td>-</td><td>-</td><td>82.00</td><td>81.98</td><td>91.1</td><td>91.0</td><td>91.62</td><td>93.87</td><td>87.60</td><td>87.29</td><td>91.65</td><td>80.24</td><td>88.15</td><td>88.13</td>
