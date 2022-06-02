@@ -14,7 +14,7 @@ colorama==0.4.4
 comtypes==1.1.11
 cycler==0.11.0
 Cython==0.29.28
-datasets==2.1.0
+datasets==2.2.2
 dill==0.3.4
 einops==0.4.1
 filelock==3.6.0
@@ -49,7 +49,7 @@ protobuf==3.20.1
 pyarrow==7.0.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
-PyAudio @ file:///D:/Programming/OFA/PyAudio-0.2.11-cp38-cp38-win_amd64.whl
+PyAudio @ file:///D:/Programming/MPCV/models/OFA/PyAudio-0.2.11-cp38-cp38-win_amd64.whl
 pycocoevalcap==1.2
 pycocotools==2.0.4
 pycparser==2.21
