@@ -110,31 +110,31 @@ Below we demonstrate the results of OFAs on cross-modal understanding and genera
 
 <table border="1" width="100%">
     <tr align="center">
-        <th>Task</th><th>Image Captioning</th><th colspan="3">Text-to-Image Generation</th><th colspan="2">VQA</th><th colspan="2">Visual Entailment</th><th colspan="8">Referring Expression Comprehension</th>
+        <th>Task</th><th>Image Captioning</th><th>VQA</th><th>Visual Entailment</th><th colspan="3">Referring Expression Comprehension</th>
     </tr>
     <tr align="center">
-        <td>Dataset</td><td>COCO</td><td colspan="3">COCO</td><td colspan="2">VQA v2</td><td colspan="2">SNLI-VE</td><td colspan="3">RefCOCO</td><td colspan="3">RefCOCO+</td><td colspan="2">RefCOCOg</td>
+        <td>Dataset</td><td>COCO</td><td>VQA v2</td><td>SNLI-VE</td><td>RefCOCO</td><td>RefCOCO+</td><td>RefCOCOg</td>
     </tr>
     <tr align="center">
-        <td>Split</td><td>Karpathy test (CE/CIDEr)</td><td colspan="3">test</td><td>test-dev</td><td>test-std</td><td>val</td><td>test</td><td>val</td><td>test-a</td><td>test-b</td><td>val</td><td>test-a</td><td>test-b</td><td>val-u</td><td>test-u</td>
+        <td>Split</td><td>Karpathy test (CE/CIDEr)</td><td>test-dev/test-std</td><td>val/test</td><td>val/test-a/test-b</td><td>val/test-a/test-b</td><td>val-u/test-u</td>
     </tr>
     <tr align="center">
-        <td>Metric</td><td>CIDEr</td><td>FID</td><td>CLIPSIM</td><td>IS</td><td colspan="2">Acc.</td><td colspan="2">Acc.</td><td colspan="8">Acc.</td>
+        <td>Metric</td><td>CIDEr</td><td>Acc.</td><td>Acc.</td><td colspan="3">Acc.</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Tiny</sub></td><td>117.5/128.4</td><td>-</td><td>-</td><td>-</td><td>70.25</td><td>70.41</td><td>85.3</td><td>85.2</td><td>80.20</td><td>84.07</td><td>75.00</td><td>68.22</td><td>75.13</td><td>57.66</td><td>72.02</td><td>69.74</td>
+        <td>OFA<sub>Tiny</sub></td><td>117.5 / 128.4</td><td>70.3 / 70.4</td><td>85.3 / 85.2</td><td>80.20 / 84.07 / 75.00</td><td>68.22 / 75.13 / 57.66</td><td>72.02 / 69.74</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Medium</sub></td><td>132.4/140.3</td><td>-</td><td>-</td><td>-</td><td>75.35</td><td>75.45</td><td>86.6</td><td>87.0</td><td>85.34</td><td>87.68</td><td>77.92</td><td>76.09</td><td>83.04</td><td>66.25</td><td>78.76</td><td>78.58</td>
+        <td>OFA<sub>Medium</sub></td><td>132.4 / 140.3</td><td>75.4 / 75.5</td><td>86.6 / 87.0</td><td>85.34 / 87.68 / 77.92</td><td>76.09 / 83.04 / 66.25</td><td>78.76 / 78.58</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Base</sub></td><td>138.2/146.7</td><td>20.8</td><td>31.6</td><td>21.8</td><td>77.98</td><td>78.07</td><td>89.3</td><td>89.2</td><td>88.48</td><td>90.67</td><td>83.30</td><td>81.39</td><td>87.15</td><td>74.29</td><td>82.29</td><td>82.31</td>
+        <td>OFA<sub>Base</sub></td><td>138.2 / 146.7</td><td>78.0 / 78.1</td><td>89.3 / 89.2</td><td>88.48 / 90.67 / 83.30</td><td>81.39 / 87.15 / 74.29</td><td>82.29 / 82.31</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Large</sub></td><td>142.2/150.7</td><td>10.5</td><td>34.4</td><td>31.1</td><td>80.43</td><td>80.67</td><td>90.3</td><td>90.2</td><td>90.05</td><td>92.93</td><td>85.26</td><td>85.80</td><td>89.87</td><td>79.22</td><td>85.89</td><td>86.55</td>
+        <td>OFA<sub>Large</sub></td><td>142.2 / 150.7</td><td>80.4 / 80.7</td><td>90.3 / 90.2</td><td>90.05 / 92.93 / 85.26</td><td>85.80 / 89.87 / 79.22</td><td>85.89 / 86.55</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Huge</sub></td><td>145.3/154.0</td><td>-</td><td>-</td><td>-</td><td>82.00</td><td>81.98</td><td>91.1</td><td>91.0</td><td>91.62</td><td>93.87</td><td>87.60</td><td>87.29</td><td>91.65</td><td>80.24</td><td>88.15</td><td>88.13</td>
+        <td>OFA<sub>Huge</sub></td><td>145.3 / 154.9</td><td>82.0 / 82.0</td><td>91.1 / 91.0</td><td>92.04 / 94.03 / 88.44</td><td>87.86 / 91.70 / 80.71</td><td>88.07 / 88.78</td>
     </tr>
 </table>
 <br></br>
@@ -569,11 +569,22 @@ To contact us, never hestitate to send an email to `zheluo.wp@alibaba-inc.com` o
 Please cite our paper if you find it helpful :)
 
 ```
-@article{wang2022OFA,
-  title={Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework},
-  author={Wang, Peng and Yang, An and Men, Rui and Lin, Junyang and Bai, Shuai and Li, Zhikang and Ma, Jianxin and Zhou, Chang and Zhou, Jingren and Yang, Hongxia},
-  journal={arXiv preprint arXiv:2202.03052},
-  year={2022}
+@article{wang2022ofa,
+  author    = {Peng Wang and
+               An Yang and
+               Rui Men and
+               Junyang Lin and
+               Shuai Bai and
+               Zhikang Li and
+               Jianxin Ma and
+               Chang Zhou and
+               Jingren Zhou and
+               Hongxia Yang},
+  title     = {OFA: Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence
+               Learning Framework},
+  journal   = {CoRR},
+  volume    = {abs/2202.03052},
+  year      = {2022}
 }
 ```
 <br></br>
