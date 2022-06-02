@@ -20,7 +20,7 @@ we run the following command to get a preprocessed version of the datast in `dat
 
 ```bash
 fairseq-preprocess --only-source \
-        --trainpref data/train.txt --validpref data/valid.txt --testpref data/test.txt \
+        --trainpref data/train.txt --validpref data/valid.txt --testpref data/question.txt \
         --destdir data-bin/ --workers 40
 ```
 As a result, the `data-bin` directory should appear.

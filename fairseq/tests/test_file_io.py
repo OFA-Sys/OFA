@@ -19,7 +19,7 @@ class TestFileIO(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls._tmpdir = tempfile.mkdtemp()
-        with open(os.path.join(cls._tmpdir, "test.txt"), "w") as f:
+        with open(os.path.join(cls._tmpdir, "question.txt"), "w") as f:
             cls._tmpfile = f.name
             f.write(cls._tmpfile_contents)
             f.flush()
@@ -33,7 +33,7 @@ class TestFileIO(unittest.TestCase):
     def test_file_io(self):
         from fairseq.file_io import PathManager
 
-        with PathManager.open(os.path.join(self._tmpdir, "test.txt"), "r") as f:
+        with PathManager.open(os.path.join(self._tmpdir, "question.txt"), "r") as f:
             s = f.read()
         self.assertEqual(s, self._tmpfile_contents)
 
@@ -42,7 +42,7 @@ class TestFileIO(unittest.TestCase):
         sys.modules["iopath"] = MagicMock()
         from fairseq.file_io import PathManager
 
-        with PathManager.open(os.path.join(self._tmpdir, "test.txt"), "r") as f:
+        with PathManager.open(os.path.join(self._tmpdir, "question.txt"), "r") as f:
             s = f.read()
         self.assertEqual(s, self._tmpfile_contents)
 

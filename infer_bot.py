@@ -11,7 +11,10 @@ from utils.zero_shot_utils import zero_shot_step
 # JW: Imports for Bot interaction
 import glob
 import os
+import warnings
 from time import sleep
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def main():
@@ -119,37 +122,40 @@ def main():
     eos_item = torch.LongTensor([task.src_dict.eos()])
     pad_idx = task.src_dict.pad()
 
-    # JW: Set folder for image and questions from Telegram Bot
-    bot_folder = ""
-    assert os.path.exists(bot_folder), "Bot folder does not exist!"
+    # JW: Set root folder for Telegram Bot
+    # Expected structure: root/question_id/image.jpg and question.txt file
+    root = 'bot'
+    assert os.path.exists(root), 'Root folder does not exist!'
 
     # Add loop to queue multiple questions
+    print("Waiting for question, image pair(s)...")
     while True:
-        images = glob.glob(os.path.join(bot_folder, "/*/*.jpg"))
-        questions = glob.glob(os.path.join(bot_folder, "/*/*.txt"))
-        assert len(images) == len(questions), "Number of images and questions must be equal!"
-        if images and questions:
-            for img, q in zip(images, questions):
-                # Load image and question
-                image = Image.open(img)
-                question = open(q).read()
+        for qid in glob.glob(f'{root}/*'):
+            qid = qid.replace("\\", "/")
+            if os.path.exists(f'{qid}/answer.txt'):
+                continue
 
-                # Construct input sample & preprocess for GPU if cuda available
-                sample = construct_sample(image, question)
-                sample = utils.move_to_cuda(sample) if use_cuda else sample
-                sample = utils.apply_to_sample(apply_half, sample) if use_fp16 else sample
+            print(f'Processing question, image pair: {qid.split("/")[-1]}')
+            image_path, question_path = f'{qid}/image.jpg', f'{qid}/question.txt'
+            image = Image.open(image_path)
+            question = open(question_path).read()
 
-                # Run eval step for open-domain VQA
-                with torch.no_grad():
-                    result, scores = zero_shot_step(task, generator, models, sample)
+            # Construct input sample & preprocess for GPU if cuda available
+            sample = construct_sample(image, question)
+            sample = utils.move_to_cuda(sample) if use_cuda else sample
+            sample = utils.apply_to_sample(apply_half, sample) if use_fp16 else sample
 
-                # Save answer as TXT file in folder
-                with open(os.path.join(bot_folder, "answer.txt"), "w") as f:
-                    f.write(result[0]['answer'])
+            # Run eval step for open-domain VQA
+            with torch.no_grad():
+                result, scores = zero_shot_step(task, generator, models, sample)
 
-                # Delete image and question
-                os.remove(img)
-                os.remove(question)
+            # Save answer as TXT file in folder
+            with open(f'{qid}/answer.txt', 'w') as f:
+                f.write(result[0]['answer'])
+
+            # Delete image and question
+            os.remove(image_path)
+            os.remove(question_path)
         else:
             sleep(1)
 

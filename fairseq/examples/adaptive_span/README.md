@@ -21,7 +21,7 @@ from [adaptive span paper](https://github.com/facebookresearch/adaptive-span/blo
 You can download the dataset, and then run:
 ```bash
 fairseq-preprocess --only-source --trainpref ~/data/enwik8/train.txt \
-    --validpref ~/data/enwik8/valid.txt --testpref ~/data/enwik8/test.txt \
+    --validpref ~/data/enwik8/valid.txt --testpref ~/data/enwik8/question.txt \
     --destdir ~/data/enwik8/data-bin/ --joined-dictionary --workers 20
 ```
 

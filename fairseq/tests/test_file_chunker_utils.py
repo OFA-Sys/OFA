@@ -20,7 +20,7 @@ class TestFileChunker(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls._num_bytes = len(cls._line_content.encode("utf-8"))
         cls._tmpdir = tempfile.mkdtemp()
-        with open(os.path.join(cls._tmpdir, "test.txt"), "w") as f:
+        with open(os.path.join(cls._tmpdir, "question.txt"), "w") as f:
             cls._tmpfile = f.name
             for _i in range(cls._num_lines):
                 f.write(cls._line_content)
