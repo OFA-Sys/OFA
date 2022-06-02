@@ -539,9 +539,7 @@ Below we provide examples of OFA in text-to-image generation and open-ended VQA.
 
 ## Text-to-Image Generation
 
-![t2i_style](examples/showcase6.jpg)
-![real](examples/showcase4.jpg)
-![fantasy](examples/showcase5.jpg)
+![case1](examples/case1.png)
 
 
 ## Open-Ended VQA
