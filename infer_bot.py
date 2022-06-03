@@ -124,19 +124,19 @@ def main():
 
     # JW: Set root folder for Telegram Bot
     # Expected structure: root/question_id/image.jpg and question.txt file
-    root = 'bot'
-    assert os.path.exists(root), 'Root folder does not exist!'
+    data = '../../tgbot/data/'
+    assert os.path.exists(data), 'Data folder does not exist!'
 
     # Add loop to queue multiple questions
-    print("Waiting for question, image pair(s)...")
+    print("Waiting for question, image pair...")
     while True:
-        for qid in glob.glob(f'{root}/*'):
-            qid = qid.replace("\\", "/")
-            if os.path.exists(f'{qid}/answer.txt'):
-                continue
+        if os.path.exists(f'{data}/answer.txt'):
+            continue
 
-            print(f'Processing question, image pair: {qid.split("/")[-1]}')
-            image_path, question_path = f'{qid}/image.jpg', f'{qid}/question.txt'
+        image_path, question_path = f'{data}/image.png', f'{data}/question.txt'
+        if os.path.exists(image_path) and os.path.exists(question_path):
+            print(f'Processing question, image pair')
+
             image = Image.open(image_path)
             question = open(question_path).read()
 
@@ -150,12 +150,18 @@ def main():
                 result, scores = zero_shot_step(task, generator, models, sample)
 
             # Save answer as TXT file in folder
-            with open(f'{qid}/answer.txt', 'w') as f:
+            with open(f'{data}/answer.txt', 'w') as f:
                 f.write(result[0]['answer'])
 
             # Delete image and question
-            os.remove(image_path)
-            os.remove(question_path)
+            try:
+                os.remove(image_path)
+                os.remove(question_path)
+            except OSError:
+                return f'Either the image or question file is open in another process, close it and try again!'
+
+            print(f'Answer saved to {data}answer.txt')
+            print("Waiting for question, image pair...")
         else:
             sleep(1)
 
