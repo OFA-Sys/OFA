@@ -87,8 +87,7 @@ def create_ans2label_file():
     val = json.load(open('vizwiz_data/Annotations/val.json', encoding='utf-8'))
     annotations = train + val
     # Extract answers
-    answers = set(ans['answer'] for question in annotations for ans in question['answers'])
-    """
+    # answers = set(ans['answer'] for question in annotations for ans in question['answers'])
     answers = [ans['answer'] for question in annotations for ans in question['answers']]
     # Count occurrences of answers
     answer_counts = {}
@@ -99,8 +98,8 @@ def create_ans2label_file():
             answer_counts[ans] += 1
     # Pick top x most frequent answers - test different x values (current x = 10000?)
     # NOTE: Taking 3129 most frequent answers as done for the VQA dataset results in gradient overflow
-    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)
-    """
+    x = 5000
+    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)[:x]
     # Create dict to map answers to labels
     trainval_ans2label = {answer: i for i, answer in enumerate(answers)}
     # Save to file

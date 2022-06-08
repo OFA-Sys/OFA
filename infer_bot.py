@@ -9,7 +9,6 @@ from tasks.mm_tasks.vqa_gen import VqaGenTask
 from utils.zero_shot_utils import zero_shot_step
 
 # JW: Imports for Bot interaction
-import glob
 import os
 import warnings
 from time import sleep
@@ -28,7 +27,7 @@ def main():
 
     # specify some options for evaluation
     parser = options.get_generation_parser()
-    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/vizwiz_base_best.pt",
+    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/ofa_large.pt",
                   "--bpe-dir=utils/BPE"]
     args = options.parse_args_and_arch(parser, input_args)
     cfg = convert_namespace_to_omegaconf(args)
