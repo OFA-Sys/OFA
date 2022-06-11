@@ -94,7 +94,7 @@ class VqaGenTask(OFATask):
     def __init__(self, cfg: VqaGenConfig, src_dict, tgt_dict):
         super().__init__(cfg, src_dict, tgt_dict)
 
-        if self.cfg.unconstrained_training:
+        if not self.cfg.unconstrained_training:
             self.ans2label_dict = None
             if self.cfg.ans2label_file is not None:
                 self.ans2label_dict = pickle.load(open(self.cfg.ans2label_file, "rb"))
