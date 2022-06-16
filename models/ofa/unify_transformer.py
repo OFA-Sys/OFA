@@ -1035,7 +1035,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         image_position_idx = torch.arange(self.window_size).unsqueeze(0).expand(self.window_size, self.window_size) + \
                              torch.arange(self.window_size).unsqueeze(1) * image_bucket_size + 1
         image_position_idx = torch.cat([torch.tensor([0]), image_position_idx.view(-1)])
-        image_position_idx = torch.cat([image_position_idx, torch.tensor([1024] * 768)])
+        image_position_idx = torch.cat([image_position_idx, torch.tensor([1024] * 769)])
         self.image_rel_pos_table_list = nn.ModuleList(
             [Embedding(image_num_rel_dis, self.num_attention_heads, zero_init=True) for _ in range(args.decoder_layers)]
         )
