@@ -100,7 +100,7 @@ We list the parameters and pretrained checkpoints of OFAs below. For finetuned c
         <td>OFA<sub>Large</sub></td><td><a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_large.pt">Download</a></td><td>470M</td><td>ResNet152</td><td>1024</td></td><td>4096</td><td>16</td><td>12</td><td>12</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Huge</sub></td><td>-</td><td>930M</td><td>ResNet152</td><td>1280</td></td><td>5120</td><td>16</td><td>24</td><td>12</td>
+        <td>OFA<sub>Huge</sub></td><td><a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_huge.pt">Download</a></td><td>930M</td><td>ResNet152</td><td>1280</td></td><td>5120</td><td>16</td><td>24</td><td>12</td>
     </tr>
 </table>
 <br></br>
