@@ -424,7 +424,7 @@ nohup sh train_snli_ve.sh > train_snli_ve.out &  # finetune for snli_ve
         Run the following command to obtain the results.
     </p>
 <pre>
-cd run_scripts/snli_ve ; sh evaluate_snli_ve.sh  # inference & evaluate for snli_ve
+cd run_scripts/snli_ve ; sh evaluate_snli_ve.sh dev  # specify 'dev' or 'test'
 </pre>
 </details>
    
