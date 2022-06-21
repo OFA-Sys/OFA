@@ -35,10 +35,31 @@ def img2base64(fn):
     return base64.b64encode(byte_data).decode('utf-8')
 
 
-def create_tsv_files():
-    """
-    Create tsv files for the VizWiz dataset.
-    """
+def main():
+    print('Generating trainval_ans2label.pkl file...')
+    # Load annotations
+    train = json.load(open('vizwiz_data/Annotations/train.json', encoding='utf-8'))
+    val = json.load(open('vizwiz_data/Annotations/val.json', encoding='utf-8'))
+    annotations = train + val
+    # Extract answers
+    answers = [ans['answer'] for question in annotations for ans in question['answers']]
+    # Count occurrences of answers
+    answer_counts = {}
+    for ca in answers:
+        if ca not in answer_counts:
+            answer_counts[ca] = 1
+        else:
+            answer_counts[ca] += 1
+    # Pick top x most frequent answers (VQA uses 3129)
+    x = 3129
+    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)[:x]
+    # Create dict to map answers to labels
+    trainval_ans2label = {answer: i for i, answer in enumerate(freq_answers)}
+    # Save to file
+    with open('vizwiz_data/trainval_ans2label.pkl', 'wb') as f:
+        pickle.dump(trainval_ans2label, f)
+
+    print('Finished generating trainval_ans2label.pkl file...')
 
     # Dict to map answer confidence to value
     conf = {'yes': '1.0', 'maybe': '0.5', 'no': '0.0'}
@@ -65,8 +86,13 @@ def create_tsv_files():
                 tsv_set.add((img_id, img_id, question, '1.0|!+no', '', img2base64(fn)))
             else:
                 ans_conf = ''
-                for ans in annotations[img_id]['answers']:
-                    ans_conf += f'{conf[ans["answer_confidence"]]}|!+{ans["answer"]}&&'
+                conf_ans = annotations[img_id]['answers']
+                conf_ans = [{'answer_confidence': ca['answer_confidence'], 'answer': ca['answer']} for ca in conf_ans
+                            if ca['answer'] in freq_answers]
+                if not conf_ans:
+                    continue
+                for ca in conf_ans:
+                    ans_conf += f'{conf[ca["answer_confidence"]]}|!+{ca["answer"]}&&'
                 tsv_set.add((img_id, img_id, question, ans_conf[:-2], '', img2base64(fn)))
         # Write to tsv file
         print(f'Writing {subset} tsv file...')
@@ -76,40 +102,6 @@ def create_tsv_files():
     return 'Finished creating tsv files!'
 
 
-def create_ans2label_file():
-    """
-    Create trainval_ans2label.pkl file for the VizWiz dataset.
-    """
-
-    print('Generating trainval_ans2label.pkl file...')
-    # Load annotations
-    train = json.load(open('vizwiz_data/Annotations/train.json', encoding='utf-8'))
-    val = json.load(open('vizwiz_data/Annotations/val.json', encoding='utf-8'))
-    annotations = train + val
-    # Extract answers
-    # answers = set(ans['answer'] for question in annotations for ans in question['answers'])
-    answers = [ans['answer'] for question in annotations for ans in question['answers']]
-    # Count occurrences of answers
-    answer_counts = {}
-    for ans in answers:
-        if ans not in answer_counts:
-            answer_counts[ans] = 1
-        else:
-            answer_counts[ans] += 1
-    # Pick top x most frequent answers - test different x values (current x = 10000?)
-    # NOTE: Taking 3129 most frequent answers as done for the VQA dataset results in gradient overflow
-    x = 5000
-    freq_answers = sorted(answer_counts, key=answer_counts.get, reverse=True)[:x]
-    # Create dict to map answers to labels
-    trainval_ans2label = {answer: i for i, answer in enumerate(freq_answers)}
-    # Save to file
-    with open('vizwiz_data/trainval_ans2label.pkl', 'wb') as f:
-        pickle.dump(trainval_ans2label, f)
-
-    return 'Finished creating trainval_ans2label.pkl file!'
-
-
 if __name__ == '__main__':
-    # print(create_tsv_files())
-    print(create_ans2label_file())
+    print(main())
     print('All done!')

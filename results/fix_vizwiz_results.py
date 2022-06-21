@@ -4,9 +4,9 @@ import os
 print('Fixing vizwiz results...')
 
 # Open results file and sort by question_id
-results_file = 'test_predict.json'
-assert os.path.exists(results_file), f'Results file not found: {results_file}'
-with open(results_file, 'r') as f:
+results_file = 'test_predict'
+assert os.path.exists(f'{results_file}.json'), f'Results file not found: {results_file}.json'
+with open(f'{results_file}.json', 'r') as f:
     results = sorted(json.load(f), key=lambda x: x['question_id'])
 
 # Get image names
