@@ -34,6 +34,7 @@ from torch import Tensor
 
 from .unify_transformer_layer import TransformerEncoderLayer, TransformerDecoderLayer
 from .resnet import ResNet
+from .frozen_bn import FrozenBatchNorm2d
 
 
 DEFAULT_MAX_SOURCE_POSITIONS = 1024
@@ -427,7 +428,10 @@ class TransformerEncoder(FairseqEncoder):
         if getattr(args, "sync_bn", False):
             norm_layer = BatchNorm2d
         else:
-            norm_layer = None
+            if getattr(args, "freeze_resnet", False):
+                norm_layer = FrozenBatchNorm2d
+            else:
+                norm_layer = None
 
         if args.resnet_type == 'resnet101':
             self.embed_images = ResNet([3, 4, 23], norm_layer=norm_layer, drop_path_rate=args.resnet_drop_path_rate)
@@ -497,15 +501,6 @@ class TransformerEncoder(FairseqEncoder):
         self.register_buffer("token_rp_bucket", token_rp_bucket)
         self.register_buffer("image_rp_bucket", image_rp_bucket)
         self.entangle_position_embedding = args.entangle_position_embedding
-
-    def train(self, mode=True):
-        super(TransformerEncoder, self).train(mode)
-        if getattr(self.args, "freeze_resnet", False):
-            for m in self.embed_images.modules():
-                if isinstance(m, nn.BatchNorm2d):
-                    m.eval()
-                    m.weight.requires_grad = False
-                    m.bias.requires_grad = False
 
     def build_encoder_layer(self, args, drop_path_rate=0.0):
         layer = TransformerEncoderLayer(args, drop_path_rate=drop_path_rate)
