@@ -132,7 +132,7 @@ class OFATask(FairseqTask):
         total_row_count = dataset.dataset.get_total_row_count()
         num_batches = math.ceil(math.ceil(total_row_count / num_shards) / max_sentences)
         if len(batch_sampler) < num_batches:
-            batch_sampler.append([1])
+            batch_sampler.append([])
 
         # return a reusable, sharded iterator
         epoch_iter = iterators.EpochBatchIterator(
