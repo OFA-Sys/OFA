@@ -113,6 +113,7 @@ class OFAConfig(PretrainedConfig):
         scale_embedding=False,
         pad_token_id=1,
         bos_token_id=0,
+        decoder_start_token_id=0,
         eos_token_id=2,
         forced_eos_token_id=2,
         encoder_normalize_before=True,
