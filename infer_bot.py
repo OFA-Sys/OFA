@@ -13,6 +13,7 @@ import os
 import warnings
 from glob import glob
 from time import sleep
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -129,22 +130,29 @@ def main():
 
     # Add loop to queue multiple questions
     print("Waiting for question, image pair...")
+    processed = set()
     while True:
         # Get images and questions to process if no answer yet
-        queue = [f for f in glob(f'{data}/*/*') if os.path.exists(f'{f}/image.png')
-                 and not os.path.exists(f'{f}/answer.txt')]
+        queue = [f for f in glob(f'{data}/*/*') if os.path.exists(f'{f}/image.png') and f not in processed]
 
         while queue:
             print(f'Processing question, image pair')
 
+            # Get folder from queue and add to processed set
             folder = queue.pop(0)
+            processed.add(folder)
+
+            # Get image and question paths
             image_path, question_path = f'{folder}/image.png', f'{folder}/question.txt'
 
+            # Wait until image fully downloaded
             wait = True
             while wait:
                 wait = os.path.exists(f'{image_path}.crdownload')
-                sleep(1)
+                if wait:
+                    sleep(1)
 
+            # Open image and question
             image = Image.open(image_path)
             question = open(question_path).read()
 
