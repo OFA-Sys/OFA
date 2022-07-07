@@ -12,7 +12,7 @@ split=test
 
 data=../../dataset/vizwiz_data/vizwiz_${split}.tsv
 ans2label_file=../../dataset/vizwiz_data/trainval_ans2label.pkl
-path=../../checkpoints/ofa_tiny.pt
+path=../../checkpoints/checkpoint_best.pt
 result_path=../../results/vizwiz_${split}_beam
 selected_cols=0,5,2,3,4
 
@@ -21,7 +21,7 @@ CUDA_VISIBLE_DEVICES=0 python3 -m torch.distributed.launch --nproc_per_node=1 --
     --path=${path} \
     --user-dir=${user_dir} \
     --task=vqa_gen \
-    --batch-size=16 \
+    --batch-size=8 \
     --log-format=simple --log-interval=10 \
     --seed=7 \
     --gen-subset="${split}" \

@@ -49,18 +49,15 @@ protobuf==3.20.1
 pyarrow==7.0.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
-PyAudio @ file:///D:/Programming/MPCV/models/OFA/PyAudio-0.2.11-cp38-cp38-win_amd64.whl
 pycocoevalcap==1.2
 pycocotools==2.0.4
 pycparser==2.21
 pyDeprecate==0.3.2
 pyparsing==3.0.8
-pypiwin32==223
 python-dateutil==2.8.2
 pytorch-lightning==1.6.1
 pyttsx3==2.90
 pytz==2022.1
-pywin32==303
 PyYAML==6.0
 regex==2022.4.24
 requests==2.27.1

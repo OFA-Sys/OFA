@@ -23,7 +23,7 @@ data=${data_dir}/vizwiz_train.tsv,${data_dir}/vizwiz_val.tsv
 # Note: If you have shuffled the data in advance, please uncomment the line below.
 # data=${data_dir}/vqa_train_1.tsv,${data_dir}/vqa_train_2.tsv,${data_dir}/vqa_train_3.tsv,${data_dir}/vqa_train_4.tsv,${data_dir}/vqa_train_5.tsv,${data_dir}/vqa_train_6.tsv,${data_dir}/vqa_train_7.tsv,${data_dir}/vqa_train_8.tsv,${data_dir}/vqa_train_9.tsv,${data_dir}/vqa_train_10.tsv,${data_dir}/vqa_val.tsv
 ans2label_file=../../dataset/vizwiz_data/trainval_ans2label.pkl
-restore_file=../../checkpoints/ofa_base.pt
+restore_file=../../checkpoints/ofa_medium.pt
 selected_cols=0,5,2,3,4
 
 log_dir=./vqa_logs
@@ -34,7 +34,7 @@ bpe_dir=../../utils/BPE
 user_dir=../../ofa_module
 
 task=vqa_gen
-arch=ofa_base
+arch=ofa_medium
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.1
 batch_size=4
@@ -60,7 +60,7 @@ ema_start_update=0
 # As mentioned in the readme, you can choose from allcand or beamsearch evaluation, default to allcand
 val_inference_type=beamsearch
 
-for max_epoch in {42,}; do
+for max_epoch in {12,}; do
   echo "max_epoch ""${max_epoch}"
   for warmup_ratio in {0.04,}; do
     echo "warmup_ratio ""${warmup_ratio}"

@@ -1,7 +1,16 @@
-import pandas as pd
-import _pickle as pickle
+import os
+from glob import glob
 
-vqa_val = pd.read_csv('dataset/vqa_data/vqa_val.tsv', sep='\t')
-vizwiz_val = pd.read_csv('dataset/vizwiz_data/vizwiz_val.tsv', sep='\t')
-ans2label = pickle.load(open('dataset/vizwiz_data/trainval_ans2label.pkl', 'rb'))
-print(ans2label)
+# JW: Set root folder for Telegram Bot
+# Expected structure: root/question_id/image.jpg and question.txt file
+data = '../../tgbot/data/'
+assert os.path.exists(data), 'Data folder does not exist!'
+
+# Add loop to queue multiple questions
+print("Waiting for question, image pair...")
+while True:
+    queue = []
+    for folder in glob(f'{data}/*/*'):
+        if not os.path.exists(f'{folder}/answer.txt'):
+            queue.append(folder)
+    print(f'Found {len(queue)} questions')

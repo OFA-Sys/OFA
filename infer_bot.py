@@ -11,6 +11,7 @@ from utils.zero_shot_utils import zero_shot_step
 # JW: Imports for Bot interaction
 import os
 import warnings
+from glob import glob
 from time import sleep
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -27,7 +28,7 @@ def main():
 
     # specify some options for evaluation
     parser = options.get_generation_parser()
-    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/ofa_large.pt",
+    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/vizwiz_base_best.pt",
                   "--bpe-dir=utils/BPE"]
     args = options.parse_args_and_arch(parser, input_args)
     cfg = convert_namespace_to_omegaconf(args)
@@ -129,12 +130,20 @@ def main():
     # Add loop to queue multiple questions
     print("Waiting for question, image pair...")
     while True:
-        if os.path.exists(f'{data}/answer.txt'):
-            continue
+        # Get images and questions to process if no answer yet
+        queue = [f for f in glob(f'{data}/*/*') if os.path.exists(f'{f}/image.png')
+                 and not os.path.exists(f'{f}/answer.txt')]
 
-        image_path, question_path = f'{data}/image.png', f'{data}/question.txt'
-        if os.path.exists(image_path) and os.path.exists(question_path):
+        while queue:
             print(f'Processing question, image pair')
+
+            folder = queue.pop(0)
+            image_path, question_path = f'{folder}/image.png', f'{folder}/question.txt'
+
+            wait = True
+            while wait:
+                wait = os.path.exists(f'{image_path}.crdownload')
+                sleep(1)
 
             image = Image.open(image_path)
             question = open(question_path).read()
@@ -149,20 +158,13 @@ def main():
                 result, scores = zero_shot_step(task, generator, models, sample)
 
             # Save answer as TXT file in folder
-            with open(f'{data}/answer.txt', 'w') as f:
+            with open(f'{folder}/answer.txt', 'w') as f:
                 f.write(result[0]['answer'])
 
-            # Delete image and question
-            try:
-                os.remove(image_path)
-                os.remove(question_path)
-            except OSError:
-                return f'Either the image or question file is open in another process, close it and try again!'
-
-            print(f'Answer saved to {data}answer.txt')
-            print("Waiting for question, image pair...")
-        else:
-            sleep(1)
+            folder_norm = f'{folder}/answer.txt'.replace('\\', '/')
+            print(f'Answer saved to {folder_norm}')
+            print("\nWaiting for question, image pair...")
+        sleep(1)
 
 
 if __name__ == "__main__":
