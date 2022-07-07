@@ -42,6 +42,8 @@ from ...modeling_utils import PreTrainedModel
 from ...utils import logging
 from .configuration_ofa import OFAConfig
 from .resnet import ResNet
+from torch import Tensor
+from typing import Dict, List, Optional, Tuple
 
 logger = logging.get_logger(__name__)
 
@@ -289,9 +291,10 @@ class OFAAttention(nn.Module):
         self.dropout = dropout
         self.head_dim = embed_dim // num_heads
         assert (
-            self.head_dim * num_heads == self.embed_dim
+                self.head_dim * num_heads == self.embed_dim
         ), f"embed_dim must be divisible by num_heads (got `embed_dim`: {self.embed_dim} and `num_heads`: {num_heads})."
-        self.scaling = self.head_dim**-0.5
+        scale_factor=2
+        self.scaling = float(self.head_dim * scale_factor) ** -0.5
         self.is_decoder = is_decoder
 
         self.k_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
@@ -861,10 +864,9 @@ class OFAEncoder(OFAPreTrainedModel):
             self.embed_images = ResNet([3, 8, 36], drop_path_rate=config.resnet_drop_path_rate)
         else:
             raise NotImplementedError
-        self.image_proj = nn.Linear(1024, embed_dim)
+        self.image_proj = Linear(1024, embed_dim)
 
         if config.resnet_model_path:
-            print("load resnet {}".format(config.resnet_model_path))
             resnet_state_dict = torch.load(config.resnet_model_path)
             self.embed_images.load_state_dict(resnet_state_dict)
         if config.patch_layernorm_embedding:
@@ -886,7 +888,9 @@ class OFAEncoder(OFAPreTrainedModel):
             self.layers = nn.ModuleList([])
 
         dpr = [x.item() for x in torch.linspace(0, config.encoder_drop_path_rate, config.encoder_layers)]
-        self.layers.extend([OFAEncoderLayer(config, drop_path_rate=dpr[i]) for i in range(config.encoder_layers)])
+        self.layers.extend(
+            [OFAEncoderLayer(config, drop_path_rate=dpr[i]) for i in range(config.encoder_layers)]
+        )
         self.num_layers = len(self.layers)
 
         if config.encoder_normalize_before:
@@ -898,20 +902,16 @@ class OFAEncoder(OFAPreTrainedModel):
         token_num_rel_dis = 2 * config.token_bucket_size - 1
         token_rp_bucket = make_token_bucket_position(config.token_bucket_size)
         self.token_rel_pos_table_list = nn.ModuleList(
-            [
-                Embedding(token_num_rel_dis, self.num_attention_heads, zero_init=True)
-                for _ in range(config.encoder_layers)
-            ]
+            [Embedding(token_num_rel_dis, self.num_attention_heads, zero_init=True) for _ in
+             range(config.encoder_layers)]
         )
 
         self.image_bucket_size = config.image_bucket_size
         image_num_rel_dis = (2 * config.image_bucket_size - 1) * (2 * config.image_bucket_size - 1) + 3
         image_rp_bucket = make_image_bucket_position(config.image_bucket_size, image_num_rel_dis)
         self.image_rel_pos_table_list = nn.ModuleList(
-            [
-                Embedding(image_num_rel_dis, self.num_attention_heads, zero_init=True)
-                for _ in range(config.encoder_layers)
-            ]
+            [Embedding(image_num_rel_dis, self.num_attention_heads, zero_init=True) for _ in
+             range(config.encoder_layers)]
         )
 
         if config.layernorm_embedding:
@@ -959,12 +959,10 @@ class OFAEncoder(OFAPreTrainedModel):
         bsz, seq_len = image_position_ids.shape
         rp_bucket_size = self.image_rp_bucket.size(1)
 
-        rp_bucket = (
-            self.image_rp_bucket.unsqueeze(0)
-            .expand(bsz, rp_bucket_size, rp_bucket_size)
-            .gather(1, image_position_ids[:, :, None].expand(bsz, seq_len, rp_bucket_size))
-            .gather(2, image_position_ids[:, None, :].expand(bsz, seq_len, seq_len))
-        )
+        rp_bucket = self.image_rp_bucket.unsqueeze(0).expand(
+            bsz, rp_bucket_size, rp_bucket_size
+        ).gather(1, image_position_ids[:, :, None].expand(bsz, seq_len, rp_bucket_size)
+                 ).gather(2, image_position_ids[:, None, :].expand(bsz, seq_len, seq_len))
         values = F.embedding(rp_bucket, self.image_rel_pos_table_list[idx].weight)
         values = values.permute(0, 3, 1, 2)
         return values
@@ -991,19 +989,21 @@ class OFAEncoder(OFAPreTrainedModel):
         h, w = image_embed.shape[-2:]
         image_num_patches = h * w
         image_padding_mask = patch_images.new_zeros((patch_images.size(0), image_num_patches)).bool()
-        image_position_idx = (
-            torch.arange(w).unsqueeze(0).expand(h, w) + torch.arange(h).unsqueeze(1) * self.image_bucket_size + 1
-        )
+        image_position_idx = torch.arange(w).unsqueeze(0).expand(h, w) + \
+                             torch.arange(h).unsqueeze(1) * self.image_bucket_size + 1
         image_position_idx = image_position_idx.view(-1).to(device)
         image_position_ids = image_position_idx[None, :].expand(patch_images.size(0), image_num_patches)
 
         image_embed = image_embed.flatten(2).transpose(1, 2)
         if sample_patch_num is not None:
             patch_orders = [
-                random.sample(range(image_num_patches), k=sample_patch_num) for _ in range(patch_images.size(0))
+                random.sample(range(image_num_patches), k=sample_patch_num)
+                for _ in range(patch_images.size(0))
             ]
             patch_orders = torch.LongTensor(patch_orders).to(device)
-            image_embed = image_embed.gather(1, patch_orders.unsqueeze(2).expand(-1, -1, image_embed.size(2)))
+            image_embed = image_embed.gather(
+                1, patch_orders.unsqueeze(2).expand(-1, -1, image_embed.size(2))
+            )
             image_num_patches = sample_patch_num
             image_padding_mask = image_padding_mask.gather(1, patch_orders)
             image_position_ids = image_position_ids.gather(1, patch_orders)
@@ -1012,14 +1012,14 @@ class OFAEncoder(OFAPreTrainedModel):
         return image_embed, image_num_patches, image_padding_mask, image_position_ids, image_pos_embed
 
     def forward_embedding(
-        self,
-        input_ids,
-        image_embed: Optional[torch.Tensor] = None,
-        image_embed_2: Optional[torch.Tensor] = None,
-        token_embedding: Optional[torch.Tensor] = None,
-        pos_embed: Optional[torch.Tensor] = None,
-        image_pos_embed: Optional[torch.Tensor] = None,
-        image_pos_embed_2: Optional[torch.Tensor] = None,
+            self,
+            input_ids,
+            image_embed: Optional[torch.Tensor] = None,
+            image_embed_2: Optional[torch.Tensor] = None,
+            token_embedding: Optional[torch.Tensor] = None,
+            pos_embed: Optional[torch.Tensor] = None,
+            image_pos_embed: Optional[torch.Tensor] = None,
+            image_pos_embed_2: Optional[torch.Tensor] = None
     ):
         r"""
         Generate embeddings of both the image and the text.
@@ -1088,6 +1088,56 @@ class OFAEncoder(OFAPreTrainedModel):
 
         return x, embed
 
+    def reorder_encoder_out(self, encoder_out, new_order):
+        """
+        Reorder encoder output according to *new_order*.
+
+        Args:
+            encoder_out: output from the ``forward()`` method
+            new_order (LongTensor): desired order
+
+        Returns:
+            *encoder_out* rearranged according to *new_order*
+        """
+
+        if "last_hidden_state" not in encoder_out:
+            new_encoder_out = None
+        else:
+            new_encoder_out = encoder_out["last_hidden_state"].index_select(0, new_order)
+
+        if "padding_mask" not in encoder_out:
+            new_encoder_padding_mask = None
+        else:
+            new_encoder_padding_mask = encoder_out["padding_mask"].index_select(0, new_order)
+
+
+        if "position_embedding" not in encoder_out:
+            new_position_embeddings = None
+        else:
+            new_position_embeddings = encoder_out["position_embedding"].index_select(0, new_order)
+
+        if "hidden_states" not in encoder_out:
+            new_encoer_states = None
+        else:
+            encoder_states = encoder_out["hidden_states"]
+            new_encoer_states = ()
+            if len(encoder_states) > 0:
+                for idx, state in enumerate(encoder_states):
+                    new_encoer_states += (state.index_select(0, new_order),)
+
+        if "attentions" not in encoder_out:
+            attentions = None
+        else:
+            attentions = encoder_out["attentions"]
+
+        return OFAEncoderOutput(
+            last_hidden_state=new_encoder_out,
+            padding_mask=new_encoder_padding_mask,
+            hidden_states=new_encoer_states,
+            attentions=attentions,
+            position_embedding=new_position_embeddings
+        )
+
     def forward(
         self,
         input_ids=None,
@@ -1135,22 +1185,12 @@ class OFAEncoder(OFAPreTrainedModel):
         image_pos_embed = None
         image_pos_embed_2 = None
         if patch_images is not None:
-            (
-                image_embed,
-                image_num_patches,
-                image_padding_mask,
-                image_position_ids,
-                image_pos_embed,
-            ) = self.get_patch_images_info(patch_images, sample_patch_num, input_ids.device)
+            image_embed, image_num_patches, image_padding_mask, image_position_ids, image_pos_embed = \
+                self.get_patch_images_info(patch_images, sample_patch_num, input_ids.device)
             image_padding_mask[~patch_masks] = True
         if patch_images_2 is not None:
-            (
-                image_embed_2,
-                image_num_patches_2,
-                image_padding_mask_2,
-                image_position_ids_2,
-                image_pos_embed_2,
-            ) = self.get_patch_images_info(patch_images_2, sample_patch_num, input_ids.device)
+            image_embed_2, image_num_patches_2, image_padding_mask_2, image_position_ids_2, image_pos_embed_2 = \
+                self.get_patch_images_info(patch_images_2, sample_patch_num, input_ids.device)
             image_padding_mask_2[~patch_masks] = True
 
         encoder_padding_mask = input_ids.eq(self.padding_idx)
@@ -1162,7 +1202,8 @@ class OFAEncoder(OFAPreTrainedModel):
 
         pos_embed = self.embed_positions(new_arange(input_ids))
         x, encoder_embedding = self.forward_embedding(
-            input_ids, image_embed, image_embed_2, token_embeddings, pos_embed, image_pos_embed, image_pos_embed_2
+            input_ids, image_embed, image_embed_2, token_embeddings,
+            pos_embed, image_pos_embed, image_pos_embed_2
         )
 
         # account for padding while computing the representation
@@ -1177,11 +1218,12 @@ class OFAEncoder(OFAPreTrainedModel):
             image_pos_embed_2 = self.image_pos_ln(image_pos_embed_2)
             pos_embed = torch.cat([image_pos_embed_2, pos_embed], dim=1)
 
-        pos_q = (
-            self.pos_q_linear(pos_embed).view(x.size(0), x.size(1), self.num_attention_heads, -1).transpose(1, 2)
-            * self.pos_scaling
-        )
-        pos_k = self.pos_k_linear(pos_embed).view(x.size(0), x.size(1), self.num_attention_heads, -1).transpose(1, 2)
+        pos_q = self.pos_q_linear(pos_embed).view(
+            x.size(0), x.size(1), self.num_attention_heads, -1
+        ).transpose(1, 2) * self.pos_scaling
+        pos_k = self.pos_k_linear(pos_embed).view(
+            x.size(0), x.size(1), self.num_attention_heads, -1
+        ).transpose(1, 2)
         abs_pos_bias = torch.matmul(pos_q, pos_k.transpose(2, 3))
 
         # expand attention_mask
@@ -1192,36 +1234,32 @@ class OFAEncoder(OFAPreTrainedModel):
         encoder_states = () if output_hidden_states else None
         all_attentions = () if output_attentions else None
 
-        if output_hidden_states:
-            encoder_states.append(x)
-
         # encoder layers
         for idx, layer in enumerate(self.layers):
+            if output_hidden_states:
+                encoder_states += (x,)
             self_attn_bias = abs_pos_bias.clone()
-            self_attn_bias[:, :, -input_ids.size(1) :, -input_ids.size(1) :] += self.get_rel_pos_bias(input_ids, idx)
+            self_attn_bias[:, :, -input_ids.size(1):, -input_ids.size(1):] += self.get_rel_pos_bias(input_ids, idx)
             if patch_images_2 is not None:
-                self_attn_bias[:, :, :image_num_patches_2, :image_num_patches_2] += self.get_image_rel_pos_bias(
-                    image_position_ids_2, idx
-                )
-                self_attn_bias[
-                    :,
-                    :,
-                    image_num_patches_2 : image_num_patches_2 + image_num_patches,
-                    image_num_patches_2 : image_num_patches_2 + image_num_patches,
-                ] += self.get_image_rel_pos_bias(image_position_ids, idx)
+                self_attn_bias[:, :, :image_num_patches_2, :image_num_patches_2] += \
+                    self.get_image_rel_pos_bias(image_position_ids_2, idx)
+                self_attn_bias[:, :, image_num_patches_2:image_num_patches_2 + image_num_patches,
+                image_num_patches_2:image_num_patches_2 + image_num_patches] += \
+                    self.get_image_rel_pos_bias(image_position_ids, idx)
             elif patch_images is not None:
-                self_attn_bias[
-                    :, :, : x.size(1) - input_ids.size(1), : x.size(1) - input_ids.size(1)
-                ] += self.get_image_rel_pos_bias(image_position_ids, idx)
+                self_attn_bias[:, :, :x.size(1) - input_ids.size(1), :x.size(1) - input_ids.size(1)] += \
+                    self.get_image_rel_pos_bias(image_position_ids, idx)
             self_attn_bias = self_attn_bias.reshape(-1, x.size(1), x.size(1))
 
-            hidden_outputs = layer(x, attention_mask if has_pads else None, attn_bias=self_attn_bias)
+            hidden_outputs = layer(x, attention_mask if has_pads else None, attn_bias=self_attn_bias, output_attentions=output_attentions)
             x = hidden_outputs[0]
-            if output_hidden_states:
-                encoder_states = encoder_states + (x,)
+
             if output_attentions:
                 attention = hidden_outputs[1]
                 all_attentions = all_attentions + (attention,)
+
+        if output_hidden_states:
+            encoder_states += (x,)
 
         if self.layer_norm is not None:
             x = self.layer_norm(x)
@@ -1319,11 +1357,8 @@ class OFADecoder(OFAPreTrainedModel):
         self.image_bucket_size = config.image_bucket_size
         image_num_rel_dis = (2 * config.image_bucket_size - 1) * (2 * config.image_bucket_size - 1) + 3
         image_rp_bucket = make_image_bucket_position(config.image_bucket_size, image_num_rel_dis)
-        image_position_idx = (
-            torch.arange(self.window_size).unsqueeze(0).expand(self.window_size, self.window_size)
-            + torch.arange(self.window_size).unsqueeze(1) * config.image_bucket_size
-            + 1
-        )
+        image_position_idx = torch.arange(self.window_size).unsqueeze(0).expand(self.window_size, self.window_size) + \
+                             torch.arange(self.window_size).unsqueeze(1) * config.image_bucket_size + 1
         image_position_idx = torch.cat([torch.tensor([0]), image_position_idx.view(-1)])
         image_position_idx = torch.cat([image_position_idx, torch.tensor([1024] * 768)])
         self.image_rel_pos_table_list = nn.ModuleList(
@@ -1351,7 +1386,9 @@ class OFADecoder(OFAPreTrainedModel):
             )
             self.output_projection.weight = self.embed_tokens.weight
         else:
-            self.output_projection = nn.Linear(self.output_embed_dim, config.vocab_size, bias=False)
+            self.output_projection = nn.Linear(
+                self.output_embed_dim, config.vocab_size, bias=False
+            )
             nn.init.normal_(self.output_projection.weight, mean=0, std=self.output_embed_dim**-0.5)
 
     def get_rel_pos_bias(self, x, idx):
@@ -1399,30 +1436,20 @@ class OFADecoder(OFAPreTrainedModel):
 
         if src_pos_embed is not None:
             src_len = src_pos_embed.size(1)
-            pos_q = (
-                self.cross_pos_q_linear(tgt_pos_embed)
-                .view(batch_size, tgt_len, self.num_attention_heads, -1)
-                .transpose(1, 2)
-                * self.pos_scaling
-            )
-            pos_k = (
-                self.cross_pos_k_linear(src_pos_embed)
-                .view(batch_size, src_len, self.num_attention_heads, -1)
-                .transpose(1, 2)
-            )
+            pos_q = self.cross_pos_q_linear(tgt_pos_embed).view(
+                batch_size, tgt_len, self.num_attention_heads, -1
+            ).transpose(1, 2) * self.pos_scaling
+            pos_k = self.cross_pos_k_linear(src_pos_embed).view(
+                batch_size, src_len, self.num_attention_heads, -1
+            ).transpose(1, 2)
         else:
             src_len = tgt_pos_embed.size(1)
-            pos_q = (
-                self.self_pos_q_linear(tgt_pos_embed)
-                .view(batch_size, tgt_len, self.num_attention_heads, -1)
-                .transpose(1, 2)
-                * self.pos_scaling
-            )
-            pos_k = (
-                self.self_pos_k_linear(tgt_pos_embed)
-                .view(batch_size, src_len, self.num_attention_heads, -1)
-                .transpose(1, 2)
-            )
+            pos_q = self.self_pos_q_linear(tgt_pos_embed).view(
+                batch_size, tgt_len, self.num_attention_heads, -1
+            ).transpose(1, 2) * self.pos_scaling
+            pos_k = self.self_pos_k_linear(tgt_pos_embed).view(
+                batch_size, src_len, self.num_attention_heads, -1
+            ).transpose(1, 2)
         abs_pos_bias = torch.matmul(pos_q, pos_k.transpose(2, 3))
 
         return abs_pos_bias
@@ -1458,6 +1485,70 @@ class OFADecoder(OFAPreTrainedModel):
             )
 
         return combined_attention_mask
+
+    def max_positions(self):
+        """Maximum output length supported by the decoder."""
+        if self.embed_positions is None:
+            return self.max_target_positions
+        return self.max_target_positions
+
+    def get_normalized_probs(
+        self,
+        net_output: Tuple[Tensor, Optional[Dict[str, List[Optional[Tensor]]]]],
+        log_probs: bool,
+        sample: Optional[Dict[str, Tensor]] = None,
+    ):
+        """Get normalized probabilities (or log probs) from a net's output."""
+        return self.get_normalized_probs_scriptable(net_output, log_probs, sample)
+
+    def get_normalized_probs_scriptable(
+        self,
+        net_output: Tuple[Tensor, Optional[Dict[str, List[Optional[Tensor]]]]],
+        log_probs: bool,
+        sample: Optional[Dict[str, Tensor]] = None,
+    ):
+        """Get normalized probabilities (or log probs) from a net's output."""
+
+        if hasattr(self, "adaptive_softmax") and self.adaptive_softmax is not None:
+            if sample is not None:
+                assert "target" in sample
+                target = sample["target"]
+            else:
+                target = None
+            out = self.adaptive_softmax.get_log_prob(net_output[0], target=target)
+            return out.exp_() if not log_probs else out
+
+        logits = net_output[0]
+        if log_probs:
+            return F.log_softmax(logits, dim=-1)
+        else:
+            return F.softmax(logits, dim=-1)
+
+    def reorder_incremental_state_scripting(
+        self,
+        # incremental_state: Dict[str, Dict[str, Optional[Tensor]]],
+        past_key_values: Optional[torch.Tensor],
+        new_order: Tensor,
+    ):
+        """Main entry point for reordering the incremental state.
+
+        Due to limitations in TorchScript, we call this function in
+        :class:`fairseq.sequence_generator.SequenceGenerator` instead of
+        calling :func:`reorder_incremental_state` directly.
+        """
+        input_buffer = past_key_values
+        new_past_key_values = []
+        if input_buffer is not None:
+            for input_buffer_k in input_buffer:
+                new_input_buffer_k = []
+                for input in input_buffer_k:
+                    if input is None:
+                        input = None
+                    else:
+                        input = input.index_select(0, new_order)
+                    new_input_buffer_k.append(input)
+                new_past_key_values.append(new_input_buffer_k)
+        return new_past_key_values
 
     def forward(
         self,
@@ -1503,7 +1594,7 @@ class OFADecoder(OFAPreTrainedModel):
         )
         use_cache = use_cache if use_cache is not None else self.config.use_cache
 
-        if past_key_values is not None:
+        if past_key_values is not None and len(past_key_values)>0:
             size = past_key_values[0][0].size()
             bsz, tgt_len = size[0], size[-2] + 1
             token_position_idx = torch.arange(tgt_len, device=input_ids.device).expand([bsz, tgt_len]).contiguous()
@@ -1512,7 +1603,7 @@ class OFADecoder(OFAPreTrainedModel):
             token_position_idx = new_arange(input_ids)
         tgt_pos_embed = self.embed_positions(token_position_idx)
         if code_masks is not None and torch.any(code_masks):
-            image_position_idx = self.image_position_idx[: input_ids.size(1)].unsqueeze(0).expand(bsz, tgt_len)
+            image_position_idx = self.image_position_idx[:input_ids.size(1)].unsqueeze(0).expand(bsz, tgt_len)
             tgt_pos_embed[code_masks] = self.embed_image_positions(image_position_idx)[code_masks]
 
         # self attn position bias
@@ -1528,7 +1619,7 @@ class OFADecoder(OFAPreTrainedModel):
         cross_abs_pos_bias = cross_abs_pos_bias.reshape(-1, *cross_abs_pos_bias.size()[-2:])
 
         all_prev_output_tokens = input_ids.clone()
-        if past_key_values is not None:
+        if past_key_values is not None and len(past_key_values)>0:
             input_ids = input_ids[:, -1:]
             cross_abs_pos_bias = cross_abs_pos_bias[:, -1:, :]
             tgt_pos_embed = tgt_pos_embed[:, -1:, :]
@@ -1536,7 +1627,8 @@ class OFADecoder(OFAPreTrainedModel):
         # embed tokens and positions
         x = self.embed_scale * self.embed_tokens(input_ids)
 
-        if self.entangle_position_embedding is not None:
+
+        if self.entangle_position_embedding and not self.disable_entangle:
             x += tgt_pos_embed
 
         if self.layernorm_embedding is not None:
@@ -1551,7 +1643,7 @@ class OFADecoder(OFAPreTrainedModel):
         hidden_states = self.dropout(x)
 
         # past_key_values_length
-        past_key_values_length = past_key_values[0][0].shape[2] if past_key_values is not None else 0
+        past_key_values_length = past_key_values[0][0].shape[2] if past_key_values is not None and len(past_key_values)>0 else 0
 
         shape, dtype = input_ids.shape, hidden_states.dtype
         attention_mask = self._prepare_decoder_attention_mask(attention_mask, shape, dtype, past_key_values_length)
@@ -1564,7 +1656,11 @@ class OFADecoder(OFAPreTrainedModel):
 
         # decoder layers
         for idx, layer in enumerate(self.layers):
-            past_key_value = past_key_values[idx] if past_key_values is not None else None
+            # add hidden states from the last decoder layer
+            if output_hidden_states:
+                all_hidden_states += (hidden_states,)
+
+            past_key_value = past_key_values[idx] if past_key_values is not None and len(past_key_values)>0 else None
 
             self_attn_bias = self_abs_pos_bias.clone()
             if code_masks is None or not code_masks.any():
@@ -1575,7 +1671,7 @@ class OFADecoder(OFAPreTrainedModel):
                 self_attn_bias[~code_masks] += self.get_rel_pos_bias(all_prev_output_tokens, idx).unsqueeze(0)
                 self_attn_bias[code_masks] += self.get_image_rel_pos_bias(all_prev_output_tokens, idx).unsqueeze(0)
             self_attn_bias = self_attn_bias.reshape(-1, *self_attn_bias.size()[-2:])
-            if past_key_value is not None:
+            if past_key_value is not None and len(past_key_values)>0 :
                 self_attn_bias = self_attn_bias[:, -1:, :]
 
             layer_outputs = layer(
@@ -1633,11 +1729,12 @@ class OFAModel(OFAPreTrainedModel):
         config (OFAConfig): OFA configuration.
     """
 
-    def __init__(self, config: OFAConfig):
+    def __init__(self, config: OFAConfig,  **kwargs):
         super().__init__(config)
+        self.disable_entangle = getattr(kwargs,'disable_entangle',False)
 
-        padding_idx, vocab_size = config.pad_token_id, config.vocab_size
-        shared = nn.Embedding(vocab_size, config.d_model, padding_idx)
+        self.padding_idx, vocab_size = config.pad_token_id, config.vocab_size
+        shared = nn.Embedding(vocab_size, config.d_model, self.padding_idx)
 
         self.encoder = OFAEncoder(config, shared)
         self.decoder = OFADecoder(config, shared)
@@ -1678,22 +1775,57 @@ class OFAModel(OFAPreTrainedModel):
         output_type=Seq2SeqModelOutput,
         config_class=_CONFIG_FOR_DOC,
     )
+
+    def max_decoder_positions(self):
+        """Maximum length supported by the decoder."""
+        return self.decoder.max_positions()
+
+    def get_normalized_probs(
+            self,
+            net_output: Tuple[Tensor, Optional[Dict[str, List[Optional[Tensor]]]]],
+            log_probs: bool,
+            sample: Optional[Dict[str, Tensor]] = None,
+    ):
+        """Get normalized probabilities (or log probs) from a net's output."""
+        return self.get_normalized_probs_scriptable(net_output, log_probs, sample)
+
+
+    def get_normalized_probs_scriptable(
+            self,
+            net_output: Tuple[Tensor, Optional[Dict[str, List[Optional[Tensor]]]]],
+            log_probs: bool,
+            sample: Optional[Dict[str, Tensor]] = None,
+    ):
+        """Scriptable helper function for get_normalized_probs in ~BaseFairseqModel"""
+        if hasattr(self, "decoder"):
+            return self.decoder.get_normalized_probs(net_output, log_probs, sample)
+        elif torch.is_tensor(net_output):
+            # syntactic sugar for simple models which don't have a decoder
+            # (e.g., the classification tutorial)
+            logits = net_output.float()
+            if log_probs:
+                return F.log_softmax(logits, dim=-1)
+            else:
+                return F.softmax(logits, dim=-1)
+        raise NotImplementedError
+
     def forward(
-        self,
-        input_ids=None,
-        patch_images=None,
-        patch_images_2=None,
-        patch_masks=None,
-        token_embeddings=None,
-        sample_patch_num=None,
-        decoder_input_ids=None,
-        code_masks=None,
-        attention_mask=None,
-        encoder_outputs=None,
-        past_key_values=None,
-        use_cache=False,
-        output_attentions=False,
-        output_hidden_states=False,
+            self,
+            input_ids=None,
+            patch_images=None,
+            patch_images_2=None,
+            patch_masks=None,
+            token_embeddings=None,
+            sample_patch_num=None,
+            decoder_input_ids=None,
+            code_masks=None,
+            attention_mask=None,
+            encoder_outputs=None,
+            past_key_values=None,
+            use_cache=False,
+            output_attentions=False,
+            output_hidden_states=False,
+            return_dict=False
     ):
         r"""
         Args:
@@ -1721,10 +1853,11 @@ class OFAModel(OFAPreTrainedModel):
             use_cache (`bool`): whether to use cache for faster inference.
             output_attentions (`bool`): whether to output attention weights.
             output_hidden_states (`bool`): whether to output hidden states.
+            return_dict (`bool`): unused. Keep it for generation only.
 
         Returns:
-            Seq2SeqModelOutput:
-                last_hidden_state (`torch.FloatTensor` of shape `(bsz, seq_len, hidden)`): the last decoder hidden states.
+            Seq2SeqLMOutput:
+                logits (`torch.FloatTensor` of shape `(bsz, seq_len, hidden)`): the last decoder hidden states.
                 past_key_values (`tuple(tuple(torch.FloatTensor)): past keys and values for faster inference.
                 decoder_hidden_states (`tuple(torch.FloatTensor)`): the decoder hidden states of all layers.
                 decoder_attentions (`tuple(torch.FloatTensor)): the decoder self attention weights of all layers.
@@ -1775,8 +1908,8 @@ class OFAModel(OFAPreTrainedModel):
             output_hidden_states=output_hidden_states,
         )
 
-        return Seq2SeqModelOutput(
-            last_hidden_state=decoder_outputs.last_hidden_state,
+        return Seq2SeqLMOutput(
+            logits=decoder_outputs.last_hidden_state,
             past_key_values=decoder_outputs.past_key_values,
             decoder_hidden_states=decoder_outputs.hidden_states,
             decoder_attentions=decoder_outputs.attentions,
@@ -1784,178 +1917,6 @@ class OFAModel(OFAPreTrainedModel):
             encoder_last_hidden_state=encoder_outputs.last_hidden_state,
             encoder_hidden_states=encoder_outputs.hidden_states,
             encoder_attentions=encoder_outputs.attentions,
-        )
-
-
-@add_start_docstrings(
-    "The OFA Model with a language modeling head. Can be used for conditional generation.", OFA_START_DOCSTRING
-)
-class OFAForConditionalGeneration(OFAPreTrainedModel):
-    r"""
-    The OFA model for conditional generation, which can adapt to most tasks due to the unified nature of OFA.
-
-    Args:
-        config (OFAConfig): OFA configuration.
-    """
-
-    base_model_prefix = "model"
-    _keys_to_ignore_on_load_missing = [
-        r"final_logits_bias",
-        r"encoder\.version",
-        r"decoder\.version",
-        r"lm_head\.weight",
-    ]
-
-    def __init__(self, config: OFAConfig):
-        super().__init__(config)
-        self.model = OFAModel(config)
-
-        # Initialize weights and apply final processing
-        self.post_init()
-
-    def get_encoder(self):
-        r"""
-        Retrieve the encoder
-        """
-        return self.model.get_encoder()
-
-    def get_decoder(self):
-        r"""
-        Retrieve the decoder
-        """
-        return self.model.get_decoder()
-
-    def resize_token_embeddings(self, new_num_tokens: int) -> nn.Embedding:
-        r"""
-        Resize token embeddings if necessary
-        """
-        new_embeddings = super().resize_token_embeddings(new_num_tokens)
-        self._resize_final_logits_bias(new_num_tokens)
-        return new_embeddings
-
-    def get_output_embeddings(self):
-        r"""
-        retrieve the output embeddings
-        """
-        return self.model.decoder.output_projection
-
-    def set_output_embeddings(self, new_embeddings):
-        r"""
-        Set values of the output embeddings
-        """
-        self.model.decoder.output_projection = new_embeddings
-
-    @add_start_docstrings_to_model_forward(OFA_INPUTS_DOCSTRING)
-    @replace_return_docstrings(output_type=Seq2SeqLMOutput, config_class=_CONFIG_FOR_DOC)
-    @add_end_docstrings(OFA_GENERATION_EXAMPLE)
-    def forward(
-        self,
-        input_ids=None,
-        patch_images=None,
-        patch_images_2=None,
-        patch_masks=None,
-        token_embeddings=None,
-        sample_patch_num=None,
-        decoder_input_ids=None,
-        code_masks=None,
-        attention_mask=None,
-        encoder_outputs=None,
-        past_key_values=None,
-        use_cache=False,
-        output_attentions=False,
-        output_hidden_states=False,
-        return_dict=False,
-        labels=None,
-    ):
-        r"""
-        Args:
-            input_ids (`torch.LongTensor` of shape `(bsz, seq_len)`):
-                indices of input sequence tokens in the vocabulary, and padding will be ignored by default;
-
-                indices can be obtained using [`~OFATokenizer`].
-
-            patch_images (`torch.FloatTensor` of shape `(bsz, 3, height, width)`):
-                the resized image, which are transformed by the default operations.
-            patch_images_2 (`torch.FloatTensor` of shape `(bsz, 3, height, width)`):
-                the second (if it exists) image.
-            patch_masks (`torch.BoolTensor`): the patches to be masked.
-            token_embeddings (`torch.FloatTensor` of shape `(bsz, seq_len, embed_dim)`): token embeddings.
-            sample_patch_num (`int`): the number of patches to sample.
-            decoder_input_ids (`torch.LongTensor` of shape `(bsz, seq_len)`): indices of the sequence in the vocabulary.
-            code_masks (`torch.Tensor` of shape `(bsz, seq_len)`): masks only for code generation.
-            attention_mask (`torch.Tensor` of shape `(bsz, seq_len)`): attention mask for decoding.
-            encoder_outputs (`OFAEncoderOutput`):
-                encoder outputs with hidden states, positional embeddings, and padding masks.
-            past_key_values (`tuple(tuple(torch.FloatTensor))`, *optional*, returned when `use_cache=True` is passed):
-                Tuple of `tuple(torch.FloatTensor)` of length `config.n_layers`, with each tuple having 2 tensors of
-                shape `(bsz, num_heads, tgt_len, head_size)`) and 2 additional tensors of
-                shape `(bsz, num_heads, src_len, head_size)`.
-            use_cache (`bool`): whether to use cache for faster inference.
-            output_attentions (`bool`): whether to output attention weights.
-            output_hidden_states (`bool`): whether to output hidden states.
-            return_dict (`bool`): unused. Keep it for generation only.
-            labels (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*):
-                Labels for computing the masked language modeling loss. Indices should either be in `[0, ...,
-                config.vocab_size]` or -100 (see `input_ids` docstring). Tokens with indices set to `-100` are ignored
-                (masked), the loss is only computed for the tokens with labels in `[0, ..., config.vocab_size]`.
-
-        Returns:
-            Seq2SeqModelOutput:
-                last_hidden_state (`torch.FloatTensor` of shape `(bsz, seq_len, hidden)`): the last decoder hidden states.
-                past_key_values (`tuple(tuple(torch.FloatTensor)): past keys and values for faster inference.
-                decoder_hidden_states (`tuple(torch.FloatTensor)`): the decoder hidden states of all layers.
-                decoder_attentions (`tuple(torch.FloatTensor)): the decoder self attention weights of all layers.
-                cross_attentions (`tuple(torch.FloatTensor)): cross attention weights of all layers.
-                encoder_last_hidden_state (`torch.FloatTensor` of shape `(bsz, seq_len, embed_dim)`):
-                    the encoder last hidden state.
-                encoder_hidden_states (`torch.FloatTensor` of shape `(bsz, seq_len, embed_dim)`):
-                    the encoder states of all layers including the embeddings.
-                encoder_attentions (`torch.FloatTensor` of shape `(bsz, num_heads, seq_len, seq_len)`):
-                    the encoder attention weights of all layers.
-        """
-
-        if labels is not None:
-            if use_cache:
-                logger.warning("The `use_cache` argument is changed to `False` since `labels` is provided.")
-            use_cache = False
-            if decoder_input_ids is None:
-                decoder_input_ids = shift_tokens_right(
-                    labels, self.config.pad_token_id, self.config.decoder_start_token_id
-                )
-
-        outputs = self.model(
-            input_ids=input_ids,
-            patch_images=patch_images,
-            patch_images_2=patch_images_2,
-            patch_masks=patch_masks,
-            token_embeddings=token_embeddings,
-            sample_patch_num=sample_patch_num,
-            decoder_input_ids=decoder_input_ids,
-            code_masks=code_masks,
-            attention_mask=attention_mask,
-            encoder_outputs=encoder_outputs,
-            past_key_values=past_key_values,
-            use_cache=use_cache,
-            output_attentions=output_attentions,
-            output_hidden_states=output_hidden_states,
-        )
-        lm_logits = outputs[0]
-
-        masked_lm_loss = None
-        if labels is not None:
-            loss_fct = CrossEntropyLoss()
-            masked_lm_loss = loss_fct(lm_logits.view(-1, self.config.vocab_size), labels.view(-1))
-
-        return Seq2SeqLMOutput(
-            loss=masked_lm_loss,
-            logits=lm_logits,
-            past_key_values=outputs.past_key_values,
-            decoder_hidden_states=outputs.decoder_hidden_states,
-            decoder_attentions=outputs.decoder_attentions,
-            cross_attentions=outputs.cross_attentions,
-            encoder_last_hidden_state=outputs.encoder_last_hidden_state,
-            encoder_hidden_states=outputs.encoder_hidden_states,
-            encoder_attentions=outputs.encoder_attentions,
         )
 
     def prepare_inputs_for_generation(

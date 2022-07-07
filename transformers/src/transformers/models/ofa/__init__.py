@@ -32,10 +32,6 @@ if is_tokenizers_available():
 if is_torch_available():
     _import_structure["modeling_ofa"] = [
         "OFA_PRETRAINED_MODEL_ARCHIVE_LIST",
-        "OFAForCausalLM",
-        "OFAForConditionalGeneration",
-        "OFAForQuestionAnswering",
-        "OFAForSequenceClassification",
         "OFAModel",
         "OFAPreTrainedModel",
     ]
@@ -51,7 +47,6 @@ if TYPE_CHECKING:
     if is_torch_available():
         from .modeling_ofa import (
             OFA_PRETRAINED_MODEL_ARCHIVE_LIST,
-            OFAForConditionalGeneration,
             OFAModel,
             OFAPreTrainedModel,
         )

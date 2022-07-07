@@ -18,7 +18,8 @@ After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the te
 ```
 >>> from PIL import Image
 >>> from torchvision import transforms
->>> from transformers import OFATokenizer, OFAForConditionalGeneration
+>>> from transformers import OFATokenizer, OFAModel
+>>> from generate import sequence_generator
 
 >>> mean, std = [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]
 >>> resolution = 256
@@ -29,14 +30,29 @@ After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the te
         transforms.Normalize(mean=mean, std=std)
     ])
 
->>> model = OFAForConditionalGeneration.from_pretrained(ckpt_dir)
+>>> model = OFAModel.from_pretrained(ckpt_dir)
 >>> tokenizer = OFATokenizer.from_pretrained(ckpt_dir)
+>>> tokenizer.add_tokens(["<code_{}>".format(i) for i in range(8192)])
+>>> tokenizer.add_tokens(["<bin_{}>".format(i) for i in range(1000)])
 
->>> txt = " what is the description of the image?"
->>> inputs = tokenizer([txt], max_length=1024, return_tensors="pt")["input_ids"]
+>>> txt = " what does the image describe?"
+>>> inputs = tokenizer([txt], return_tensors="pt").input_ids
 >>> img = Image.open(path_to_image)
 >>> patch_img = patch_resize_transform(img).unsqueeze(0)
 
->>> gen = model.generate(inputs, patch_images=patch_img, num_beams=4)
+
+>>> # using the generator of fairseq version
+>>> generator = sequence_generator.SequenceGenerator(tokenizer=tokenizer,beam_size=5,
+                                                                      max_len_b=16,
+                                                                      min_len=0,
+                                                                      no_repeat_ngram_size=3) # using the generator of fairseq version
+>>> data = {}
+>>> data["net_input"] = {"input_ids": inputs, 'patch_images': patch_img, 'patch_masks':torch.tensor([True])}
+>>> gen_output = generator.generate([model], data)
+>>> gen = [gen_output[i][0]["tokens"] for i in range(len(gen_output))]
+
+>>> # using the generator of huggingface version
+>>> gen = model.generate(inputs, patch_images=patch_img, num_beams=5, no_repeat_ngram_size=3) 
+
 >>> print(tokenizer.batch_decode(gen, skip_special_tokens=True))
 ```
