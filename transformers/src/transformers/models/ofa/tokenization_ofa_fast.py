@@ -17,6 +17,8 @@ from ...utils import logging
 from ..bart.tokenization_bart_fast import BartTokenizerFast
 from .tokenization_ofa import OFATokenizer
 
+from typing import TYPE_CHECKING, Any, Dict, List, NamedTuple, Optional, Sequence, Tuple, Union
+import os
 
 logger = logging.get_logger(__name__)
 
@@ -59,3 +61,10 @@ class OFATokenizerFast(BartTokenizerFast):
     pretrained_vocab_files_map = PRETRAINED_VOCAB_FILES_MAP
     max_model_input_sizes = PRETRAINED_POSITIONAL_EMBEDDINGS_SIZES
     slow_tokenizer_class = OFATokenizer
+
+    @classmethod
+    def from_pretrained(cls, pretrained_model_name_or_path: Union[str, os.PathLike], *init_inputs, **kwargs):
+        tokenizer = super().from_pretrained(pretrained_model_name_or_path, *init_inputs, **kwargs)
+        tokenizer.add_tokens(["<code_{}>".format(i) for i in range(8192)])
+        tokenizer.add_tokens(["<bin_{}>".format(i) for i in range(1000)])
+        return tokenizer
