@@ -32,8 +32,6 @@ After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the te
 
 >>> model = OFAModel.from_pretrained(ckpt_dir)
 >>> tokenizer = OFATokenizer.from_pretrained(ckpt_dir)
->>> tokenizer.add_tokens(["<code_{}>".format(i) for i in range(8192)])
->>> tokenizer.add_tokens(["<bin_{}>".format(i) for i in range(1000)])
 
 >>> txt = " what does the image describe?"
 >>> inputs = tokenizer([txt], return_tensors="pt").input_ids
