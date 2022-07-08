@@ -56,7 +56,7 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
 
 
 # News 
-* 2022.7.7: Updated support of OFA on **huggingface transformers**. Refer to the doc [transformers.md](transformers.md) and the branch `feature/add_transformers`. 
+* 2022.7.7: Updated support of OFA on **huggingface transformers** (fixed bugs in forward, add sequence generator from Fairseq to ensure performance, etc.). Refer to the doc [transformers.md](transformers.md) and the branch `feature/add_transformers`. 
 * 2022.6.17: Released the pretrained checkpoint of **OFA-Huge**. To use it, set `--arch=ofa_huge` in the script.
 * 2022.5.15: OFA was accepted by **ICML 2022**
 * 2022.4.28: Add support of inference on **huggingface transformers**. For how to use it, please refer to the doc [transformers.md](transformers.md) and our [huggingface models](https://huggingface.co/OFA-Sys). 
@@ -124,10 +124,10 @@ Below we demonstrate the results of OFAs on cross-modal understanding and genera
         <td>Metric</td><td>CIDEr</td><td>Acc.</td><td>Acc.</td><td colspan="3">Acc.</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Tiny</sub></td><td>117.5 / 128.4</td><td>70.3 / 70.4</td><td>85.3 / 85.2</td><td>80.20 / 84.07 / 75.00</td><td>68.22 / 75.13 / 57.66</td><td>72.02 / 69.74</td>
+        <td>OFA<sub>Tiny</sub></td><td>119.0 / 128.7</td><td>70.3 / 70.4</td><td>85.3 / 85.2</td><td>80.20 / 84.07 / 75.00</td><td>68.22 / 75.13 / 57.66</td><td>72.02 / 69.74</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Medium</sub></td><td>132.4 / 140.3</td><td>75.4 / 75.5</td><td>86.6 / 87.0</td><td>85.34 / 87.68 / 77.92</td><td>76.09 / 83.04 / 66.25</td><td>78.76 / 78.58</td>
+        <td>OFA<sub>Medium</sub></td><td>130.4 / 140.3</td><td>75.4 / 75.5</td><td>86.6 / 87.0</td><td>85.34 / 87.68 / 77.92</td><td>76.09 / 83.04 / 66.25</td><td>78.76 / 78.58</td>
     </tr>
     <tr align="center">
         <td>OFA<sub>Base</sub></td><td>138.2 / 146.7</td><td>78.0 / 78.1</td><td>89.3 / 89.2</td><td>88.48 / 90.67 / 83.30</td><td>81.39 / 87.15 / 74.29</td><td>82.29 / 82.31</td>
