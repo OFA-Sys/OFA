@@ -10,8 +10,11 @@ from utils.zero_shot_utils import zero_shot_step
 
 # JW: Imports for Bot interaction
 import os
+import speech_recognition as sr
 import warnings
 from glob import glob
+from gtts import gTTS
+from pydub import AudioSegment
 from time import sleep
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -148,13 +151,21 @@ def main():
             # Wait until image fully downloaded
             wait = True
             while wait:
-                wait = os.path.exists(f'{image_path}.crdownload')
+                wait = os.stat(image_path).st_size / 1e3 < 1 or os.stat(question_path).st_size / 1e3 < 1
                 if wait:
                     sleep(1)
 
             # Open image and question
             image = Image.open(image_path)
             question = open(question_path).read()
+
+            # Convert question audio to wav and then text
+            """question_wav = f'{folder}/question.wav'
+            question = AudioSegment.from_file(question_path).export(question_wav, format='wav')
+            r = sr.Recognizer()
+            with sr.AudioFile(question_wav) as source:
+                audio = r.record(source)
+                question = r.recognize_google(audio)"""
 
             # Construct input sample & preprocess for GPU if cuda available
             sample = construct_sample(image, question)
@@ -165,9 +176,13 @@ def main():
             with torch.no_grad():
                 result, scores = zero_shot_step(task, generator, models, sample)
 
-            # Save answer as TXT file in folder
+            # Save answer as TXT file
             with open(f'{folder}/answer.txt', 'w') as f:
                 f.write(result[0]['answer'])
+
+            # Save answer as MP3 file
+            """answer = f'Ofa\'s answer is: {result[0]["answer"]}'
+            gTTS(text=answer, lang='en', slow=False).save(f'{folder}/answer.ogg')"""
 
             folder_norm = f'{folder}/answer.txt'.replace('\\', '/')
             print(f'Answer saved to {folder_norm}')
