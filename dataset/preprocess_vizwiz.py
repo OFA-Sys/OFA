@@ -69,6 +69,8 @@ def main():
         print(f'Generating rows for {subset} tsv file...')
         # Load corresponding json file
         annotations = json.load(open(f'vizwiz_data/Annotations/{subset}.json', encoding='utf-8'))
+        if subset == 'train':
+            annotations += json.load(open('vizwiz_data/Annotations/val.json', encoding='utf-8'))
         # Create empty set to store data
         tsv_set = set()
         # Iterate over all images in subset
