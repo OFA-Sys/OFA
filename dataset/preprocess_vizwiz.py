@@ -75,6 +75,8 @@ def main():
         tsv_set = set()
         # Iterate over all images in subset
         file_names = glob.glob(f'vizwiz_data/{subset}/*.jpg')
+        if subset == 'train':
+            file_names += glob.glob('vizwiz_data/val/*.jpg')
         for fn in tqdm(file_names, file=sys.stdout):
             # Some string manipulation to get img_id
             fn = fn.replace('\\', '/')
