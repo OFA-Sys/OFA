@@ -37,7 +37,7 @@ def img2base64(fn):
 
 
 def main():
-    """print('Generating trainval_ans2label2.pkl file...')
+    print('Generating trainval_ans2label.pkl file...')
     # Load annotations
     train = json.load(open('vizwiz_data/Annotations/train.json', encoding='utf-8'))
     val = json.load(open('vizwiz_data/Annotations/val.json', encoding='utf-8'))
@@ -57,10 +57,10 @@ def main():
     # Create dict to map answers to labels
     trainval_ans2label = {answer: i for i, answer in enumerate(freq_answers)}
     # Save to file
-    with open('vizwiz_data/trainval_ans2label2.pkl', 'wb') as f:
+    with open('vizwiz_data/trainval_ans2label.pkl', 'wb') as f:
         pickle.dump(trainval_ans2label, f)
 
-    print('Finished generating trainval_ans2label2.pkl file...')"""
+    print('Finished generating trainval_ans2label.pkl file...')
 
     # Dict to map answer confidence to value
     conf = {'yes': '1.0', 'maybe': '0.5', 'no': '0.0'}
@@ -69,14 +69,10 @@ def main():
         print(f'Generating rows for {subset} tsv file...')
         # Load corresponding json file
         annotations = json.load(open(f'vizwiz_data/Annotations/{subset}.json', encoding='utf-8'))
-        if subset == 'train':
-            annotations += json.load(open('vizwiz_data/Annotations/val.json', encoding='utf-8'))
         # Create empty set to store data
         tsv_set = set()
         # Iterate over all images in subset
         file_names = glob.glob(f'vizwiz_data/{subset}/*.jpg')
-        if subset == 'train':
-            file_names += glob.glob('vizwiz_data/val/*.jpg')
         for fn in tqdm(file_names, file=sys.stdout):
             # Some string manipulation to get img_id
             fn = fn.replace('\\', '/')
@@ -90,13 +86,17 @@ def main():
             if subset == 'test':
                 tsv_set.add((img_id, img_id, question, '1.0|!+no', '', img2base64(fn)))
             else:
-                answers = [ca['answer'] for ca in annotations[img_id]['answers']]
+                """answers = [ca['answer'] for ca in annotations[img_id]['answers']]
                 conf, ans = 1.0, Counter(answers).most_common(1)[0][0]
-                ans_conf = f'{conf}|!+{ans}&&'
-                """ans_conf = ''
+                ans_conf = f'{conf}|!+{ans}&&'"""
+                ans_conf = ''
                 conf_ans = annotations[img_id]['answers']
+                conf_ans = [{'answer_confidence': ca['answer_confidence'], 'answer': ca['answer']} for ca in conf_ans
+                            if ca['answer'] in freq_answers]
+                if not conf_ans:
+                    continue
                 for ca in conf_ans:
-                    ans_conf += f'{conf[ca["answer_confidence"]]}|!+{ca["answer"]}&&'"""
+                    ans_conf += f'{conf[ca["answer_confidence"]]}|!+{ca["answer"]}&&'
                 tsv_set.add((img_id, img_id, question, ans_conf[:-2], '', img2base64(fn)))
         # Write to tsv file
         print(f'Writing {subset} tsv file...')
