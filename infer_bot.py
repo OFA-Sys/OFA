@@ -10,12 +10,13 @@ from utils.zero_shot_utils import zero_shot_step
 
 # JW: Imports for Bot interaction
 import os
-import speech_recognition as sr
 import warnings
 from glob import glob
-from gtts import gTTS
-from pydub import AudioSegment
 from time import sleep
+
+"""import speech_recognition as sr
+from gtts import gTTS
+from pydub import AudioSegment"""
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -32,7 +33,7 @@ def main():
 
     # specify some options for evaluation
     parser = options.get_generation_parser()
-    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/vizwiz_base_best+.pt",
+    input_args = ["", "--task=vqa_gen", "--beam=100", "--unnormalized", "--path=checkpoints/vizwiz_base_sa_best.pt",
                   "--bpe-dir=utils/BPE"]
     args = options.parse_args_and_arch(parser, input_args)
     cfg = convert_namespace_to_omegaconf(args)
@@ -136,8 +137,9 @@ def main():
     processed = set()
     while True:
         # Get images and questions to process if no answer yet
-        queue = [f for f in glob(f'{data}/*/*') if os.path.exists(f'{f}/image.png') and f not in processed]
-
+        queue = [f for f in glob(f'{data}/*/*') if os.path.exists(f'{f}/image.png')
+                 and os.path.exists(f'{f}/question.txt') and not os.path.exists(f'{f}/answer.txt')
+                 and f not in processed]
         while queue:
             print(f'Processing question, image pair')
 
@@ -151,7 +153,7 @@ def main():
             # Wait until image fully downloaded
             wait = True
             while wait:
-                wait = os.stat(image_path).st_size / 1e3 < 1 or os.stat(question_path).st_size / 1e3 < 1
+                wait = os.stat(image_path).st_size / 1e3 < 1 or os.stat(question_path).st_size < 1
                 if wait:
                     sleep(1)
 
@@ -177,8 +179,11 @@ def main():
                 result, scores = zero_shot_step(task, generator, models, sample)
 
             # Save answer as TXT file
+            answer_string = bytes(result[0]['answer'], 'utf-8')
+            # Fix Unicode errors
+            answer_string = answer_string.decode('utf-8').replace('\ufffd', '')
             with open(f'{folder}/answer.txt', 'w') as f:
-                f.write(result[0]['answer'])
+                f.write(answer_string)
 
             # Save answer as MP3 file
             """answer = f'Ofa\'s answer is: {result[0]["answer"]}'
