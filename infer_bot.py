@@ -134,18 +134,15 @@ def main():
 
     # Add loop to queue multiple questions
     print("Waiting for question, image pair...")
-    processed = set()
     while True:
         # Get images and questions to process if no answer yet
         queue = [f for f in glob(f'{data}/*/*') if os.path.exists(f'{f}/image.png')
-                 and os.path.exists(f'{f}/question.txt') and not os.path.exists(f'{f}/answer.txt')
-                 and f not in processed]
+                 and os.path.exists(f'{f}/question.txt') and not os.path.exists(f'{f}/answer.txt')]
         while queue:
             print(f'Processing question, image pair')
 
             # Get folder from queue and add to processed set
             folder = queue.pop(0)
-            processed.add(folder)
 
             # Get image and question paths
             image_path, question_path = f'{folder}/image.png', f'{folder}/question.txt'
@@ -178,10 +175,8 @@ def main():
             with torch.no_grad():
                 result, scores = zero_shot_step(task, generator, models, sample)
 
-            # Save answer as TXT file
-            answer_string = bytes(result[0]['answer'], 'utf-8')
-            # Fix Unicode errors
-            answer_string = answer_string.decode('utf-8').replace('\ufffd', '')
+            # Save answer as TXT file, removing unicode characters
+            answer_string = result[0]['answer'].encode('ascii', 'ignore').decode()
             with open(f'{folder}/answer.txt', 'w') as f:
                 f.write(answer_string)
 
