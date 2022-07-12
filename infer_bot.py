@@ -14,9 +14,10 @@ import warnings
 from glob import glob
 from time import sleep
 
-"""import speech_recognition as sr
+# JW: Import for audio stuff
+import speech_recognition as sr
 from gtts import gTTS
-from pydub import AudioSegment"""
+from pydub import AudioSegment
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -132,6 +133,9 @@ def main():
     data = '../../tgbot/data/'
     assert os.path.exists(data), 'Data folder does not exist!'
 
+    # Add bool to whether to use audio or text
+    audio = False
+
     # Add loop to queue multiple questions
     print("Waiting for question, image pair...")
     while True:
@@ -156,15 +160,17 @@ def main():
 
             # Open image and question
             image = Image.open(image_path)
-            question = open(question_path).read()
 
-            # Convert question audio to wav and then text
-            """question_wav = f'{folder}/question.wav'
-            question = AudioSegment.from_file(question_path).export(question_wav, format='wav')
-            r = sr.Recognizer()
-            with sr.AudioFile(question_wav) as source:
-                audio = r.record(source)
-                question = r.recognize_google(audio)"""
+            if audio:
+                # Convert question audio to wav and then text
+                question_wav = f'{folder}/question.wav'
+                question = AudioSegment.from_file(question_path).export(question_wav, format='wav')
+                r = sr.Recognizer()
+                with sr.AudioFile(question) as source:
+                    audio = r.record(source)
+                    question = r.recognize_google(audio)
+            else:
+                question = open(question_path).read()
 
             # Construct input sample & preprocess for GPU if cuda available
             sample = construct_sample(image, question)
@@ -175,14 +181,15 @@ def main():
             with torch.no_grad():
                 result, scores = zero_shot_step(task, generator, models, sample)
 
-            # Save answer as TXT file, removing unicode characters
-            answer_string = result[0]['answer'].encode('ascii', 'ignore').decode()
-            with open(f'{folder}/answer.txt', 'w') as f:
-                f.write(answer_string)
-
-            # Save answer as MP3 file
-            """answer = f'Ofa\'s answer is: {result[0]["answer"]}'
-            gTTS(text=answer, lang='en', slow=False).save(f'{folder}/answer.ogg')"""
+            if audio:
+                # Save answer as MP3 file
+                answer = f'Ofa\'s answer is: {result[0]["answer"]}'
+                gTTS(text=answer, lang='en', slow=False).save(f'{folder}/answer.ogg')
+            else:
+                # Save answer as TXT file, removing unicode characters
+                answer_string = result[0]['answer'].encode('ascii', 'ignore').decode()
+                with open(f'{folder}/answer.txt', 'w') as f:
+                    f.write(answer_string)
 
             folder_norm = f'{folder}/answer.txt'.replace('\\', '/')
             print(f'Answer saved to {folder_norm}')
