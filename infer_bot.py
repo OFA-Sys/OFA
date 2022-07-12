@@ -133,23 +133,26 @@ def main():
     data = '../../tgbot/data/'
     assert os.path.exists(data), 'Data folder does not exist!'
 
-    # Add bool to whether to use audio or text
-    audio = False
-
     # Add loop to queue multiple questions
     print("Waiting for question, image pair...")
     while True:
         # Get images and questions to process if no answer yet
         queue = [f for f in glob(f'{data}/*/*') if os.path.exists(f'{f}/image.png')
-                 and os.path.exists(f'{f}/question.txt') and not os.path.exists(f'{f}/answer.txt')]
+                 and (os.path.exists(f'{f}/question.txt') or os.path.exists(f'{f}/question.ogg'))
+                 and not (os.path.exists(f'{f}/answer.txt') or os.path.exists(f'{f}/answer.ogg'))]
         while queue:
             print(f'Processing question, image pair')
 
             # Get folder from queue and add to processed set
             folder = queue.pop(0)
 
+            # Check if audio file present
+            audio = os.path.exists(f'{folder}/question.ogg')
+
             # Get image and question paths
-            image_path, question_path = f'{folder}/image.png', f'{folder}/question.txt'
+            image_path = f'{folder}/image.png'
+            question_path = f'{folder}/question.ogg' if audio else f'{folder}/question.txt'
+            answer_path = f'{folder}/answer.ogg' if audio else f'{folder}/answer.txt'
 
             # Wait until image fully downloaded
             wait = True
@@ -183,15 +186,16 @@ def main():
 
             if audio:
                 # Save answer as MP3 file
-                answer = f'Ofa\'s answer is: {result[0]["answer"]}'
-                gTTS(text=answer, lang='en', slow=False).save(f'{folder}/answer.ogg')
+                answer = f'Your question was interpreted as: {question}. Ofa\'s answer is: {result[0]["answer"]}'
+                gTTS(text=answer, lang='en', slow=False).save(answer_path)
+                folder_norm = f'{folder}/answer.ogg'.replace('\\', '/')
             else:
                 # Save answer as TXT file, removing unicode characters
                 answer_string = result[0]['answer'].encode('ascii', 'ignore').decode()
-                with open(f'{folder}/answer.txt', 'w') as f:
+                with open(answer_path, 'w') as f:
                     f.write(answer_string)
 
-            folder_norm = f'{folder}/answer.txt'.replace('\\', '/')
+            folder_norm = answer_path.replace('\\', '/')
             print(f'Answer saved to {folder_norm}')
             print("\nWaiting for question, image pair...")
         sleep(1)
