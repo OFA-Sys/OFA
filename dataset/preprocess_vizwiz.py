@@ -37,7 +37,7 @@ def img2base64(fn):
 
 
 def main():
-    print('Generating trainval_ans2label.pkl file...')
+    """print('Generating trainval_ans2label.pkl file...')
     # Load annotations
     train = json.load(open('vizwiz_data/Annotations/train.json', encoding='utf-8'))
     val = json.load(open('vizwiz_data/Annotations/val.json', encoding='utf-8'))
@@ -60,8 +60,10 @@ def main():
     with open('vizwiz_data/trainval_ans2label.pkl', 'wb') as f:
         pickle.dump(trainval_ans2label, f)
 
-    print('Finished generating trainval_ans2label.pkl file...')
+    print('Finished generating trainval_ans2label.pkl file...')"""
 
+    # Load pickled dict
+    pkl = pickle.load(open('vizwiz_data/trainval_ans2label.pkl', 'rb'))
     # Dict to map answer confidence to value
     conf = {'yes': '1.0', 'maybe': '0.5', 'no': '0.0'}
     # Iterate over subsets
@@ -71,6 +73,8 @@ def main():
         annotations = json.load(open(f'vizwiz_data/Annotations/{subset}.json', encoding='utf-8'))
         # Create empty set to store data
         tsv_set = set()
+        # Single or multiple answer(s)
+        single_answer = True
         # Iterate over all images in subset
         file_names = glob.glob(f'vizwiz_data/{subset}/*.jpg')
         for fn in tqdm(file_names, file=sys.stdout):
@@ -86,17 +90,19 @@ def main():
             if subset == 'test':
                 tsv_set.add((img_id, img_id, question, '1.0|!+no', '', img2base64(fn)))
             else:
-                """answers = [ca['answer'] for ca in annotations[img_id]['answers']]
-                conf, ans = 1.0, Counter(answers).most_common(1)[0][0]
-                ans_conf = f'{conf}|!+{ans}&&'"""
-                ans_conf = ''
-                conf_ans = annotations[img_id]['answers']
-                conf_ans = [{'answer_confidence': ca['answer_confidence'], 'answer': ca['answer']} for ca in conf_ans
-                            if ca['answer'] in freq_answers]
-                if not conf_ans:
-                    continue
-                for ca in conf_ans:
-                    ans_conf += f'{conf[ca["answer_confidence"]]}|!+{ca["answer"]}&&'
+                if single_answer:
+                    answers = [ca['answer'] for ca in annotations[img_id]['answers']]
+                    conf, ans = 1.0, Counter(answers).most_common(1)[0][0]
+                    ans_conf = f'{conf}|!+{ans}&&'
+                else:
+                    ans_conf = ''
+                    conf_ans = annotations[img_id]['answers']
+                    conf_ans = [{'answer_confidence': ca['answer_confidence'], 'answer': ca['answer']}
+                                for ca in conf_ans if ca['answer'] in pkl.values()]
+                    if not conf_ans:
+                        continue
+                    for ca in conf_ans:
+                        ans_conf += f'{conf[ca["answer_confidence"]]}|!+{ca["answer"]}&&'
                 tsv_set.add((img_id, img_id, question, ans_conf[:-2], '', img2base64(fn)))
         # Write to tsv file
         print(f'Writing {subset} tsv file...')
