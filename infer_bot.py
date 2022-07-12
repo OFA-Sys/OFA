@@ -198,7 +198,6 @@ def main():
             folder_norm = answer_path.replace('\\', '/')
             print(f'Answer saved to {folder_norm}')
             print("\nWaiting for question, image pair...")
-        sleep(1)
 
 
 if __name__ == "__main__":
