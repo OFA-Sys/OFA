@@ -16,9 +16,12 @@ from time import sleep
 
 # JW: Import for audio stuff
 import speech_recognition as sr
-from gtts import gTTS
+import pyttsx3
 from pydub import AudioSegment
 
+import logging
+logger = logging.getLogger()
+logger.setLevel(logging.CRITICAL)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -186,9 +189,10 @@ def main():
 
             if audio:
                 # Save answer as MP3 file
-                answer = f'Your question was interpreted as: {question}. Ofa\'s answer is: {result[0]["answer"]}'
-                gTTS(text=answer, lang='en', slow=False).save(answer_path)
-                folder_norm = f'{folder}/answer.ogg'.replace('\\', '/')
+                answer = f'Your question was interpreted as: {question}. Mr. VQA\'s answer is: {result[0]["answer"]}'
+                engine = pyttsx3.init()
+                engine.save_to_file(answer, f'{folder}/answer.ogg')
+                engine.runAndWait()
             else:
                 # Save answer as TXT file, removing unicode characters
                 answer_string = result[0]['answer'].encode('ascii', 'ignore').decode()

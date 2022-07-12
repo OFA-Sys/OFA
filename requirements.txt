@@ -17,7 +17,8 @@ Cython==0.29.28
 datasets==2.2.2
 dill==0.3.4
 einops==0.4.1
--e git+https://github.com/Velcorn/OFA.git@d1160b11b44b2126b53986be054089b914b79ceb#egg=fairseq&subdirectory=fairseq
+-e git+https://github.com/Velcorn/OFA.git@a250dc3b8e3bb5f876214016170a907741f4e74e#egg=fairseq&subdirectory=fairseq
+ffmpeg==1.4
 filelock==3.6.0
 Flask==2.1.2
 fonttools==4.33.3
@@ -27,7 +28,6 @@ ftfy==6.0.3
 google-auth==2.6.6
 google-auth-oauthlib==0.4.6
 grpcio==1.44.0
-gTTS==2.2.4
 huggingface-hub==0.5.1
 hydra-core==1.0.7
 idna==3.3
