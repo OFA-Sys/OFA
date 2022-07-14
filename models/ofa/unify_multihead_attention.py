@@ -127,7 +127,8 @@ class MultiheadAttention(nn.Module):
         self_attn_mask: Optional[Tensor] = None,
         before_softmax: bool = False,
         need_head_weights: bool = False,
-        attn_bias: Optional[Tensor] = None
+        attn_bias: Optional[Tensor] = None,
+        prompt_kv: Optional[Tensor] = None
     ) -> Tuple[Tensor, Optional[Tensor]]:
         """Input shape: Time x Batch x Channel
 
@@ -314,7 +315,7 @@ class MultiheadAttention(nn.Module):
 
         if key_padding_mask is not None:
             assert key_padding_mask.size(0) == bsz
-            assert key_padding_mask.size(1) == src_len
+            assert key_padding_mask.size(1) == k.size(1)
 
         if self.add_zero_attn:
             assert v is not None
@@ -335,14 +336,19 @@ class MultiheadAttention(nn.Module):
                     ],
                     dim=1,
                 )
-
+        if prompt_kv is not None:
+            prompt_k, prompt_v = prompt_kv.split(1)
+            prompt_k = prompt_k.squeeze(0).reshape(k.size(0), -1, k.size(2))
+            prompt_v = prompt_v.squeeze(0).reshape(v.size(0), -1, v.size(2))
+            k = torch.cat([prompt_k, k], dim=1)
+            v = torch.cat([prompt_v, v], dim=1)
         attn_weights = torch.bmm(q, k.transpose(1, 2))
-        attn_weights = self.apply_sparse_mask(attn_weights, tgt_len, src_len, bsz)
+        attn_weights = self.apply_sparse_mask(attn_weights, tgt_len, k.size(1), bsz)
 
-        assert list(attn_weights.size()) == [bsz * self.num_heads, tgt_len, src_len]
+        assert list(attn_weights.size()) == [bsz * self.num_heads, tgt_len, k.size(1)]
 
         if attn_bias is not None:
-            attn_weights += attn_bias
+            attn_weights[:, :, -src_len:] += attn_bias[:, :, -src_len:]
 
         if attn_mask is not None:
             attn_mask = attn_mask.unsqueeze(0)
@@ -351,12 +357,12 @@ class MultiheadAttention(nn.Module):
             attn_weights += attn_mask
 
         if self_attn_mask is not None:
-            self_attn_mask = self_attn_mask.unsqueeze(1).expand(bsz, self.num_heads, tgt_len, src_len)
-            attn_weights += self_attn_mask.contiguous().view(bsz * self.num_heads, tgt_len, src_len)
+            self_attn_mask = self_attn_mask.unsqueeze(1).expand(bsz, self.num_heads, tgt_len, k.size(1))
+            attn_weights += self_attn_mask.contiguous().view(bsz * self.num_heads, tgt_len, k.size(1))
 
         if key_padding_mask is not None:
             # don't attend to padding symbols
-            attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len)
+            attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, k.size(1))
             if not is_tpu:
                 attn_weights = attn_weights.masked_fill(
                     key_padding_mask.unsqueeze(1).unsqueeze(2).to(torch.bool),
@@ -366,7 +372,7 @@ class MultiheadAttention(nn.Module):
                 attn_weights = attn_weights.transpose(0, 2)
                 attn_weights = attn_weights.masked_fill(key_padding_mask, float("-inf"))
                 attn_weights = attn_weights.transpose(0, 2)
-            attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
+            attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, k.size(1))
 
         if before_softmax:
             return attn_weights, v
@@ -394,7 +400,7 @@ class MultiheadAttention(nn.Module):
         attn_weights: Optional[Tensor] = None
         if need_weights:
             attn_weights = attn_weights_float.view(
-                bsz, self.num_heads, tgt_len, src_len
+                bsz, self.num_heads, tgt_len, k.size(1)
             ).transpose(1, 0)
             if not need_head_weights:
                 # average attention weights over heads
