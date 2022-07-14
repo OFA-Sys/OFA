@@ -8,7 +8,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 ### Overview
 
-This is the code to reproduce the experiments from the paper **"Multimodal Prompt Tuning for Unified Sequence-to-Sequence Learning"**. This paper explores prompting methods for multimodal pretraining, and specifically focuses on the unified sequence-to-sequence learning framework instead of the constrastive learning models. We investigate a series of parameter-efficient tuning methods, and demonstrate that light-weight prompt tuning can achieve comparable performance with finetuning with a much fewer computation costs. **Paper will be released soon.**    
+This is the code to reproduce the experiments from the paper **"Multimodal Prompt Tuning for Unified Sequence-to-Sequence Learning"**. This paper explores prompting methods for multimodal pretraining, and specifically focuses on the unified sequence-to-sequence learning framework instead of the constrastive learning models. We investigate a series of parameter-efficient tuning methods, and demonstrate that light-weight prompt tuning can achieve comparable performance with finetuning with a much fewer computation costs. **The Paper will be released soon.**    
 <br></br>
 
 
