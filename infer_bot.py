@@ -10,9 +10,9 @@ from utils.zero_shot_utils import zero_shot_step
 
 # JW: Imports for Bot interaction
 import os
+import time
 import warnings
 from glob import glob
-from time import sleep
 
 # JW: Import for audio stuff
 import speech_recognition as sr
@@ -146,6 +146,9 @@ def main():
         while queue:
             print(f'Processing question, image pair')
 
+            # Log time taken
+            start = time.time()
+
             # Get folder from queue and add to processed set
             folder = queue.pop(0)
 
@@ -162,7 +165,7 @@ def main():
             while wait:
                 wait = os.stat(image_path).st_size / 1e3 < 1 or os.stat(question_path).st_size < 1
                 if wait:
-                    sleep(1)
+                    time.sleep(1)
 
             # Open image and question
             image = Image.open(image_path)
@@ -198,6 +201,12 @@ def main():
                 answer_string = result[0]['answer'].encode('ascii', 'ignore').decode()
                 with open(answer_path, 'w') as f:
                     f.write(answer_string)
+
+            # Save time taken
+            end = time.time()
+            duration = end - start
+            with open(f'{folder}/time.txt', 'w') as f:
+                f.write(f'{duration}')
 
             folder_norm = answer_path.replace('\\', '/')
             print(f'Answer saved to {folder_norm}')
