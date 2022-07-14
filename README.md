@@ -40,7 +40,7 @@ See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
 We provide a demo script (`run_scripts/refcoco/train_refcoco_prefix.sh`) that has all the required parts for training.
 
 ```sh
-./run_scripts/refcoco/train_refcoco_prefix.sh
+sh ./run_scripts/refcoco/train_refcoco_prefix.sh
 ```
 A few options of note:
 *   `--encoder-prompt` :: whether to insert prompts to the encoder
