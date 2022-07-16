@@ -39,19 +39,14 @@ OFA is a unified multimodal pretrained model that unifies modalities (i.e., cros
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
 to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [OFA: Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
     
-We welcome contributions to our project. Feel free to contact us or send us issues/PRs!
-<br></br>
+In the following, we provide:
+* News about our recent updates;
+* Online Demos with links to Huggingface spaces and Colab notebooks;
+* Model card (including official release of pretrained checkpoints (more can be found at [checkpoints.md](checkpoints.md)), and we also provide checkpoints for Huggingface Transformers on [https://huggingface.co/OFA-Sys](https://huggingface.co/OFA-Sys)) and experimental results of OFA models of different sizes;
+* Step-by-step instructions of pretraining and finetuning (including almost all tasks presented in the paper), and if you try to use our repo for reimplementation, we strongly advise you to carefully read the corresponding sections;
+* Case demonstration of OFA.
 
-
-# Online Demos
-We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
-* [Generic Interface](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)
-* [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
-* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
-* [Visual Grounding](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)
-* [Visual Question Answering](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)
-
-Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
+We sincerely welcome contributions to our project. Feel free to contact us or send us issues / PRs!
 <br></br>
 
 
@@ -79,6 +74,18 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
         </ul>
     </p>
 </details>
+<br></br>
+
+
+# Online Demos
+We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
+* [Generic Interface](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)
+* [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
+* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
+* [Visual Grounding](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)
+* [Visual Question Answering](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)
+
+Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
 <br></br>
 
 
