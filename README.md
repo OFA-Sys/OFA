@@ -43,7 +43,7 @@ In the following, we provide:
 * News about our recent updates;
 * Online Demos with links to Huggingface spaces and Colab notebooks;
 * Model card (including official release of pretrained checkpoints (more can be found at [checkpoints.md](checkpoints.md)), and we also provide checkpoints for Huggingface Transformers on [https://huggingface.co/OFA-Sys](https://huggingface.co/OFA-Sys)) and experimental results of OFA models of different sizes;
-* Step-by-step instructions of pretraining and finetuning (including almost all tasks presented in the paper), and if you try to use our repo for reimplementation, we strongly advise you to carefully read the corresponding sections;
+* Step-by-step instructions of pretraining and finetuning (including almost all tasks presented in the paper);
 * Case demonstration of OFA.
 
 We sincerely welcome contributions to our project. Feel free to contact us or send us issues / PRs!
