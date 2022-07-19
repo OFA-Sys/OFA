@@ -204,7 +204,8 @@ def main():
 
             # Save time taken
             end = time.time()
-            duration = end - start
+            duration = round(end - start, 2)
+            print(f'Time taken: {duration} seconds')
             with open(f'{folder}/time.txt', 'w') as f:
                 f.write(f'{duration}')
 
