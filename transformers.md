@@ -30,7 +30,7 @@ After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the te
         transforms.Normalize(mean=mean, std=std)
     ])
 
->>> model = OFAModel.from_pretrained(ckpt_dir)
+
 >>> tokenizer = OFATokenizer.from_pretrained(ckpt_dir)
 
 >>> txt = " what does the image describe?"
@@ -40,6 +40,7 @@ After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the te
 
 
 >>> # using the generator of fairseq version
+>>> model = OFAModel.from_pretrained(ckpt_dir, use_cache=True)
 >>> generator = sequence_generator.SequenceGenerator(tokenizer=tokenizer,beam_size=5,
                                                                       max_len_b=16,
                                                                       min_len=0,
@@ -50,6 +51,7 @@ After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the te
 >>> gen = [gen_output[i][0]["tokens"] for i in range(len(gen_output))]
 
 >>> # using the generator of huggingface version
+>>> model = OFAModel.from_pretrained(ckpt_dir, use_cache=False)
 >>> gen = model.generate(inputs, patch_images=patch_img, num_beams=5, no_repeat_ngram_size=3) 
 
 >>> print(tokenizer.batch_decode(gen, skip_special_tokens=True))
