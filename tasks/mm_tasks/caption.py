@@ -229,13 +229,12 @@ class CaptionTask(OFATask):
 
         gen_out = self.inference_step(generator, [model], sample)
         hyps, refs = [], []
-        transtab = str.maketrans({key: None for key in string.punctuation})
         for i in range(len(gen_out)):
             decode_tokens = decode(gen_out[i][0]["tokens"])
-            hyps.append(decode_tokens.translate(transtab).strip())
+            hyps.append(decode_tokens.strip())
             refs.append(
                 [
-                    sent.translate(transtab).strip()
+                    sent.strip()
                     for sent in decode(
                         utils.strip_pad(sample["target"][i], self.tgt_dict.pad()),
                         escape_unk=True,  # don't count <unk> as matches to the hypo

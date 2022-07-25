@@ -68,7 +68,6 @@ class ScstRewardCriterion(FairseqCriterion):
         self.scst_cider_scorer = CiderD(df=scst_cider_cached_tokens)
         self.sentence_avg = sentence_avg
         self.ignore_prefix_size = ignore_prefix_size
-        self.transtab = str.maketrans({key: None for key in string.punctuation})
 
         self.constraint_start = None
         self.constraint_end = None
@@ -111,11 +110,11 @@ class ScstRewardCriterion(FairseqCriterion):
 
         res = OrderedDict()
         for i in range(gen_res_size):
-            res[i] = [self._wrap_sentence(gen_res[i].strip().translate(self.transtab))]
+            res[i] = [self._wrap_sentence(gen_res[i].strip())]
 
         gts = OrderedDict()
         gt_res_ = [
-            [self._wrap_sentence(gt_res[i][j].strip().translate(self.transtab)) for j in range(len(gt_res[i]))]
+            [self._wrap_sentence(gt_res[i][j].strip()) for j in range(len(gt_res[i]))]
                 for i in range(len(gt_res))
         ]
         for i in range(gen_res_size):

@@ -121,12 +121,23 @@ class CaptionDataset(OFADataset):
         patch_mask = torch.tensor([True])
 
         if self.split == 'train' and not self.scst:
-            caption = caption.translate(self.transtab).strip()
+            try:
+                caption.translate(self.transtab).strip().encode("GBK")
+                caption = caption.translate(self.transtab).strip()
+            except Exception:
+                pass
             caption_token_list = caption.strip().split()
             tgt_caption = ' '.join(caption_token_list[:self.max_tgt_length])
         else:
             caption = ' '.join(caption.strip().split())
-            caption_list = [cap.translate(self.transtab).strip() for cap in caption.strip().split('&&')]
+            caption_list = []
+            for cap in caption.strip().split('&&'):
+                try:
+                    cap.translate(self.transtab).strip().encode("GBK")
+                    cap = cap.translate(self.transtab).strip()
+                except Exception:
+                    pass
+                caption_list.append(cap)
             tgt_caption = '&&'.join(caption_list)
         src_item = self.encode_text(" what does the image describe?")
         tgt_item = self.encode_text(" {}".format(tgt_caption))
