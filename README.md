@@ -39,19 +39,14 @@ OFA is a unified multimodal pretrained model that unifies modalities (i.e., cros
 (e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
 to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [OFA: Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
     
-We welcome contributions to our project. Feel free to contact us or send us issues/PRs!
-<br></br>
+In the following, we provide:
+* News about our recent updates;
+* Online Demos with links to Huggingface spaces and Colab notebooks;
+* Model card (including official release of pretrained checkpoints (more can be found at [checkpoints.md](checkpoints.md)), and we also provide checkpoints for Huggingface Transformers on [https://huggingface.co/OFA-Sys](https://huggingface.co/OFA-Sys)) and experimental results of OFA models of different sizes;
+* Step-by-step instructions of pretraining and finetuning (including almost all tasks presented in the paper);
+* Case demonstration of OFA.
 
-
-# Online Demos
-We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
-* [Generic Interface](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)
-* [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
-* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
-* [Visual Grounding](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)
-* [Visual Question Answering](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)
-
-Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
+We sincerely welcome contributions to our project. Feel free to contact us or send us issues / PRs!
 <br></br>
 
 
@@ -79,6 +74,18 @@ Also we provide Colab notebooks for you to better perceive the procedures. Click
         </ul>
     </p>
 </details>
+<br></br>
+
+
+# Online Demos
+We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
+* [Generic Interface](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)
+* [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
+* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
+* [Visual Grounding](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)
+* [Visual Question Answering](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)
+
+Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
 <br></br>
 
 
@@ -159,7 +166,50 @@ pip install -r requirements.txt
 See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
 <br></br>
 
-# Pretraining
+# Training & Inference
+Below we provide methods for training and inference on different tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts mentioned in this section are prepared for OFA-Large. For reproducing the downstreaming results of OFA-Base, we have also provided the corresponding finetuning and inference scripts for OFA-Base in the `run_scripts/` folder.
+
+We recommend that your workspace directory should be organized like this: 
+```
+OFA/
+├── checkpoints/
+│   ├── ofa_base.pt
+│   ├── ofa_large.pt
+│   ├── caption_large_best_clean.pt
+│   └── ...
+├── criterions/
+├── data/
+├── dataset/
+│   ├── caption_data/
+│   ├── gigaword_data/
+│   └── ...
+├── fairseq/
+├── models/
+├── run_scripts/
+├── tasks/
+├── train.py
+├── trainer.py
+└── utils/
+```
+
+
+## Image Processing
+To ensure the efficiency of processing data, we did not store images with small files, but instead we encode them to base64 strings.
+Transforming image files to base64 strings is simple. Run the following code:
+```python
+from PIL import Image
+from io import BytesIO
+import base64
+
+img = Image.open(file_name) # path to file
+img_buffer = BytesIO()
+img.save(img_buffer, format=img.format)
+byte_data = img_buffer.getvalue()
+base64_str = base64.b64encode(byte_data) # bytes
+base64_str = base64_str.decode("utf-8") # str
+```
+
+## Pretraining
 Below we provide methods for pretraining OFA.
 
 <details>
@@ -193,34 +243,6 @@ bash pretrain_ofa_large.sh # Pretrain OFA-Large. For OFA-Base, use pretrain_ofa_
 INFO: Loaded checkpoint ../../checkpoints/ofa_large.pt
 </pre>
 </details>
-
-<br></br>
-
-# Finetuning & Inference
-Below we provide methods for finetuning and inference on different downstream tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts mentioned in this section are prepared for OFA-Large. For reproducing the downstreaming results of OFA-Base, we have also provided the corresponding finetuning and inference scripts for OFA-Base in the `run_scripts/` folder.
-
-We recommend that your workspace directory should be organized like this: 
-```
-OFA/
-├── checkpoints/
-│   ├── ofa_base.pt
-│   ├── ofa_large.pt
-│   ├── caption_large_best_clean.pt
-│   └── ...
-├── criterions/
-├── data/
-├── dataset/
-│   ├── caption_data/
-│   ├── gigaword_data/
-│   └── ...
-├── fairseq/
-├── models/
-├── run_scripts/
-├── tasks/
-├── train.py
-├── trainer.py
-└── utils/
-```
 
 ## Image Captioning
 We provide procedures to reproduce our results of image captioning on our paper below.
