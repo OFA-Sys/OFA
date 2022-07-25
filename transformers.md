@@ -41,10 +41,13 @@ After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the te
 
 >>> # using the generator of fairseq version
 >>> model = OFAModel.from_pretrained(ckpt_dir, use_cache=True)
->>> generator = sequence_generator.SequenceGenerator(tokenizer=tokenizer,beam_size=5,
-                                                                      max_len_b=16,
-                                                                      min_len=0,
-                                                                      no_repeat_ngram_size=3) # using the generator of fairseq version
+>>> generator = sequence_generator.SequenceGenerator(
+                    tokenizer=tokenizer,
+                    beam_size=5,
+                    max_len_b=16,
+                    min_len=0,
+                    no_repeat_ngram_size=3,
+                )
 >>> data = {}
 >>> data["net_input"] = {"input_ids": inputs, 'patch_images': patch_img, 'patch_masks':torch.tensor([True])}
 >>> gen_output = generator.generate([model], data)
