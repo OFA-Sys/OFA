@@ -385,6 +385,8 @@ def ofa_large_architecture(args):
     args.scale_heads = getattr(args, "scale_heads", False)
     args.scale_resids = getattr(args, "scale_resids", False)
 
+    args.orig_patch_image_size = getattr(args, "orig_patch_image_size", 256)
+
 
 @register_model_architecture("ofa", "ofa_base")
 def ofa_base_architecture(args):
