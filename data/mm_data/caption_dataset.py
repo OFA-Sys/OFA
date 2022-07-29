@@ -113,6 +113,11 @@ class CaptionDataset(OFADataset):
             transforms.Normalize(mean=mean, std=std),
         ])
 
+        if type(bpe).__name__ == 'GPT2BPE':
+            self.prompt = " what does the image describe?"
+        elif type(bpe).__name__ == 'BertBPE':
+            self.prompt = "图片描述了什么内容?"
+
     def __getitem__(self, index):
         uniq_id, image, caption = self.dataset[index]
 
@@ -128,7 +133,7 @@ class CaptionDataset(OFADataset):
             caption = ' '.join(caption.strip().split())
             caption_list = [cap.translate(self.transtab).strip() for cap in caption.strip().split('&&')]
             tgt_caption = '&&'.join(caption_list)
-        src_item = self.encode_text(" what does the image describe?")
+        src_item = self.encode_text(self.prompt)
         tgt_item = self.encode_text(" {}".format(tgt_caption))
 
         src_item = torch.cat([self.bos_item, src_item, self.eos_item])

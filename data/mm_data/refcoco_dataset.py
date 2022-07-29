@@ -118,6 +118,11 @@ class RefcocoDataset(OFADataset):
             T.Normalize(mean=mean, std=std, max_image_size=max_image_size)
         ])
 
+        if type(bpe).__name__ == 'GPT2BPE':
+            self.prompt = ' which region does the text " {} " describe?'
+        elif type(bpe).__name__ == 'BertBPE':
+            self.prompt = '这段文字" {} "描述的是哪个区域？'
+
     def __getitem__(self, index):
         uniq_id, base64_str, text, region_coord = self.dataset[index]
 
@@ -139,7 +144,7 @@ class RefcocoDataset(OFADataset):
         quant_y1 = "<bin_{}>".format(int((patch_boxes["boxes"][0][3] * (self.num_bins - 1)).round()))
         region_coord = "{} {} {} {}".format(quant_x0, quant_y0, quant_x1, quant_y1)
         src_caption = self.pre_caption(text, self.max_src_length)
-        src_item = self.encode_text(' which region does the text " {} " describe?'.format(src_caption))
+        src_item = self.encode_text(self.prompt.format(src_caption))
         tgt_item = self.encode_text(region_coord, use_bpe=False)
 
         src_item = torch.cat([self.bos_item, src_item, self.eos_item])
