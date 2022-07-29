@@ -9,6 +9,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
     <img src="examples/OFA_logo_tp_path.svg" width="150" />
     <br>
 <p>
+<br>
 <p align="center">
     <a href="https://github.com/huggingface/transformers/blob/master/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/huggingface/transformers.svg?color=blue">
