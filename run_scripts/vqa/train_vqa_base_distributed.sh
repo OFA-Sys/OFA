@@ -48,7 +48,6 @@ max_src_length=80
 max_object_length=30
 max_tgt_length=30
 num_bins=1000
-patch_image_size=480
 
 uses_ema="--uses-ema"
 store_ema="--store-ema"
