@@ -52,6 +52,7 @@ We sincerely welcome contributions to our project. Feel free to contact us or se
 
 
 # News 
+* 2022.8.5: Released support of prompt tuning for OFA (temporarily maintained at `feature/prompt_tuning`). Check our paper [here](https://arxiv.org/abs/2208.02532)!
 * 2022.7.7: Updated support of OFA on **huggingface transformers** (fixed bugs in forward, add sequence generator from Fairseq to ensure performance, etc.). Refer to the doc [transformers.md](transformers.md) and the branch `feature/add_transformers`. 
 * 2022.6.17: Released the pretrained checkpoint of **OFA-Huge**. To use it, set `--arch=ofa_huge` in the script.
 * 2022.5.15: OFA was accepted by **ICML 2022**
