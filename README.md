@@ -4,7 +4,7 @@ All rights reserved.
 This source code is licensed under the Apache 2.0 license found in the LICENSE file in the root directory.
 -->
 
-## Multimodal Prompt Tuning for Unified Sequence-to-Sequence Learning
+## Prompt Tuning for Generative Multimodal Pretrained Models
 
 ### Overview
 This is the code for **"Prompt Tuning for Generative Multimodal Pretrained Models"**, [Check our paper on ArXiv](https://arxiv.org/abs/2208.02532). This paper explores prompt tuning for generative multimodal pretrained models, instead of the constrastive learning models. We specifically focuses on the unified sequence-to-sequence learning framework and implement on our OFA models. 
