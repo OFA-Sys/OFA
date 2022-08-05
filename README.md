@@ -8,16 +8,13 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 ### Overview
 
-This is the code to reproduce the experiments from the paper **"Prompt Tuning for Generative Multimodal Pretrained Models"**. This paper explores prompting methods for multimodal pretraining, and specifically focuses on the unified sequence-to-sequence learning framework instead of the constrastive learning models. We investigate a series of parameter-efficient tuning methods, and demonstrate that light-weight prompt tuning can achieve comparable performance with finetuning with a much fewer computation costs. More remarkably, we show that prompt tuning becomes more competitive with finetuning as parameters increase. **The Paper will be released soon.**    
-<br></br>
-
-
+This is the code to reproduce the experiments from the paper **"Prompt Tuning for Generative Multimodal Pretrained Models"**, [Check our paper on ArXiv](https://arxiv.org/abs/2208.02532). This paper explores prompting methods for multimodal pretraining, and specifically focuses on the unified sequence-to-sequence learning framework instead of the constrastive learning models. We investigate a series of parameter-efficient tuning methods, and demonstrate that light-weight prompt tuning can achieve comparable performance with finetuning with a much fewer computation costs. More remarkably, we show that prompt tuning becomes more competitive with finetuning as parameters increase. 
+<br>
 
 ### Results
 Experimental results on RefCOCO, RefCOCO+, RefCOCOg, SNLI-VE, COCO Captions and VQA
 ![result](examples/result.png)
-
-<br></br>
+<br>
 
 ### Requirements
 * python 3.7.4
@@ -34,8 +31,7 @@ pip install -r requirements.txt
 
 ### Datasets and Checkpoints
 See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
-<br></br>
-
+<br>
 
 ### Training
 We provide a demo script (`run_scripts/refcoco/train_refcoco_prefix.sh`) that has all the required parts for training.
