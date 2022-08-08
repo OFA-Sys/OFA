@@ -38,7 +38,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 OFA is a unified sequence-to-sequence pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks (**finetuning** and **prompt tuning** are supported):
 * **Image Captioning** (e.g., Microsoft COCO Caption, see [Leaderboard](https://competitions.codalab.org/competitions/3221#results))
-* **Visual Question Answering** (e.g., [VQA 2.0]())
+* **Visual Question Answering** (e.g., [VQA 2.0](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278))
 * **Referring Expression Comprehension** (e.g., [RefCOCO](https://paperswithcode.com/sota/referring-expression-comprehension-on-refcoco), [RefCOCO+](https://paperswithcode.com/sota/referring-expression-comprehension-on-refcoco-1), and [RefCOCOg](https://paperswithcode.com/sota/referring-expression-comprehension-on-1))
 * **Visual Entailment** (e.g., [SNLI-VE](https://paperswithcode.com/sota/visual-entailment-on-snli-ve-test))
 * **Text-to-Image Generation** (e.g., MSCOCO)
