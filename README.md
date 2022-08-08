@@ -36,23 +36,39 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 
-OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
-(e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
-to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [OFA: Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
+OFA is a unified sequence-to-sequence pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks:
+* **Image Captioning** (e.g., Microsoft COCO Caption, see [Leaderboard](https://competitions.codalab.org/competitions/3221#results))
+* **Visual Question Answering** (e.g., [VQA 2.0]())
+* **Referring Expression Comprehension** (e.g., [RefCOCO](https://paperswithcode.com/sota/referring-expression-comprehension-on-refcoco), [RefCOCO+](https://paperswithcode.com/sota/referring-expression-comprehension-on-refcoco-1), and [RefCOCOg](https://paperswithcode.com/sota/referring-expression-comprehension-on-1))
+* **Visual Entailment** (e.g., [SNLI-VE](https://paperswithcode.com/sota/visual-entailment-on-snli-ve-test))
+* **Text-to-Image Generation** (e.g., MSCOCO)
+* **Text Classification** (e.g., GLUE) and **Text Generation** (e.g., [text summarization](https://paperswithcode.com/sota/text-summarization-on-gigaword))
+* **Image Classification** (e.g., [ImageNet](https://paperswithcode.com/sota/self-supervised-image-classification-on-1))
+* ......
     
-In the following, we provide:
-* News about our recent updates;
-* Online Demos with links to Huggingface spaces and Colab notebooks;
-* Model card (including official release of pretrained checkpoints (more can be found at [checkpoints.md](checkpoints.md)), and we also provide checkpoints for Huggingface Transformers on [https://huggingface.co/OFA-Sys](https://huggingface.co/OFA-Sys)) and experimental results of OFA models of different sizes;
-* Step-by-step instructions of pretraining and finetuning (including almost all tasks presented in the paper);
-* Case demonstration of OFA.
+In this doc, we provide: 
+* **Step-by-step** instructions of **pretraining** and **finetuning** (including almost **all tasks** presented in the paper);
+* **Pretrained** and **finetuned** checkpoints (check [official ckpt](checkpoints.md) or [huggingface ckpt](https://huggingface.co/OFA-Sys) for what you need for what you need), and model cards with experimental results;
+* ......
 
 We sincerely welcome contributions to our project. Feel free to contact us or send us issues / PRs!
 <br></br>
 
 
+# Online Demos
+We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
+* [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
+* [Visual Grounding](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)
+* [Visual Question Answering](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)
+* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
+* [Generic Interface](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)
+
+Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
+<br></br>
+
+
 # News 
-* 2022.8.5: Released support of prompt tuning for OFA (temporarily maintained at `feature/prompt_tuning`). Check our paper [here](https://arxiv.org/abs/2208.02532)!
+* 2022.8.5: Released support of **prompt tuning** for OFA (temporarily maintained at `feature/prompt_tuning`). Check our paper [here](https://arxiv.org/abs/2208.02532)!
 * 2022.7.7: Updated support of OFA on **huggingface transformers** (fixed bugs in forward, add sequence generator from Fairseq to ensure performance, etc.). Refer to the doc [transformers.md](transformers.md) and the branch `feature/add_transformers`. 
 * 2022.6.17: Released the pretrained checkpoint of **OFA-Huge**. To use it, set `--arch=ofa_huge` in the script.
 * 2022.5.15: OFA was accepted by **ICML 2022**
@@ -76,18 +92,6 @@ We sincerely welcome contributions to our project. Feel free to contact us or se
         </ul>
     </p>
 </details>
-<br></br>
-
-
-# Online Demos
-We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
-* [Generic Interface](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)
-* [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
-* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
-* [Visual Grounding](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)
-* [Visual Question Answering](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)
-
-Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
 <br></br>
 
 
