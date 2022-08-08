@@ -47,7 +47,7 @@ OFA is a unified sequence-to-sequence pretrained model that unifies modalities (
 * ......
     
 In this doc, we provide: 
-* **Step-by-step** instructions of **pretraining** and **finetuning** (including almost **all tasks** presented in the paper);
+* **Step-by-step** instructions for **pretraining** and **finetuning** (including almost **all tasks** presented in the paper);
 * **Pretrained** and **finetuned** checkpoints (check [official ckpt](checkpoints.md) or [huggingface ckpt](https://huggingface.co/OFA-Sys) for what you need for what you need), and model cards with experimental results;
 * ......
 
