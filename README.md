@@ -36,7 +36,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 
-OFA is a unified sequence-to-sequence pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks (**finetuning** and **prompt tuning** are supported): image captioning (1st at the [MSCOCO Leaderboard](https://competitions.codalab.org/competitions/3221#results)), VQA ([link](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278)), visual grounding, text-to-image generation, text classification, text generation, image classification, etc. We provide **step-by-step** instructions for pretraining and finetuning and corresponding checkpoints (check [official ckpt](checkpoints.md) or [huggingface ckpt](https://huggingface.co/OFA-Sys).
+OFA is a unified sequence-to-sequence pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks (**finetuning** and **prompt tuning** are supported): image captioning (1st at the [MSCOCO Leaderboard](https://competitions.codalab.org/competitions/3221#results)), VQA ([link](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278)), visual grounding, text-to-image generation, text classification, text generation, image classification, etc. We provide **step-by-step** instructions for pretraining and finetuning and corresponding checkpoints (check [official ckpt](checkpoints.md) or [huggingface ckpt](https://huggingface.co/OFA-Sys)).
 
 We sincerely welcome contributions to our project. Feel free to contact us or send us issues / PRs!
 <br></br>
