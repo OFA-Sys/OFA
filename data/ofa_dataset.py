@@ -42,7 +42,7 @@ class OFADataset(FairseqDataset):
             s = torch.cat([s, self.eos_item])
         return s
 
-    def pre_question(self, question, max_ques_words):
+    def pre_question(self, question, max_ques_words=None):
         question = question.lower().lstrip(",.!?*#:;~").replace('-', ' ').replace('/', ' ')
 
         question = re.sub(
@@ -55,12 +55,12 @@ class OFADataset(FairseqDataset):
 
         # truncate question
         question_words = question.split(' ')
-        if len(question_words) > max_ques_words:
+        if max_ques_words is not None and len(question_words) > max_ques_words:
             question = ' '.join(question_words[:max_ques_words])
 
         return question
 
-    def pre_caption(self, caption, max_words):
+    def pre_caption(self, caption, max_words=None):
         caption = caption.lower().lstrip(",.!?*#:;~").replace('-', ' ').replace('/', ' ').replace('<person>', 'person')
 
         caption = re.sub(
@@ -73,7 +73,7 @@ class OFADataset(FairseqDataset):
 
         # truncate caption
         caption_words = caption.split(' ')
-        if len(caption_words) > max_words:
+        if max_words is not None and len(caption_words) > max_words:
             caption = ' '.join(caption_words[:max_words])
 
         return caption

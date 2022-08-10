@@ -1,14 +1,16 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
+# Copyright 2022 The OFA-Sys Team. 
+# All rights reserved.
+# This source code is licensed under the Apache 2.0 license
+# found in the LICENSE file in the root directory.
 
 from dataclasses import dataclass, field
 import json
 import logging
 import os
+import math
 from typing import Optional
 from fairseq.tasks import register_task
+from fairseq.data import FairseqDataset, iterators
 
 from tasks.ofa_task import OFATask, OFAConfig
 from data.pretrain_data.unify_dataset import UnifyDataset
@@ -152,3 +154,49 @@ class UnifyTask(OFATask):
             poisson_lambda=self.cfg.poisson_lambda,
             replace_length=self.cfg.replace_length
         )
+   
+    def get_batch_iterator(
+        self,
+        dataset,
+        max_tokens=None,
+        max_sentences=None,
+        max_positions=None,
+        ignore_invalid_inputs=False,
+        required_batch_size_multiple=1,
+        seed=1,
+        num_shards=1,
+        shard_id=0,
+        num_workers=0,
+        epoch=1,
+        data_buffer_size=0,
+        disable_iterator_cache=False,
+    ):
+        assert isinstance(dataset, FairseqDataset)
+
+        # initialize the dataset with the correct starting epoch
+        dataset.set_epoch(epoch)
+
+        # create mini-batches with given size constraints
+        batch_sampler = [
+            [j for j in range(i, min(i + max_sentences, len(dataset)))]
+            for i in range(0, len(dataset), max_sentences)
+        ]
+        total_row_count = dataset.dataset.get_total_row_count()
+        num_batches = math.ceil(math.ceil(total_row_count / num_shards) / max_sentences)
+        if len(batch_sampler) < num_batches:
+            batch_sampler.append([1])
+
+        # return a reusable, sharded iterator
+        epoch_iter = iterators.EpochBatchIterator(
+            dataset=dataset,
+            collate_fn=dataset.collater,
+            batch_sampler=batch_sampler,
+            seed=seed,
+            num_shards=1,
+            shard_id=0,
+            num_workers=num_workers,
+            epoch=epoch,
+            buffer_size=data_buffer_size
+        )
+
+        return epoch_iter

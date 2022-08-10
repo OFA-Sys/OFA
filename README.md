@@ -6,9 +6,10 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 <p align="center">
     <br>
-    <img src="examples/OFA_logo_tp.svg" width="150" />
+    <img src="examples/OFA_logo_tp_path.svg" width="150" />
     <br>
 <p>
+<br>
 <p align="center">
     <a href="https://github.com/huggingface/transformers/blob/master/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/huggingface/transformers.svg?color=blue">
@@ -35,39 +36,53 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 
-OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
-(e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
-to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [OFA: Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
+OFA is a unified sequence-to-sequence pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks (**finetuning** and **prompt tuning** are supported):
+* **Image Captioning** (e.g., Microsoft COCO Caption, see [Leaderboard](https://competitions.codalab.org/competitions/3221#results))
+* **Visual Question Answering** (e.g., [VQA 2.0](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278))
+* **Referring Expression Comprehension** (e.g., [RefCOCO](https://paperswithcode.com/sota/referring-expression-comprehension-on-refcoco), [RefCOCO+](https://paperswithcode.com/sota/referring-expression-comprehension-on-refcoco-1), and [RefCOCOg](https://paperswithcode.com/sota/referring-expression-comprehension-on-1))
+* **Visual Entailment** (e.g., [SNLI-VE](https://paperswithcode.com/sota/visual-entailment-on-snli-ve-test))
+* **Text-to-Image Generation** (e.g., MSCOCO)
+* **Text Classification** (e.g., GLUE) and **Text Generation** (e.g., [text summarization](https://paperswithcode.com/sota/text-summarization-on-gigaword))
+* **Image Classification** (e.g., [ImageNet](https://paperswithcode.com/sota/self-supervised-image-classification-on-1))
+* ......
     
-We welcome contributions to our project. Feel free to contact us or send us issues/PRs!
+In this doc, we provide: 
+* **Step-by-step** instructions for **pretraining** and **finetuning** (including almost **all tasks** presented in the paper);
+* **Pretrained** and **finetuned** checkpoints (check [official ckpt](checkpoints.md) or [huggingface ckpt](https://huggingface.co/OFA-Sys) for what you need for what you need), and model cards with experimental results;
+* ......
+
+We sincerely welcome contributions to our project. Feel free to contact us or send us issues / PRs!
 <br></br>
 
 
 # Online Demos
 We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
-* [Generic Interface](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)
 * [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
-* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
 * [Visual Grounding](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)
 * [Visual Question Answering](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)
+* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
+* [Generic Interface](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)
 
 Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
 <br></br>
 
 
 # News 
+* 2022.8.5: Released support of **prompt tuning** for OFA (temporarily maintained at `feature/prompt_tuning`). Check our paper [here](https://arxiv.org/abs/2208.02532)!
+* 2022.7.7: Updated support of OFA on **huggingface transformers** (fixed bugs in forward, add sequence generator from Fairseq to ensure performance, etc.). Refer to the doc [transformers.md](transformers.md) and the branch `feature/add_transformers`. 
+* 2022.6.17: Released the pretrained checkpoint of **OFA-Huge**. To use it, set `--arch=ofa_huge` in the script.
 * 2022.5.15: OFA was accepted by **ICML 2022**
 * 2022.4.28: Add support of inference on **huggingface transformers**. For how to use it, please refer to the doc [transformers.md](transformers.md) and our [huggingface models](https://huggingface.co/OFA-Sys). 
 * 2022.4.16: Released lightweight pretrained models **OFA-Medium** (~93M params) and **OFA-Tiny** (~33M params) in [checkpoints.md](checkpoints.md). To use them, you just need to load the corresponding checkpoint and set `--arch=ofa_medium` or `--arch=ofa_tiny` in the scripts.
 * 2022.3.23: Added [Encouraging Loss](https://arxiv.org/pdf/2110.06537.pdf) as a feature. See [README_EncouragingLoss.md](README_EncouragingLoss.md). Leveraging this feature, OFA-Large has achieved improved results in both VQA (**test-std acc: 80.67**) and Image Classification (**test acc: 85.6**) recently.
-* 2022.3.21: Released codes for pretraining OFA.
-* 2022.3.18: Released the finetuned **OFA-Base** (~180M parameters) checkpoints and running scripts for vision & language tasks, including: **Caption (146.4 CIDEr), VQA (78.07 on test-std), SNLI-VE (89.3 on dev), RefCOCO (90.67 on testA), RefCOCO+ (87.15 on testA) and RefCOCOg (82.31 on test-u)** .
-* 2022.3.11: Released the finetuning & inference code/checkpoints for **Gigaword**.
-* 2022.3.08: Released the pretrained checkpoint of **OFA-Base** in [checkpoints.md](checkpoints.md). To use OFA-Base, you just need to load `ofa_base.pt` and change `--arch=ofa_large` to `--arch=ofa_base` in the training scripts.
 <details>
     <summary><b>More News</b></summary>
     <p>
         <ul>
+            <li>2022.3.21: Released codes for pretraining OFA.</li>
+            <li>2022.3.18: Released the finetuned <b>OFA-Base</b> (~180M parameters) checkpoints and running scripts for vision & language tasks, including: <b>Caption (146.4 CIDEr), VQA (78.07 on test-std), SNLI-VE (89.3 on dev), RefCOCO (90.67 on testA), RefCOCO+ (87.15 on testA) and RefCOCOg (82.31 on test-u)</b>.</li>
+            <li>2022.3.11: Released the finetuning & inference code/checkpoints for <b>Gigaword</b>.</li>
+            <li>2022.3.08: Released the pretrained checkpoint of <b>OFA-Base</b> in <a href="https://github.com/OFA-Sys/OFA/blob/main/checkpoints.md">checkpoints.md</a>. To use OFA-Base, you just need to load <code>ofa_base.pt</code> and change <code>--arch=ofa_large</code> to <code>--arch=ofa_base</code> in the training scripts.</li>
             <li>2022.3.07: Released the finetuning & inference code/checkpoints for <b>Image Classification</b>, which achieves <b>85.0</b> accuracy on ImageNet-1K, slightly better than reported in OFA paper.</li>
             <li>2022.3.04: Released the finetuning & inference code/checkpoints for <b>Text-to-Image Generation</b>.</li>
             <li>2022.3.03: Released the finetuning & inference code/checkpoints for <b>SNLI-VE</b> and <b>GLUE</b>.</li>
@@ -100,7 +115,7 @@ We list the parameters and pretrained checkpoints of OFAs below. For finetuned c
         <td>OFA<sub>Large</sub></td><td><a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_large.pt">Download</a></td><td>470M</td><td>ResNet152</td><td>1024</td></td><td>4096</td><td>16</td><td>12</td><td>12</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Huge</sub></td><td>-</td><td>930M</td><td>ResNet152</td><td>1280</td></td><td>5120</td><td>16</td><td>24</td><td>12</td>
+        <td>OFA<sub>Huge</sub></td><td><a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_huge.pt">Download</a></td><td>930M</td><td>ResNet152</td><td>1280</td></td><td>5120</td><td>16</td><td>24</td><td>12</td>
     </tr>
 </table>
 <br></br>
@@ -122,10 +137,10 @@ Below we demonstrate the results of OFAs on cross-modal understanding and genera
         <td>Metric</td><td>CIDEr</td><td>Acc.</td><td>Acc.</td><td colspan="3">Acc.</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Tiny</sub></td><td>117.5 / 128.4</td><td>70.3 / 70.4</td><td>85.3 / 85.2</td><td>80.20 / 84.07 / 75.00</td><td>68.22 / 75.13 / 57.66</td><td>72.02 / 69.74</td>
+        <td>OFA<sub>Tiny</sub></td><td>119.0 / 128.7</td><td>70.3 / 70.4</td><td>85.3 / 85.2</td><td>80.20 / 84.07 / 75.00</td><td>68.22 / 75.13 / 57.66</td><td>72.02 / 69.74</td>
     </tr>
     <tr align="center">
-        <td>OFA<sub>Medium</sub></td><td>132.4 / 140.3</td><td>75.4 / 75.5</td><td>86.6 / 87.0</td><td>85.34 / 87.68 / 77.92</td><td>76.09 / 83.04 / 66.25</td><td>78.76 / 78.58</td>
+        <td>OFA<sub>Medium</sub></td><td>130.4 / 140.3</td><td>75.4 / 75.5</td><td>86.6 / 87.0</td><td>85.34 / 87.68 / 77.92</td><td>76.09 / 83.04 / 66.25</td><td>78.76 / 78.58</td>
     </tr>
     <tr align="center">
         <td>OFA<sub>Base</sub></td><td>138.2 / 146.7</td><td>78.0 / 78.1</td><td>89.3 / 89.2</td><td>88.48 / 90.67 / 83.30</td><td>81.39 / 87.15 / 74.29</td><td>82.29 / 82.31</td>
@@ -157,45 +172,8 @@ pip install -r requirements.txt
 See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
 <br></br>
 
-# Pretraining
-Below we provide methods for pretraining OFA.
-
-<details>
-    <summary><b>1. Prepare the Dataset</b></summary>
-    <p>
-        To pretrain OFA, you should first download the dataset we provide (<a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/pretrain_data/pretrain_data_examples.zip">pretrain_data_examples.zip</a>, a small subset of the original pretraining data). For your customed pretraining datasets, please prepare your training samples into the same format. <code>pretrain_data_examples.zip</code> contains 4 TSV files: <code>vision_language_examples.tsv</code>, <code>text_examples.tsv</code>, <code>image_examples.tsv</code> and <code>detection_examples.tsv</code>. Details of these files are as follows: 
-        <br />
-        <ul type="circle">
-            <li><b>vision_language_examples.tsv</b>:
-    Each line contains uniq-id, image (base64 string), caption, question, answer, ground-truth objects (objects appearing in the caption or question), dataset name (source of the data) and task type (caption, qa or visual gronunding). Prepared for the pretraining tasks of visual grounding, grounded captioning, image-text matching, image captioning and visual question answering. </li>
-            <li><b>text_examples.tsv</b>: Each line contains uniq-id and text. Prepared for the pretraining task of text infilling. </li> 
-            <li><b>image_examples.tsv</b>: Each line contains uniq-id, image (base64 string) and image-code (generated by VQ-GAN). Prepared for the pretraining task of image infilling. </li>
-            <li><b>detection_examples.tsv</b>: Each line contains uniq-id, image (base64 string) and bounding box annotations (contains the top-left and bottom-right coordinates of the bounding box, object_id and object_name, seperated by commas). Prepared for the pretraining task of detection. </li>
-        </ul>
-        In addition, the folder negative_sample in pretrain_data_examples.zip contains three files <code>all_captions.txt</code>, <code>object.txt</code> and <code>type2ans.json</code>. The data in these files are used as negative samples for the image-text matching (ITM) task.
-    </p>
-</details>
-<details>
-    <summary><b>2. Pretraining</b></summary>
-    <p>
-        By default, the pretraining script will attempt to restore the released pretrained checkpoints of OFA-Base or OFA-Large and perform continuous pretraining. Continuous pretraining is more recommended, which achieves much better results compared with pretraining from scratch. For continuous pretraining, please download the pretrained weights in advance (see <a href='checkpoints.md'>checkpoints.md</a>) and put them in the correct directory <code>OFA/checkpoints/</code>. If not, the pretraining will begin from scratch.
-    </p>
-<pre>
-cd run_scripts/pretraining
-bash pretrain_ofa_large.sh # Pretrain OFA-Large. For OFA-Base, use pretrain_ofa_base.sh
-</pre>
-    <p>
-        If the pretrained OFA checkpoint is restored successfully, you will see the following information in the log:
-    </p>
-<pre>
-INFO: Loaded checkpoint ../../checkpoints/ofa_large.pt
-</pre>
-</details>
-
-<br></br>
-
-# Finetuning & Inference
-Below we provide methods for finetuning and inference on different downstream tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts mentioned in this section are prepared for OFA-Large. For reproducing the downstreaming results of OFA-Base, we have also provided the corresponding finetuning and inference scripts for OFA-Base in the `run_scripts/` folder.
+# Training & Inference
+Below we provide methods for training and inference on different tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts mentioned in this section are prepared for OFA-Large. For reproducing the downstreaming results of OFA-Base, we have also provided the corresponding finetuning and inference scripts for OFA-Base in the `run_scripts/` folder.
 
 We recommend that your workspace directory should be organized like this: 
 ```
@@ -219,6 +197,58 @@ OFA/
 ├── trainer.py
 └── utils/
 ```
+
+
+## Image Processing
+To ensure the efficiency of processing data, we did not store images with small files, but instead we encode them to base64 strings.
+Transforming image files to base64 strings is simple. Run the following code:
+```python
+from PIL import Image
+from io import BytesIO
+import base64
+
+img = Image.open(file_name) # path to file
+img_buffer = BytesIO()
+img.save(img_buffer, format=img.format)
+byte_data = img_buffer.getvalue()
+base64_str = base64.b64encode(byte_data) # bytes
+base64_str = base64_str.decode("utf-8") # str
+```
+
+## Pretraining
+Below we provide methods for pretraining OFA.
+
+<details>
+    <summary><b>1. Prepare the Dataset</b></summary>
+    <p>
+        To pretrain OFA, you should first download the dataset we provide (<a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/pretrain_data/pretrain_data_examples.zip">pretrain_data_examples.zip</a>, a small subset of the original pretraining data). For your customed pretraining datasets, please prepare your training samples into the same format. <code>pretrain_data_examples.zip</code> contains 4 TSV files: <code>vision_language_examples.tsv</code>, <code>text_examples.tsv</code>, <code>image_examples.tsv</code> and <code>detection_examples.tsv</code>. Details of these files are as follows: 
+        <br />
+        <ul type="circle">
+            <li><b>vision_language_examples.tsv</b>:
+    Each line contains uniq-id, image (base64 string), caption, question, answer, ground-truth objects (objects appearing in the caption or question), dataset name (source of the data) and task type (caption, qa or visual gronunding). Prepared for the pretraining tasks of visual grounding, grounded captioning, image-text matching, image captioning and visual question answering. </li>
+            <li><b>text_examples.tsv</b>: Each line contains uniq-id and text. Prepared for the pretraining task of text infilling. </li> 
+            <li><b>image_examples.tsv</b>: Each line contains uniq-id, image (base64 string, should be resized to 256*256 resolution) and image-code (generate the sparse codes for the central part of image through VQ-GAN). Prepared for the pretraining task of image infilling. </li>
+            <li><b>detection_examples.tsv</b>: Each line contains uniq-id, image (base64 string) and bounding box annotations (contains the top-left and bottom-right coordinates of the bounding box, object_id and object_name, seperated by commas). Prepared for the pretraining task of detection. </li>
+        </ul>
+        In addition, the folder negative_sample in pretrain_data_examples.zip contains three files <code>all_captions.txt</code>, <code>object.txt</code> and <code>type2ans.json</code>. The data in these files are used as negative samples for the image-text matching (ITM) task.
+    </p>
+</details>
+<details>
+    <summary><b>2. Pretraining</b></summary>
+    <p>
+        By default, the pretraining script will attempt to restore the released pretrained checkpoints of OFA-Base or OFA-Large and perform continuous pretraining. Continuous pretraining is more recommended, which achieves much better results compared with pretraining from scratch. For continuous pretraining, please download the pretrained weights in advance (see <a href='checkpoints.md'>checkpoints.md</a>) and put them in the correct directory <code>OFA/checkpoints/</code>. If not, the pretraining will begin from scratch.
+    </p>
+<pre>
+cd run_scripts/pretraining
+bash pretrain_ofa_large.sh # Pretrain OFA-Large. For OFA-Base, use pretrain_ofa_base.sh
+</pre>
+    <p>
+        If the pretrained OFA checkpoint is restored successfully, you will see the following information in the log:
+    </p>
+<pre>
+INFO: Loaded checkpoint ../../checkpoints/ofa_large.pt
+</pre>
+</details>
 
 ## Image Captioning
 We provide procedures to reproduce our results of image captioning on our paper below.
@@ -423,7 +453,7 @@ nohup sh train_snli_ve.sh > train_snli_ve.out &  # finetune for snli_ve
         Run the following command to obtain the results.
     </p>
 <pre>
-cd run_scripts/snli_ve ; sh evaluate_snli_ve.sh  # inference & evaluate for snli_ve
+cd run_scripts/snli_ve ; sh evaluate_snli_ve.sh dev  # specify 'dev' or 'test'
 </pre>
 </details>
    

@@ -81,6 +81,11 @@ class SummaryDataset(OFADataset):
         self.num_bins = num_bins
         self.noise_ratio = noise_ratio
 
+        if type(bpe).__name__ == 'GPT2BPE':
+            self.prompt = ' what is the summary of article " {} "?'
+        elif type(bpe).__name__ == 'BertBPE':
+            self.prompt = "{} 请用一个句子简单总结上文："
+
     def __getitem__(self, index):
         source, target = self.dataset[index]
         target_str = target.lower()
@@ -91,10 +96,10 @@ class SummaryDataset(OFADataset):
         target = target.replace('<unk>', 'unk')
 
         src_item = self.encode_text(
-            ' what is the summary of article " {} "?'.format(source),
+            self.prompt.format(source),
             length=self.max_src_length
         )
-        tgt_item = self.encode_text(' {}'.format(target))
+        tgt_item = self.encode_text('{}'.format(target))
         noise_tgt_item = self.add_noise_to_tgt(tgt_item.clone(), self.noise_ratio)
 
         src_item = torch.cat([self.bos_item, src_item, self.eos_item])
