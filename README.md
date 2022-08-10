@@ -10,22 +10,10 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
     <br>
 <p>
 <br>
-<p align="center">
-    <a href="https://github.com/huggingface/transformers/blob/master/LICENSE">
-        <img alt="GitHub" src="https://img.shields.io/github/license/huggingface/transformers.svg?color=blue">
-    </a>
-    <a href="https://huggingface.co/ofa-sys">
-        <img alt="spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue">
-    </a>
-    <a href="colab.md"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="DOI"></a>
-</p>
 
-<h4 align="center">
-    <p>
-        <a href="http://arxiv.org/abs/2202.03052">Paper</a> |
-        <b>Blog</b>
-    <p>
-</h4>
+<p align="center">
+        <a href="checkpoint.md">Checkpoints</a>&nbsp ｜ &nbsp<a href="colab.md">Colab</a>&nbsp ｜ &nbsp<a href="https://huggingface.co/ofa-sys">Demo</a>&nbsp ｜ &nbsp<a href="http://arxiv.org/abs/2202.03052">Paper </a>&nbsp ｜ &nbspBlog
+</p>
 <br></br>
 
 <p align="center">
