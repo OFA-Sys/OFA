@@ -36,20 +36,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 
-OFA is a unified sequence-to-sequence pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks (**finetuning** and **prompt tuning** are supported):
-* **Image Captioning** (e.g., Microsoft COCO Caption, see [Leaderboard](https://competitions.codalab.org/competitions/3221#results))
-* **Visual Question Answering** (e.g., [VQA 2.0](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278))
-* **Referring Expression Comprehension** (e.g., [RefCOCO](https://paperswithcode.com/sota/referring-expression-comprehension-on-refcoco), [RefCOCO+](https://paperswithcode.com/sota/referring-expression-comprehension-on-refcoco-1), and [RefCOCOg](https://paperswithcode.com/sota/referring-expression-comprehension-on-1))
-* **Visual Entailment** (e.g., [SNLI-VE](https://paperswithcode.com/sota/visual-entailment-on-snli-ve-test))
-* **Text-to-Image Generation** (e.g., MSCOCO)
-* **Text Classification** (e.g., GLUE) and **Text Generation** (e.g., [text summarization](https://paperswithcode.com/sota/text-summarization-on-gigaword))
-* **Image Classification** (e.g., [ImageNet](https://paperswithcode.com/sota/self-supervised-image-classification-on-1))
-* ......
-    
-In this doc, we provide: 
-* **Step-by-step** instructions for **pretraining** and **finetuning** (including almost **all tasks** presented in the paper);
-* **Pretrained** and **finetuned** checkpoints (check [official ckpt](checkpoints.md) or [huggingface ckpt](https://huggingface.co/OFA-Sys) for what you need for what you need), and model cards with experimental results;
-* ......
+OFA is a unified sequence-to-sequence pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks (**finetuning** and **prompt tuning** are supported): image captioning (1st at the [MSCOCO Leaderboard](https://competitions.codalab.org/competitions/3221#results)), VQA ([link](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278)), visual grounding, text-to-image generation, text classification, text generation, image classification, etc. We provide **step-by-step** instructions for pretraining and finetuning and corresponding checkpoints (check [official ckpt](checkpoints.md) or [huggingface ckpt](https://huggingface.co/OFA-Sys).
 
 We sincerely welcome contributions to our project. Feel free to contact us or send us issues / PRs!
 <br></br>
