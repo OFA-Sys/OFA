@@ -13,7 +13,7 @@ pip install OFA/transformers/
 git clone https://huggingface.co/OFA-Sys/OFA-tiny 
 ```
 
-After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the testing example below. Also, ensure that you have pillow and torchvision in your environment. 
+After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the testing example below. Also, ensure that you have pillow and torchvision in your environment. Check if there is the directory `generate` in your model directory `transformers/src/transformers/models/ofa` to ensure that you can use the sequence generator that we provide. 
 
 ```
 >>> from PIL import Image
