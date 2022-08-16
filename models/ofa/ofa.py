@@ -425,7 +425,7 @@ def ofa_medium_architecture(args):
 
 
 @register_model_architecture("ofa", "ofa_tiny")
-def ofa_medium_architecture(args):
+def ofa_tiny_architecture(args):
     args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 256)
     args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4 * 256)
     args.encoder_layers = getattr(args, "encoder_layers", 4)
