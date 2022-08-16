@@ -8,12 +8,13 @@ export GPUS_PER_NODE=1
 
 user_dir=../../ofa_module
 bpe_dir=../../utils/BERT_CN_dict
-selected_cols=0,3,1,2
+selected_cols=0,3,1,2   # make sure that you index "id, image, text, box"
 
-data=../../dataset/refcoco_cn_data/refcoco+_test_sample.tsv
+data=../../dataset/refcoco_cn_data/refcoco+_val.tsv
 path=../../checkpoints/refcocoplus_cn_large.pt
 result_path=../../results/refcoco
-split='refcoco_val'
+split='refcoco+_val'
+
 python3 ../../evaluate.py \
     ${data} \
     --path=${path} \
