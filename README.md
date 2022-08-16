@@ -12,7 +12,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 <br>
 
 <p align="center">
-        <a href="checkpoint.md">Checkpoints</a>&nbsp ｜ &nbsp<a href="colab.md">Colab</a>&nbsp ｜ &nbsp<a href="https://huggingface.co/ofa-sys">Demo</a>&nbsp ｜ &nbsp<a href="http://arxiv.org/abs/2202.03052">Paper </a>&nbsp ｜ &nbspBlog
+        <a href="checkpoints.md">Checkpoints</a>&nbsp ｜ &nbsp<a href="colab.md">Colab</a>&nbsp ｜ &nbsp<a href="https://huggingface.co/ofa-sys">Demo</a>&nbsp ｜ &nbsp<a href="http://arxiv.org/abs/2202.03052">Paper </a>&nbsp ｜ &nbspBlog
 </p>
 
 <p align="center">
