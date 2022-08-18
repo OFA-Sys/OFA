@@ -916,8 +916,8 @@ class TransformerEncoder(FairseqEncoder):
             else:
                 prompt_kv = None 
             x = layer(
-                x, encoder_padding_mask=encoder_padding_mask if has_pads else None, \
-                    self_attn_bias=self_attn_bias, prompt_kv=prompt_kv)
+                x, encoder_padding_mask = encoder_padding_mask if has_pads else None, \
+                    self_attn_bias = self_attn_bias, prompt_kv=prompt_kv)
             if return_all_hiddens:
                 assert encoder_states is not None
                 encoder_states.append(x)
@@ -1240,7 +1240,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
 
     def build_decoder_layer(self, args, no_encoder_attn=False, drop_path_rate=0.0):
         layer = TransformerDecoderLayer(args, no_encoder_attn, drop_path_rate = \
-            drop_path_rate,use_adapter=getattr(args, "adapter", False), adapter_dim = getattr(args, "adapter_dim", 200))
+            drop_path_rate, use_adapter = getattr(args, "adapter", False), adapter_dim = getattr(args, "adapter_dim", 200))
         checkpoint = getattr(args, "checkpoint_activations", False)
         if checkpoint:
             offload_to_cpu = getattr(args, "offload_activations", False)
