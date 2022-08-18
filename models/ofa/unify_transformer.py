@@ -915,8 +915,7 @@ class TransformerEncoder(FairseqEncoder):
                         prompt_kv = None
             else:
                 prompt_kv = None 
-            x = layer(
-                x, encoder_padding_mask = encoder_padding_mask if has_pads else None, \
+            x = layer(x, encoder_padding_mask = encoder_padding_mask if has_pads else None, \
                     self_attn_bias = self_attn_bias, prompt_kv = prompt_kv)
             if return_all_hiddens:
                 assert encoder_states is not None
