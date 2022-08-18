@@ -122,7 +122,7 @@ class TransformerEncoderLayer(nn.Module):
         args (argparse.Namespace): parsed command-line arguments
     """
 
-    def __init__(self, args, drop_path_rate=0.0,use_adapter=False,adapter_dim=200):
+    def __init__(self, args, drop_path_rate = 0.0, use_adapter = False, adapter_dim = 200):
         super().__init__()
         self.args = args
         self.use_adapter = use_adapter
