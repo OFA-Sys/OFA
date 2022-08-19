@@ -497,13 +497,13 @@ class TransformerEncoder(FairseqEncoder):
   
         if getattr(args, "encoder_prompt", False):
             self.encoder_prompt_encoder = PromptEncoder(
-                type=args.encoder_prompt_type,
-                length=args.encoder_prompt_length,
-                projection=args.encoder_prompt_projection,
-                embed_dim=args.encoder_embed_dim,
-                proj_dim=args.encoder_prompt_dim,
-                layers=args.encoder_layers,
-                vocab_size=args.vocab_size)
+                type = args.encoder_prompt_type,
+                length = args.encoder_prompt_length,
+                projection = args.encoder_prompt_projection,
+                embed_dim = args.encoder_embed_dim,
+                proj_dim = args.encoder_prompt_dim,
+                layers = args.encoder_layers,
+                vocab_size = args.vocab_size)
         self.encoder_dropout = nn.Dropout(p=0.2)
         
         self.dropout_module = FairseqDropout(
@@ -1074,13 +1074,13 @@ class TransformerDecoder(FairseqIncrementalDecoder):
 
         if getattr(args, "decoder_prompt", False):
             self.decoder_prompt_encoder = PromptEncoder(
-                type=args.decoder_prompt_type,
-                length=args.decoder_prompt_length,
-                projection=args.decoder_prompt_projection,
-                embed_dim=args.decoder_embed_dim,
-                proj_dim=args.decoder_prompt_dim,
-                layers=args.decoder_layers,
-                vocab_size=args.vocab_size)
+                type = args.decoder_prompt_type,
+                length = args.decoder_prompt_length,
+                projection = args.decoder_prompt_projection,
+                embed_dim = args.decoder_embed_dim,
+                proj_dim = args.decoder_prompt_dim,
+                layers = args.decoder_layers,
+                vocab_size = args.vocab_size)
             self.decoder_dropout = nn.Dropout(p=0.2)
 
         self.dropout_module = FairseqDropout(
@@ -1474,7 +1474,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         if self.cross_self_attention or prev_output_tokens.eq(self.padding_idx).any():
             self_attn_padding_mask = prev_output_tokens.eq(self.padding_idx)
             if prompt_padding_mask is not None:
-                self_attn_padding_mask = torch.cat([prompt_padding_mask, self_attn_padding_mask], dim=1)
+                self_attn_padding_mask = torch.cat([prompt_padding_mask, self_attn_padding_mask], dim = 1)
 
         # decoder layers
         attn: Optional[Tensor] = None
@@ -1517,13 +1517,13 @@ class TransformerDecoder(FairseqIncrementalDecoder):
                 enc,
                 padding_mask,
                 incremental_state,
-                self_attn_mask=self_attn_mask,
-                self_attn_padding_mask=self_attn_padding_mask,
-                need_attn=bool((idx == alignment_layer)),
-                need_head_weights=bool((idx == alignment_layer)),
-                self_attn_bias=self_attn_bias,
-                cross_attn_bias=cross_abs_pos_bias,
-                prompt_kv=prompt_kv
+                self_attn_mask = self_attn_mask,
+                self_attn_padding_mask = self_attn_padding_mask,
+                need_attn = bool((idx == alignment_layer)),
+                need_head_weights = bool((idx == alignment_layer)),
+                self_attn_bias = self_attn_bias,
+                cross_attn_bias = cross_abs_pos_bias,
+                prompt_kv = prompt_kv
             )
             inner_states.append(x)
             if layer_attn is not None and idx == alignment_layer:

@@ -257,14 +257,14 @@ class TransformerEncoderLayer(nn.Module):
         if self.normalize_before:
             x = self.self_attn_layer_norm(x)
         x, _ = self.self_attn(
-            query=x,
-            key=x,
-            value=x,
-            key_padding_mask=encoder_padding_mask,
-            need_weights=False,
-            attn_mask=attn_mask,
-            attn_bias=self_attn_bias,
-            prompt_kv=prompt_kv
+            query = x,
+            key = x,
+            value = x,
+            key_padding_mask = encoder_padding_mask,
+            need_weights = False,
+            attn_mask = attn_mask,
+            attn_bias = self_attn_bias,
+            prompt_kv = prompt_kv
         )
         if self.attn_ln is not None:
             x = self.attn_ln(x)
@@ -283,7 +283,7 @@ class TransformerEncoderLayer(nn.Module):
         x = self.fc2(x)
         x = self.dropout_module(x)
         if self.use_adapter:
-            x=self.adapter(x)
+            x = self.adapter(x)
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
         x = self.residual_connection(x, residual)
@@ -316,7 +316,7 @@ class TransformerDecoderLayer(nn.Module):
         self.embed_dim = args.decoder_embed_dim
         self.use_adapter = use_adapter
         if use_adapter == True:
-            self.adapter = Adapter_Layer(d_model=self.embed_dim,down_size=adapter_dim)
+            self.adapter = Adapter_Layer(d_model = self.embed_dim, down_size = adapter_dim)
         self.dropout_module = FairseqDropout(
             args.dropout, module_name=self.__class__.__name__
         )
@@ -499,15 +499,15 @@ class TransformerDecoderLayer(nn.Module):
             y = x
 
         x, attn = self.self_attn(
-            query=x,
-            key=y,
-            value=y,
-            key_padding_mask=self_attn_padding_mask,
-            incremental_state=incremental_state,
-            need_weights=False,
-            attn_mask=self_attn_mask,
-            attn_bias=self_attn_bias,
-            prompt_kv=prompt_kv
+            query = x,
+            key = y,
+            value = y,
+            key_padding_mask = self_attn_padding_mask,
+            incremental_state = incremental_state,
+            need_weights = False,
+            attn_mask = self_attn_mask,
+            attn_bias = self_attn_bias,
+            prompt_kv = prompt_kv
         )
         if self.self_attn_ln is not None:
             x = self.self_attn_ln(x)
@@ -560,7 +560,7 @@ class TransformerDecoderLayer(nn.Module):
         x = self.fc2(x)
         x = self.dropout_module(x)
         if self.use_adapter == True:
-            x=self.adapter(x)
+            x = self.adapter(x)
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
         x = self.residual_connection(x, residual)
