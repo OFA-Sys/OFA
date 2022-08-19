@@ -81,6 +81,48 @@ def make_image_bucket_position(bucket_size, num_relative_distance):
     return relative_position_index
 
 
+class PromptEncoder(torch.nn.Module):
+    r"""
+    Prompt encoder to generate prompts, including prompt, prefix, instance and instruction
+    """
+
+    def __init__(
+            self,
+            type,
+            length,
+            projection,
+            embed_dim,
+            proj_dim,
+            layers,
+            vocab_size):
+        super().__init__()
+        self.prefix_projection = projection
+
+        if type == "prefix":
+            layers = layers
+            prompt_vocab_size = length
+
+        if self.prefix_projection:
+            self.embedding = torch.nn.Embedding(prompt_vocab_size, embed_dim)
+            self.trans = torch.nn.Sequential(
+                torch.nn.Linear(embed_dim, proj_dim),
+                torch.nn.ReLU(),
+                torch.nn.Linear(proj_dim, layers * 2 * embed_dim)
+            )
+        else:
+            if type == "prefix":
+                self.embedding = torch.nn.Embedding(
+                    prompt_vocab_size, layers * 2 * embed_dim)
+
+    def forward(self, prefix: torch.Tensor):
+        if self.prefix_projection:
+            prefix_tokens = self.embedding(prefix)
+            past_key_values = self.trans(prefix_tokens)
+        else:
+            past_key_values = self.embedding(prefix)
+        return past_key_values
+
+
 @register_model("unify_transformer")
 class TransformerModel(FairseqEncoderDecoderModel):
     """
@@ -131,6 +173,28 @@ class TransformerModel(FairseqEncoderDecoderModel):
                             help='apply layernorm before each encoder block')
         parser.add_argument('--encoder-learned-pos', action='store_true',
                             help='use learned positional embeddings in the encoder')
+        parser.add_argument('--bitfit', default=False, action='store_true',
+                            help='use bitfit in the transformer')
+        parser.add_argument('--freeze-encoder', action='store_true',
+                            help='freeze the parameters in the encoder')
+
+
+        parser.add_argument('--adapter', action='store_true',
+                            help='use adapter in the model')
+        parser.add_argument('--adapter-dim', type=int, metavar='N',
+                            help='adapter-down-dim')
+
+        parser.add_argument('--encoder-prompt', action='store_true',
+                            help='use prompt tuning in the encoder')
+        parser.add_argument('--encoder-prompt-type', type=str, metavar='STR',
+                            choices=['prefix'],
+                            help='the type of prompt tuning')
+        parser.add_argument('--encoder-prompt-projection', action='store_true',
+                            help='use prompt projection')
+        parser.add_argument('--encoder-prompt-length', type=int, metavar='N',
+                            help='use prompt tuning in the decoder')
+        parser.add_argument('--encoder-prompt-dim', type=int, metavar='N',
+                            help='encoder prompt dimension if use encoder prompt projection')
         parser.add_argument('--decoder-embed-path', type=str, metavar='STR',
                             help='path to pre-trained decoder embedding')
         parser.add_argument('--decoder-embed-dim', type=int, metavar='N',
@@ -148,6 +212,20 @@ class TransformerModel(FairseqEncoderDecoderModel):
         parser.add_argument('--decoder-output-dim', type=int, metavar='N',
                             help='decoder output dimension (extra linear layer '
                                  'if different from decoder embed dim')
+        parser.add_argument('--freeze-decoder', action='store_true',
+                            help='freeze the parameters in the decoder')
+
+        parser.add_argument('--decoder-prompt', action='store_true',
+                            help='use prompt tuning in the decoder')
+        parser.add_argument('--decoder-prompt-type', type=str, metavar='STR',
+                            choices=['prefix'],
+                            help='the type of prompt tuning')
+        parser.add_argument('--decoder-prompt-length', type=int, metavar='N',
+                            help='use prompt tuning in the decoder')
+        parser.add_argument('--decoder-prompt-projection', action='store_true',
+                            help='use prompt projection')
+        parser.add_argument('--decoder-prompt-dim', type=int, metavar='N',
+                            help='decoder prompt dimension if use decoder prompt projection')
         parser.add_argument('--share-decoder-input-output-embed', action='store_true',
                             help='share decoder input and output embeddings')
         parser.add_argument('--share-all-embeddings', action='store_true',
@@ -299,14 +377,29 @@ class TransformerModel(FairseqEncoderDecoderModel):
             decoder_embed_tokens = cls.build_embedding(
                 args, tgt_dict, args.decoder_embed_dim, args.decoder_embed_path
             )
-        if getattr(args, "freeze_encoder_embedding", False):
+        if getattr(args, "freeze_encoder_embedding", False) or getattr(
+                args, "encoder_prompt", False) or getattr(args, "decoder_prompt", False) or getattr(args, "adapter", False):    
             encoder_embed_tokens.weight.requires_grad = False
-        if getattr(args, "freeze_decoder_embedding", False):
+        if getattr(args, "freeze_decoder_embedding", False) or getattr(
+                args, "encoder_prompt", False) or getattr(args, "decoder_prompt", False) or getattr(args, "adapter", False):    
             decoder_embed_tokens.weight.requires_grad = False
         if getattr(args, "offload_activations", False):
             args.checkpoint_activations = True  # offloading implies checkpointing
         encoder = cls.build_encoder(args, src_dict, encoder_embed_tokens)
         decoder = cls.build_decoder(args, tgt_dict, decoder_embed_tokens)
+        if getattr(args, "encoder_prompt", False) or getattr(
+                args, "decoder_prompt", False):
+            encoder.requires_grad_(False)
+            decoder.requires_grad_(False)
+            if getattr(args, "encoder_prompt", False):
+                encoder.encoder_prompt_encoder.requires_grad_(True)
+            if getattr(args, "decoder_prompt", False):
+                decoder.decoder_prompt_encoder.requires_grad_(True)
+            if getattr(args, "adapter", False):
+                for idx, layer in enumerate(encoder.layers):
+                    layer.adapter.requires_grad_(True)
+                for idx, layer in enumerate(decoder.layers):
+                    layer.adapter.requires_grad_(True)        
         if not args.share_all_embeddings:
             min_params_to_wrap = getattr(
                 args, "min_params_to_wrap", DEFAULT_MIN_PARAMS_TO_WRAP
@@ -321,6 +414,7 @@ class TransformerModel(FairseqEncoderDecoderModel):
         num_embeddings = len(dictionary)
         padding_idx = dictionary.pad()
 
+        args.vocab_size = num_embeddings
         emb = Embedding(num_embeddings, embed_dim, padding_idx)
         # if provided, load from preloaded dictionaries
         if path:
@@ -402,7 +496,18 @@ class TransformerEncoder(FairseqEncoder):
         self.args = args
         super().__init__(dictionary)
         self.register_buffer("version", torch.Tensor([3]))
-
+  
+        if getattr(args, "encoder_prompt", False):
+            self.encoder_prompt_encoder = PromptEncoder(
+                type=args.encoder_prompt_type,
+                length=args.encoder_prompt_length,
+                projection=args.encoder_prompt_projection,
+                embed_dim=args.encoder_embed_dim,
+                proj_dim=args.encoder_prompt_dim,
+                layers=args.encoder_layers,
+                vocab_size=args.vocab_size)
+        self.encoder_dropout = nn.Dropout(p=0.2)
+        
         self.dropout_module = FairseqDropout(
             args.dropout, module_name=self.__class__.__name__
         )
@@ -508,7 +613,8 @@ class TransformerEncoder(FairseqEncoder):
         self.entangle_position_embedding = args.entangle_position_embedding
 
     def build_encoder_layer(self, args, drop_path_rate=0.0):
-        layer = TransformerEncoderLayer(args, drop_path_rate=drop_path_rate)
+        layer = TransformerEncoderLayer(args, drop_path_rate=drop_path_rate, \
+            use_adapter=getattr(args, "adapter", False), adapter_dim=getattr(args, "adapter_dim", 200))
         checkpoint = getattr(args, "checkpoint_activations", False)
         if checkpoint:
             offload_to_cpu = getattr(args, "offload_activations", False)
@@ -581,6 +687,20 @@ class TransformerEncoder(FairseqEncoder):
 
         return image_embed, image_num_patches, image_padding_mask, image_position_ids, image_pos_embed
 
+    def get_encoder_prompt(self, prompt_tokens):
+        past_key_values = self.encoder_prompt_encoder(prompt_tokens)
+        bsz, seqlen, _ = past_key_values.shape
+        past_key_values = past_key_values.view(
+            bsz,
+            seqlen,
+            (self.args.encoder_layers) * 2,
+            self.args.encoder_attention_heads,
+            self.args.encoder_embed_dim // self.args.encoder_attention_heads,
+        )
+        past_key_values = self.encoder_dropout(past_key_values)
+        past_key_values = past_key_values.permute([2, 0, 3, 1, 4]).split(2)
+        return past_key_values
+    
     def forward_embedding(
         self,
         src_tokens,
@@ -721,6 +841,18 @@ class TransformerEncoder(FairseqEncoder):
                   hidden states of shape `(src_len, batch, embed_dim)`.
                   Only populated if *return_all_hiddens* is True.
         """
+        prompt_tokens = None
+        prompt_padding_mask = None
+        prompt_kv_list = None
+        if self.args.encoder_prompt:
+            bsz, seq_len = src_tokens.shape[0], src_tokens.shape[1]
+            if self.args.encoder_prompt_type in ("prefix"):
+                prompt_tokens = torch.arange(
+                    0, self.args.encoder_prompt_length).to(
+                    src_tokens.device)
+                prompt_tokens = prompt_tokens.unsqueeze(0).expand(bsz, -1)
+                prompt_padding_mask = torch.zeros_like(prompt_tokens).to(prompt_tokens.device)
+            prompt_kv_list = self.get_encoder_prompt(prompt_tokens)
         image_embed = None
         image_embed_2 = None
         image_pos_embed = None
@@ -763,10 +895,10 @@ class TransformerEncoder(FairseqEncoder):
             pos_embed = torch.cat([image_pos_embed_2, pos_embed], dim=1)
 
         pos_q = self.pos_q_linear(pos_embed).view(
-            x.size(1), x.size(0), self.num_attention_heads, -1
+            pos_embed.size(0), pos_embed.size(1), self.num_attention_heads, -1
         ).transpose(1, 2) * self.pos_scaling
         pos_k = self.pos_k_linear(pos_embed).view(
-            x.size(1), x.size(0), self.num_attention_heads, -1
+            pos_embed.size(0), pos_embed.size(1), self.num_attention_heads, -1
         ).transpose(1, 2)
         abs_pos_bias = torch.matmul(pos_q, pos_k.transpose(2, 3))
 
@@ -775,6 +907,8 @@ class TransformerEncoder(FairseqEncoder):
         if return_all_hiddens:
             encoder_states.append(x)
 
+        if prompt_padding_mask is not None:
+            encoder_padding_mask = torch.cat([prompt_padding_mask, encoder_padding_mask], dim=1)
         # encoder layers
         for idx, layer in enumerate(self.layers):
             self_attn_bias = abs_pos_bias.clone()
@@ -787,18 +921,27 @@ class TransformerEncoder(FairseqEncoder):
             elif patch_images is not None:
                 self_attn_bias[:, :, :x.size(0) - src_tokens.size(1), :x.size(0) - src_tokens.size(1)] += \
                     self.get_image_rel_pos_bias(image_position_ids, idx)
-            self_attn_bias = self_attn_bias.reshape(-1, x.size(0), x.size(0))
-
-            x = layer(
-                x, encoder_padding_mask=encoder_padding_mask if has_pads else None, self_attn_bias=self_attn_bias
-            )
+            self_attn_bias = self_attn_bias.reshape(-1, self_attn_bias.size(2), self_attn_bias.size(2))
+            if self.args.encoder_prompt:
+                if self.args.encoder_prompt_type != "prompt":
+                    prompt_kv = prompt_kv_list[idx]
+                else:
+                    if idx == 0:
+                        prompt_kv = prompt_kv_list[idx]
+                    else:
+                        prompt_kv = None
+            else:
+                prompt_kv = None 
+            x = layer(x, encoder_padding_mask=encoder_padding_mask if has_pads else None, \
+                    self_attn_bias=self_attn_bias, prompt_kv=prompt_kv)
             if return_all_hiddens:
                 assert encoder_states is not None
                 encoder_states.append(x)
 
         if self.layer_norm is not None:
             x = self.layer_norm(x)
-
+        if self.args.encoder_prompt:
+            encoder_padding_mask = encoder_padding_mask[:, prompt_tokens.size(1):]
         # The Pytorch Mobile lite interpreter does not supports returning NamedTuple in
         # `forward` so we use a dictionary instead.
         # TorchScript does not support mixed values so the values are all lists.
@@ -946,6 +1089,17 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         self.register_buffer("version", torch.Tensor([3]))
         self._future_mask = torch.empty(0)
 
+        if getattr(args, "decoder_prompt", False):
+            self.decoder_prompt_encoder = PromptEncoder(
+                type=args.decoder_prompt_type,
+                length=args.decoder_prompt_length,
+                projection=args.decoder_prompt_projection,
+                embed_dim=args.decoder_embed_dim,
+                proj_dim=args.decoder_prompt_dim,
+                layers=args.decoder_layers,
+                vocab_size=args.vocab_size)
+            self.decoder_dropout = nn.Dropout(p=0.2)
+
         self.dropout_module = FairseqDropout(
             args.dropout, module_name=self.__class__.__name__
         )
@@ -1057,6 +1211,20 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         self.register_buffer("image_position_idx", image_position_idx)
         self.entangle_position_embedding = args.entangle_position_embedding
 
+    def get_decoder_prompt(self, prompt_tokens):
+        past_key_values = self.decoder_prompt_encoder(prompt_tokens)
+        bsz, seqlen, _ = past_key_values.shape
+        past_key_values = past_key_values.view(
+            bsz,
+            seqlen,
+            self.args.decoder_layers * 2,
+            self.args.decoder_attention_heads,
+            self.args.decoder_embed_dim // self.args.decoder_attention_heads,
+        )
+        past_key_values = self.decoder_dropout(past_key_values)
+        past_key_values = past_key_values.permute([2, 0, 3, 1, 4]).split(2)
+        return past_key_values
+
     def build_output_projection(self, args, dictionary, embed_tokens):
         if args.adaptive_softmax_cutoff is not None:
             self.adaptive_softmax = AdaptiveSoftmax(
@@ -1087,7 +1255,8 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             self.layers.insert(((i+1) * args.decoder_layers) // (num_base_layers + 1), BaseLayer(args))
 
     def build_decoder_layer(self, args, no_encoder_attn=False, drop_path_rate=0.0):
-        layer = TransformerDecoderLayer(args, no_encoder_attn, drop_path_rate=drop_path_rate)
+        layer = TransformerDecoderLayer(args, no_encoder_attn, drop_path_rate= \
+            drop_path_rate, use_adapter=getattr(args, "adapter", False), adapter_dim=getattr(args, "adapter_dim", 200))
         checkpoint = getattr(args, "checkpoint_activations", False)
         if checkpoint:
             offload_to_cpu = getattr(args, "offload_activations", False)
@@ -1240,6 +1409,18 @@ class TransformerDecoder(FairseqIncrementalDecoder):
                 - the decoder's features of shape `(batch, tgt_len, embed_dim)`
                 - a dictionary with any model-specific outputs
         """
+        prompt_tokens = None
+        prompt_padding_mask = None
+        prompt_kv_list = None
+        if self.args.decoder_prompt:
+            bsz, seq_len = prev_output_tokens.shape[0], prev_output_tokens.shape[1]
+            if self.args.decoder_prompt_type in ("prefix"):
+                prompt_tokens = torch.arange(
+                    0, self.args.decoder_prompt_length).to(
+                    prev_output_tokens.device)
+                prompt_tokens = prompt_tokens.unsqueeze(0).expand(bsz, -1)
+                prompt_padding_mask = torch.zeros_like(prompt_tokens).to(prompt_tokens.device)
+            prompt_kv_list = self.get_decoder_prompt(prompt_tokens)
         bs, slen = prev_output_tokens.size()
         if alignment_layer is None:
             alignment_layer = self.num_layers - 1
@@ -1309,6 +1490,8 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         self_attn_padding_mask: Optional[Tensor] = None
         if self.cross_self_attention or prev_output_tokens.eq(self.padding_idx).any():
             self_attn_padding_mask = prev_output_tokens.eq(self.padding_idx)
+            if prompt_padding_mask is not None:
+                self_attn_padding_mask = torch.cat([prompt_padding_mask, self_attn_padding_mask], dim=1)
 
         # decoder layers
         attn: Optional[Tensor] = None
@@ -1316,6 +1499,10 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         for idx, layer in enumerate(self.layers):
             if incremental_state is None and not full_context_alignment:
                 self_attn_mask = self.buffered_future_mask(x)
+                if self.args.decoder_prompt:
+                    seq_len, prompt_len = x.size(0), prompt_tokens.size(1)
+                    prompt_mask = torch.zeros([seq_len, prompt_len]).to(x.device)
+                    self_attn_mask = torch.cat([prompt_mask, self_attn_mask], dim=1)
             else:
                 self_attn_mask = None
 
@@ -1331,6 +1518,17 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             if incremental_state is not None:
                 self_attn_bias = self_attn_bias[:, -1:, :]
 
+            if self.args.decoder_prompt:
+                if self.args.decoder_prompt_type != "prompt":
+                    prompt_kv = prompt_kv_list[idx]
+                else:
+                    if idx == 0:
+                        prompt_kv = prompt_kv_list[idx]
+                    else:
+                        prompt_kv = None
+            else:
+                prompt_kv = None
+
             x, layer_attn, _ = layer(
                 x,
                 enc,
@@ -1341,7 +1539,8 @@ class TransformerDecoder(FairseqIncrementalDecoder):
                 need_attn=bool((idx == alignment_layer)),
                 need_head_weights=bool((idx == alignment_layer)),
                 self_attn_bias=self_attn_bias,
-                cross_attn_bias=cross_abs_pos_bias
+                cross_attn_bias=cross_abs_pos_bias,
+                prompt_kv=prompt_kv
             )
             inner_states.append(x)
             if layer_attn is not None and idx == alignment_layer:
@@ -1507,6 +1706,18 @@ def base_architecture(args):
         args, "decoder_output_dim", args.decoder_embed_dim
     )
     args.decoder_input_dim = getattr(args, "decoder_input_dim", args.decoder_embed_dim)
+
+    args.encoder_prompt = getattr(args, "encoder_prompt", False)
+    args.encoder_prompt_length = getattr(args, "encoder_prompt_length", 100)
+    args.encoder_prompt_type = getattr(args, "encoder_prompt_type", "prefix")
+    args.encoder_prompt_projection = getattr(args, "encoder_prompt_projection", False)
+    args.encoder_prompt_dim = getattr(args, "encoder_prompt_dim", 2 * args.encoder_embed_dim)
+
+    args.decoder_prompt = getattr(args, "decoder_prompt", False)
+    args.decoder_prompt_length = getattr(args, "decoder_prompt_length", 100)
+    args.decoder_prompt_type = getattr(args, "decoder_prompt_type", "prefix")
+    args.decoder_prompt_projection = getattr(args, "decoder_prompt_projection", False)
+    args.decoder_prompt_dim = getattr(args, "decoder_prompt_dim", 2 * args.encoder_embed_dim)
 
     args.no_scale_embedding = getattr(args, "no_scale_embedding", False)
     args.layernorm_embedding = getattr(args, "layernorm_embedding", False)
