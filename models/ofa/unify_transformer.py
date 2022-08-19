@@ -915,8 +915,8 @@ class TransformerEncoder(FairseqEncoder):
                         prompt_kv = None
             else:
                 prompt_kv = None 
-            x = layer(x, encoder_padding_mask = encoder_padding_mask if has_pads else None, \
-                    self_attn_bias = self_attn_bias, prompt_kv = prompt_kv)
+            x = layer(x, encoder_padding_mask=encoder_padding_mask if has_pads else None, \
+                    self_attn_bias=self_attn_bias, prompt_kv=prompt_kv)
             if return_all_hiddens:
                 assert encoder_states is not None
                 encoder_states.append(x)
@@ -1238,8 +1238,8 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             self.layers.insert(((i+1) * args.decoder_layers) // (num_base_layers + 1), BaseLayer(args))
 
     def build_decoder_layer(self, args, no_encoder_attn=False, drop_path_rate=0.0):
-        layer = TransformerDecoderLayer(args, no_encoder_attn, drop_path_rate = \
-            drop_path_rate, use_adapter = getattr(args, "adapter", False), adapter_dim = getattr(args, "adapter_dim", 200))
+        layer = TransformerDecoderLayer(args, no_encoder_attn, drop_path_rate= \
+            drop_path_rate, use_adapter=getattr(args, "adapter", False), adapter_dim=getattr(args, "adapter_dim", 200))
         checkpoint = getattr(args, "checkpoint_activations", False)
         if checkpoint:
             offload_to_cpu = getattr(args, "offload_activations", False)
@@ -1474,7 +1474,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         if self.cross_self_attention or prev_output_tokens.eq(self.padding_idx).any():
             self_attn_padding_mask = prev_output_tokens.eq(self.padding_idx)
             if prompt_padding_mask is not None:
-                self_attn_padding_mask = torch.cat([prompt_padding_mask, self_attn_padding_mask], dim = 1)
+                self_attn_padding_mask = torch.cat([prompt_padding_mask, self_attn_padding_mask], dim=1)
 
         # decoder layers
         attn: Optional[Tensor] = None
