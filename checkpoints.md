@@ -1,6 +1,6 @@
 # Checkpoints
 
-We provide links for you to download our checkpoints. We will release all the checkpoints including pretrained and finetuned models on different tasks. 
+We provide links for you to download our checkpoints, including pretrained and finetuned models on different tasks. If you would like to use OFA with Transformers, please download checkpoints at [https://huggingface.co/OFA-Sys](https://huggingface.co/OFA-Sys), and check the code in the branch `feature/add_transformers`. 
 
 ## Pretraining
 * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_huge.pt"> Pre-trained checkpoint (OFA-Huge) </a> (~930M parameters)
