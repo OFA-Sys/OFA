@@ -257,14 +257,14 @@ class TransformerEncoderLayer(nn.Module):
         if self.normalize_before:
             x = self.self_attn_layer_norm(x)
         x, _ = self.self_attn(
-            query = x,
-            key = x,
-            value = x,
-            key_padding_mask = encoder_padding_mask,
-            need_weights = False,
-            attn_mask = attn_mask,
-            attn_bias = self_attn_bias,
-            prompt_kv = prompt_kv
+            query=x,
+            key=x,
+            value=x,
+            key_padding_mask=encoder_padding_mask,
+            need_weights=False,
+            attn_mask=attn_mask,
+            attn_bias=self_attn_bias,
+            prompt_kv=prompt_kv
         )
         if self.attn_ln is not None:
             x = self.attn_ln(x)
@@ -310,13 +310,13 @@ class TransformerDecoderLayer(nn.Module):
     """
 
     def __init__(
-        self, args, no_encoder_attn = False, add_bias_kv = False, add_zero_attn = False, \
-            drop_path_rate = 0.0,use_adapter = False, adapter_dim = 200):
+        self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False, \
+            drop_path_rate=0.0,use_adapter=False, adapter_dim=200):
         super().__init__()
         self.embed_dim = args.decoder_embed_dim
         self.use_adapter = use_adapter
         if use_adapter == True:
-            self.adapter = Adapter_Layer(d_model = self.embed_dim, down_size = adapter_dim)
+            self.adapter = Adapter_Layer(d_model=self.embed_dim, down_size=adapter_dim)
         self.dropout_module = FairseqDropout(
             args.dropout, module_name=self.__class__.__name__
         )
@@ -499,15 +499,15 @@ class TransformerDecoderLayer(nn.Module):
             y = x
 
         x, attn = self.self_attn(
-            query = x,
-            key = y,
-            value = y,
-            key_padding_mask = self_attn_padding_mask,
-            incremental_state = incremental_state,
-            need_weights = False,
-            attn_mask = self_attn_mask,
-            attn_bias = self_attn_bias,
-            prompt_kv = prompt_kv
+            query=x,
+            key=y,
+            value=y,
+            key_padding_mask=self_attn_padding_mask,
+            incremental_state=incremental_state,
+            need_weights=False,
+            attn_mask=self_attn_mask,
+            attn_bias=self_attn_bias,
+            prompt_kv=prompt_kv
         )
         if self.self_attn_ln is not None:
             x = self.self_attn_ln(x)
