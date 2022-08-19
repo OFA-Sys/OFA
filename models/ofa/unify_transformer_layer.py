@@ -128,7 +128,7 @@ class TransformerEncoderLayer(nn.Module):
         self.use_adapter = use_adapter
         self.embed_dim = args.encoder_embed_dim
         if use_adapter:
-            self.adapter = Adapter_Layer(d_model=self.embed_dim,down_size=adapter_dim)
+            self.adapter = Adapter_Layer(d_model = self.embed_dim, down_size = adapter_dim)
         self.quant_noise = getattr(args, 'quant_noise_pq', 0)
         self.quant_noise_block_size = getattr(args, 'quant_noise_pq_block_size', 8) or 8
         self.self_attn = self.build_self_attention(self.embed_dim, args)
@@ -310,8 +310,8 @@ class TransformerDecoderLayer(nn.Module):
     """
 
     def __init__(
-        self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False, drop_path_rate=0.0,use_adapter=False,adapter_dim=200
-    ):
+        self, args, no_encoder_attn = False, add_bias_kv = False, add_zero_attn = False, \
+            drop_path_rate = 0.0,use_adapter = False, adapter_dim = 200):
         super().__init__()
         self.embed_dim = args.decoder_embed_dim
         self.use_adapter = use_adapter
