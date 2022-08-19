@@ -122,13 +122,13 @@ class TransformerEncoderLayer(nn.Module):
         args (argparse.Namespace): parsed command-line arguments
     """
 
-    def __init__(self, args, drop_path_rate = 0.0, use_adapter = False, adapter_dim = 200):
+    def __init__(self, args, drop_path_rate=0.0, use_adapter=False, adapter_dim=200):
         super().__init__()
         self.args = args
         self.use_adapter = use_adapter
         self.embed_dim = args.encoder_embed_dim
         if use_adapter:
-            self.adapter = Adapter_Layer(d_model = self.embed_dim, down_size = adapter_dim)
+            self.adapter = Adapter_Layer(d_model=self.embed_dim, down_size=adapter_dim)
         self.quant_noise = getattr(args, 'quant_noise_pq', 0)
         self.quant_noise_block_size = getattr(args, 'quant_noise_pq_block_size', 8) or 8
         self.self_attn = self.build_self_attention(self.embed_dim, args)
