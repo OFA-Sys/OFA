@@ -311,7 +311,7 @@ class TransformerDecoderLayer(nn.Module):
 
     def __init__(
         self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False, \
-            drop_path_rate=0.0,use_adapter=False, adapter_dim=200):
+            drop_path_rate=0.0, use_adapter=False, adapter_dim=200):
         super().__init__()
         self.embed_dim = args.decoder_embed_dim
         self.use_adapter = use_adapter
