@@ -46,7 +46,7 @@ Below we provide the results of OFA-CN and the baselines for comparison.
 ### [MUGE Caption]("https://tianchi.aliyun.com/muge")
 <table border="1" width="100%">
     <tr align="center">
-        <td>模型</td><td>BLEU@4</td><td>ROUGE-L</td><td>CIDEr-D</td>
+        <td>Model</td><td>BLEU@4</td><td>ROUGE-L</td><td>CIDEr-D</td>
     </tr>
     <tr align="center">
         <td>Trm </td><td>7.33</td><td>51.51</td><td>11.00</td>
