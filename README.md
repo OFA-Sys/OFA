@@ -12,7 +12,7 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 <br>
 
 <p align="center">
-        <a href="checkpoints.md">Checkpoints</a>&nbsp ｜ &nbsp<a href="colab.md">Colab</a>&nbsp ｜ &nbsp<a href="https://huggingface.co/ofa-sys">Demo</a>&nbsp ｜ &nbsp<a href="http://arxiv.org/abs/2202.03052">Paper </a>&nbsp ｜ &nbspBlog
+        <a href="modelscope.md">ModelScope</a>&nbsp ｜ &nbsp<a href="checkpoints.md">Checkpoints</a>&nbsp ｜ &nbsp<a href="colab.md">Colab</a>&nbsp ｜ &nbsp<a href="https://huggingface.co/ofa-sys">Demo</a>&nbsp ｜ &nbsp<a href="http://arxiv.org/abs/2202.03052">Paper </a>&nbsp ｜ &nbspBlog
 </p>
 
 <p align="center">
@@ -31,17 +31,18 @@ We sincerely welcome contributions to our project. Feel free to contact us or se
 
 # Online Demos
 We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
-* [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
-* [Visual Grounding](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)
-* [Visual Question Answering](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)
-* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
-* [Generic Interface](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)
+* Image Captioning \[[ModelScope](https://modelscope.cn/#/models/damo/ofa_image-caption_coco_large_en/summary)  |  [Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)\]
+* Visual Grounding \[[ModelScope](https://modelscope.cn/#/models/damo/ofa_visual-grounding_refcoco_large_en/summary) | [Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)\]
+* Visual Question Answering\[[ModelScope](https://modelscope.cn/#/models/damo/ofa_visual-question-answering_pretrain_large_en/summary) | [Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)\]
+* Text-to-Image Generation \[[ModelScope](https://modelscope.cn/#/models/damo/ofa_text-to-image-synthesis_coco_large_en/summary) | [Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)\]
+* Generic Interface \[[Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)\]
 
 Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
 <br></br>
 
 
-# News 
+# News
+* 2022.8.22: Released checkpoints and demos of **OFA** and **Chinese CLIP** on [ModelScope](https://modelscope.cn/). Check the [README](modelscope.md) for more details!
 * 2022.8.16: Released the **Chinese** version of OFA. **OFA-CN** needs only switching to `bpe_dir=../../utils/BERT_CN_dict` and using our provided Chinese checkpoints in [checkpoints_cn.md](checkpoints_cn.md). Temporarily, we only provide base-size and large-size pretrained checkpoints and finetuned checkpoints on [MUGE Caption](https://tianchi.aliyun.com/muge) and the Chinese version of RefCOCO(-/+/g) (to release soon). 
 * 2022.8.5: Released support of **prompt tuning** for OFA. Check our paper [here](https://arxiv.org/abs/2208.02532)! Please see the [prompt_tuning.md](prompt_tuning.md) for further details.
 * 2022.7.7: Updated support of OFA on **huggingface transformers** (fixed bugs in forward, add sequence generator from Fairseq to ensure performance, etc.). Refer to the doc [transformers.md](transformers.md) and the branch `feature/add_transformers`. 
