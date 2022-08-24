@@ -160,7 +160,7 @@ def _make_causal_mask(input_ids_shape: torch.Size, dtype: torch.dtype, past_key_
     Make causal mask used for uni-directional self-attention.
     """
     bsz, tgt_len = input_ids_shape
-    mask = torch.full((tgt_len, tgt_len), float("-inf"))
+    mask = torch.full((tgt_len, tgt_len), torch.finfo(dtype).min)
     mask_cond = torch.arange(mask.size(-1))
     mask.masked_fill_(mask_cond < (mask_cond + 1).view(mask.size(-1), 1), 0)
     mask = mask.to(dtype)
@@ -178,7 +178,9 @@ def _expand_mask(mask: torch.Tensor, dtype: torch.dtype, tgt_len: Optional[int] 
     tgt_len = tgt_len if tgt_len is not None else src_len
 
     expanded_mask = mask[:, None, None, :].expand(bsz, 1, tgt_len, src_len).to(dtype)
-    return expanded_mask.masked_fill(expanded_mask.bool(), torch.finfo(dtype).min)
+    inverted_mask = 1.0 - expanded_mask
+
+    return inverted_mask.masked_fill(inverted_mask.bool(), torch.finfo(dtype).min)
 
 
 def Embedding(num_embeddings, embedding_dim, padding_idx=None, zero_init=False):
@@ -1229,7 +1231,7 @@ class OFAEncoder(OFAPreTrainedModel):
         # expand attention_mask
         if has_pads:
             # [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
-            attention_mask = _expand_mask(encoder_padding_mask, dtype=x.dtype)
+            attention_mask = _expand_mask(~encoder_padding_mask, dtype=x.dtype)
 
         encoder_states = () if output_hidden_states else None
         all_attentions = () if output_attentions else None
@@ -1891,7 +1893,7 @@ class OFAModel(OFAPreTrainedModel):
 
         encoder_hidden_states = encoder_outputs.last_hidden_state
         encoder_attention_mask = _expand_mask(
-            encoder_outputs.padding_mask, encoder_hidden_states.dtype, decoder_input_ids.shape[-1]
+            ~encoder_outputs.padding_mask, encoder_hidden_states.dtype, decoder_input_ids.shape[-1]
         )
         src_pos_embed = encoder_outputs.position_embedding
 
