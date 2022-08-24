@@ -303,6 +303,8 @@ class TransformerModel(FairseqEncoderDecoderModel):
                             help='freeze decoder token embedding')
         parser.add_argument('--add-type-embedding', action='store_true',
                             help='add source/region/patch type embedding')
+        parser.add_argument('--interpolate-position', action='store_true',
+                            help='interpolate position')
 
         parser.add_argument('--resnet-type', choices=['resnet50', 'resnet101', 'resnet152'],
                             help='resnet type')
@@ -603,12 +605,16 @@ class TransformerEncoder(FairseqEncoder):
             [Embedding(image_num_rel_dis, self.num_attention_heads, zero_init=True) for _ in range(args.encoder_layers)]
         )
 
+        self.patch_image_size = args.patch_image_size
+        self.orig_patch_image_size = args.orig_patch_image_size
+
         self.register_buffer("token_rp_bucket", token_rp_bucket)
         self.register_buffer("image_rp_bucket", image_rp_bucket)
         self.entangle_position_embedding = args.entangle_position_embedding
 
     def build_encoder_layer(self, args, drop_path_rate=0.0):
-        layer = TransformerEncoderLayer(args, drop_path_rate=drop_path_rate,use_adapter=getattr(args, "adapter", False),adapter_dim=getattr(args, "adapter_dim", 200))
+        layer = TransformerEncoderLayer(args, drop_path_rate=drop_path_rate, \
+            use_adapter=getattr(args, "adapter", False), adapter_dim=getattr(args, "adapter_dim", 200))
         checkpoint = getattr(args, "checkpoint_activations", False)
         if checkpoint:
             offload_to_cpu = getattr(args, "offload_activations", False)
@@ -665,7 +671,19 @@ class TransformerEncoder(FairseqEncoder):
             image_num_patches = sample_patch_num
             image_padding_mask = image_padding_mask.gather(1, patch_orders)
             image_position_ids = image_position_ids.gather(1, patch_orders)
-        image_pos_embed = self.embed_image_positions(image_position_ids)
+        orig_num_patches = (self.orig_patch_image_size // 16) ** 2
+        orig_hw= self.orig_patch_image_size // 16
+        if getattr(self.args, "interpolate_position", False) and image_num_patches > orig_num_patches:
+            old_image_position_ids = torch.arange(orig_hw).unsqueeze(0).expand(orig_hw, orig_hw) + \
+                                     torch.arange(orig_hw).unsqueeze(1) * self.args.image_bucket_size + 1
+            old_image_position_ids = old_image_position_ids.to(device)
+            old_image_pos_embed = self.embed_image_positions(old_image_position_ids)
+            old_image_pos_embed = old_image_pos_embed.reshape(1, orig_hw, orig_hw, -1).permute(0, 3, 1, 2)
+            image_pos_embed = F.interpolate(old_image_pos_embed, size=(h, w), mode='bilinear')
+            image_pos_embed = image_pos_embed.permute(0, 2, 3, 1).reshape(1, image_num_patches, -1)
+            image_pos_embed = image_pos_embed.expand(patch_images.size(0), -1, -1)
+        else:
+            image_pos_embed = self.embed_image_positions(image_position_ids)
 
         return image_embed, image_num_patches, image_padding_mask, image_position_ids, image_pos_embed
 
@@ -914,9 +932,8 @@ class TransformerEncoder(FairseqEncoder):
                         prompt_kv = None
             else:
                 prompt_kv = None 
-            x = layer(
-                x, encoder_padding_mask=encoder_padding_mask if has_pads else None, self_attn_bias=self_attn_bias, prompt_kv=prompt_kv
-            )
+            x = layer(x, encoder_padding_mask=encoder_padding_mask if has_pads else None, \
+                    self_attn_bias=self_attn_bias, prompt_kv=prompt_kv)
             if return_all_hiddens:
                 assert encoder_states is not None
                 encoder_states.append(x)
@@ -1238,7 +1255,8 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             self.layers.insert(((i+1) * args.decoder_layers) // (num_base_layers + 1), BaseLayer(args))
 
     def build_decoder_layer(self, args, no_encoder_attn=False, drop_path_rate=0.0):
-        layer = TransformerDecoderLayer(args, no_encoder_attn, drop_path_rate=drop_path_rate,use_adapter=getattr(args, "adapter", False),adapter_dim=getattr(args, "adapter_dim", 200))
+        layer = TransformerDecoderLayer(args, no_encoder_attn, drop_path_rate= \
+            drop_path_rate, use_adapter=getattr(args, "adapter", False), adapter_dim=getattr(args, "adapter_dim", 200))
         checkpoint = getattr(args, "checkpoint_activations", False)
         if checkpoint:
             offload_to_cpu = getattr(args, "offload_activations", False)

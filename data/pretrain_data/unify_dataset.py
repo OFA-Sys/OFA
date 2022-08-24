@@ -627,11 +627,10 @@ class UnifyDataset(OFADataset):
         for sample_tuple in samples:
             samples_v1 += sample_tuple[0]
             samples_v2 += sample_tuple[1]
-        if samples_v2 == []:
-            samples_v2 += self.process_pure_text(0) if self.pure_text_dataset else []
-            samples_v2 += self.process_pure_image(0) if self.pure_image_dataset else []
-            samples_v2 += self.process_detection(0) if self.detection_dataset else []
-
-        res_v1 = collate(samples_v1, pad_idx=self.src_dict.pad(), eos_idx=self.eos)
-        res_v2 = collate(samples_v2, pad_idx=self.src_dict.pad(), eos_idx=self.eos)
-        return res_v1, res_v2
+        if samples_v2 != []:
+            res_v1 = collate(samples_v1, pad_idx=self.src_dict.pad(), eos_idx=self.eos)
+            res_v2 = collate(samples_v2, pad_idx=self.src_dict.pad(), eos_idx=self.eos)
+            return res_v1, res_v2
+        else:
+            res_v1 = collate(samples_v1, pad_idx=self.src_dict.pad(), eos_idx=self.eos)
+            return res_v1

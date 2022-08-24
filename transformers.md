@@ -13,7 +13,7 @@ pip install OFA/transformers/
 git clone https://huggingface.co/OFA-Sys/OFA-tiny 
 ```
 
-After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the testing example below. Also, ensure that you have pillow and torchvision in your environment. 
+After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the testing example below. Also, ensure that you have pillow and torchvision in your environment. Check if there is the directory `generate` in your model directory `transformers/src/transformers/models/ofa` to ensure that you can use the sequence generator that we provide. 
 
 ```
 >>> from PIL import Image
@@ -30,7 +30,7 @@ After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the te
         transforms.Normalize(mean=mean, std=std)
     ])
 
->>> model = OFAModel.from_pretrained(ckpt_dir)
+
 >>> tokenizer = OFATokenizer.from_pretrained(ckpt_dir)
 
 >>> txt = " what does the image describe?"
@@ -40,16 +40,21 @@ After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the te
 
 
 >>> # using the generator of fairseq version
->>> generator = sequence_generator.SequenceGenerator(tokenizer=tokenizer,beam_size=5,
-                                                                      max_len_b=16,
-                                                                      min_len=0,
-                                                                      no_repeat_ngram_size=3) # using the generator of fairseq version
+>>> model = OFAModel.from_pretrained(ckpt_dir, use_cache=True)
+>>> generator = sequence_generator.SequenceGenerator(
+                    tokenizer=tokenizer,
+                    beam_size=5,
+                    max_len_b=16,
+                    min_len=0,
+                    no_repeat_ngram_size=3,
+                )
 >>> data = {}
 >>> data["net_input"] = {"input_ids": inputs, 'patch_images': patch_img, 'patch_masks':torch.tensor([True])}
 >>> gen_output = generator.generate([model], data)
 >>> gen = [gen_output[i][0]["tokens"] for i in range(len(gen_output))]
 
 >>> # using the generator of huggingface version
+>>> model = OFAModel.from_pretrained(ckpt_dir, use_cache=False)
 >>> gen = model.generate(inputs, patch_images=patch_img, num_beams=5, no_repeat_ngram_size=3) 
 
 >>> print(tokenizer.batch_decode(gen, skip_special_tokens=True))

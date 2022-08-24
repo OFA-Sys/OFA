@@ -122,13 +122,13 @@ class TransformerEncoderLayer(nn.Module):
         args (argparse.Namespace): parsed command-line arguments
     """
 
-    def __init__(self, args, drop_path_rate=0.0,use_adapter=False,adapter_dim=200):
+    def __init__(self, args, drop_path_rate=0.0, use_adapter=False, adapter_dim=200):
         super().__init__()
         self.args = args
         self.use_adapter = use_adapter
         self.embed_dim = args.encoder_embed_dim
         if use_adapter:
-            self.adapter = Adapter_Layer(d_model=self.embed_dim,down_size=adapter_dim)
+            self.adapter = Adapter_Layer(d_model=self.embed_dim, down_size=adapter_dim)
         self.quant_noise = getattr(args, 'quant_noise_pq', 0)
         self.quant_noise_block_size = getattr(args, 'quant_noise_pq_block_size', 8) or 8
         self.self_attn = self.build_self_attention(self.embed_dim, args)
@@ -283,7 +283,7 @@ class TransformerEncoderLayer(nn.Module):
         x = self.fc2(x)
         x = self.dropout_module(x)
         if self.use_adapter:
-            x=self.adapter(x)
+            x = self.adapter(x)
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
         x = self.residual_connection(x, residual)
@@ -310,13 +310,13 @@ class TransformerDecoderLayer(nn.Module):
     """
 
     def __init__(
-        self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False, drop_path_rate=0.0,use_adapter=False,adapter_dim=200
-    ):
+        self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False, \
+            drop_path_rate=0.0, use_adapter=False, adapter_dim=200):
         super().__init__()
         self.embed_dim = args.decoder_embed_dim
         self.use_adapter = use_adapter
         if use_adapter == True:
-            self.adapter = Adapter_Layer(d_model=self.embed_dim,down_size=adapter_dim)
+            self.adapter = Adapter_Layer(d_model=self.embed_dim, down_size=adapter_dim)
         self.dropout_module = FairseqDropout(
             args.dropout, module_name=self.__class__.__name__
         )
@@ -560,7 +560,7 @@ class TransformerDecoderLayer(nn.Module):
         x = self.fc2(x)
         x = self.dropout_module(x)
         if self.use_adapter == True:
-            x=self.adapter(x)
+            x = self.adapter(x)
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
         x = self.residual_connection(x, residual)

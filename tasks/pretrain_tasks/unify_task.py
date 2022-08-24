@@ -7,8 +7,10 @@ from dataclasses import dataclass, field
 import json
 import logging
 import os
+import math
 from typing import Optional
 from fairseq.tasks import register_task
+from fairseq.data import FairseqDataset, iterators
 
 from tasks.ofa_task import OFATask, OFAConfig
 from data.pretrain_data.unify_dataset import UnifyDataset
