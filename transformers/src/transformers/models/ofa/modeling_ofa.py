@@ -166,7 +166,7 @@ def _make_causal_mask(input_ids_shape: torch.Size, dtype: torch.dtype, past_key_
     mask = mask.to(dtype)
 
     if past_key_values_length > 0:
-        mask = torch.cat([torch.zeros(tgt_len, past_key_values_length, dtype=dtype), mask], dim=-1)
+        mask = torch.cat([torch.ones(tgt_len, past_key_values_length, dtype=dtype), mask], dim=-1)
     return mask[None, None, :, :].expand(bsz, 1, tgt_len, tgt_len + past_key_values_length)
 
 
@@ -1932,7 +1932,7 @@ class OFAModel(OFAPreTrainedModel):
         **kwargs
     ):
         # if attention_mask is None:
-        attention_mask = decoder_input_ids.new_zeros(decoder_input_ids.shape)
+        attention_mask = decoder_input_ids.new_ones(decoder_input_ids.shape)
 
         # cut decoder_input_ids if past is used
         if past is not None:
@@ -1971,7 +1971,7 @@ class OFAModel(OFAPreTrainedModel):
         }
 
         if encoder_kwargs.get("patch_masks") is None:
-            encoder_kwargs["patch_masks"] = torch.tensor([True])
+            encoder_kwargs["patch_masks"] = torch.ones((len(inputs_tensor), 1), dtype=torch.bool, device=inputs_tensor.device)
 
         # 3. make sure that encoder returns `ModelOutput`
         model_input_name = model_input_name if model_input_name is not None else self.main_input_name
