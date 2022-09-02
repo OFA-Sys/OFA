@@ -36,5 +36,4 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m torch.distributed.launch --nproc_per_nod
     --beam=20 \
     --unnormalized \
     --temperature=1.0 \
-    --num-workers=0 \
-    --model-overrides="{\"data\":\"${data}\",\"bpe_dir\":\"${bpe_dir}\",\"selected_cols\":\"${selected_cols}\"}"
+    --num-workers=0
