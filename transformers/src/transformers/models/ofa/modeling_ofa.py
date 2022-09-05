@@ -1189,7 +1189,7 @@ class OFAEncoder(OFAPreTrainedModel):
         if patch_images is not None:
             image_embed, image_num_patches, image_padding_mask, image_position_ids, image_pos_embed = \
                 self.get_patch_images_info(patch_images, sample_patch_num, input_ids.device)
-            image_padding_mask[~patch_masks] = True
+            # image_padding_mask[~patch_masks] = True # comment the line to temporarily fix the bug of mismatch
         if patch_images_2 is not None:
             image_embed_2, image_num_patches_2, image_padding_mask_2, image_position_ids_2, image_pos_embed_2 = \
                 self.get_patch_images_info(patch_images_2, sample_patch_num, input_ids.device)
