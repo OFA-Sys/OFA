@@ -19,7 +19,7 @@ After, refer the path to OFA-tiny to `ckpt_dir`, and prepare an image for the te
 >>> from PIL import Image
 >>> from torchvision import transforms
 >>> from transformers import OFATokenizer, OFAModel
->>> from generate import sequence_generator
+>>> from transformers.models.ofa.generate import sequence_generator
 
 >>> mean, std = [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]
 >>> resolution = 256
