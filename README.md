@@ -40,6 +40,10 @@ We provide online demo via Hugging Face Spaces for you to interact with our pret
 Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
 <br></br>
 
+# Use in Huggingface Transformers
+We support the inference of OFA in Huggingface Transformers. Check the [README](transformers.md) and [Colab Notebook](https://colab.research.google.com/drive/1Ho81RBV8jysZ7e0FhsSCk_v938QeDuy3?usp=sharing) for more information. Codes are released in this branch https://github.com/OFA-Sys/OFA/tree/feature/add_transformers
+<br><br>
+
 
 # News
 * 2022.8.22: Released checkpoints and demos of **OFA** and **Chinese CLIP** on [ModelScope](https://modelscope.cn/). Check the [README](modelscope.md) for more details!
