@@ -18,6 +18,7 @@ from omegaconf import DictConfig
 
 from utils import checkpoint_utils
 from utils.eval_utils import eval_step, merge_results
+from utils.zero_shot_utils import zero_shot_step
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -131,7 +132,10 @@ def main(cfg: DictConfig, **kwargs):
         sample = utils.move_to_cuda(sample) if use_cuda else sample
         sample = utils.apply_to_sample(apply_half, sample) if cfg.common.fp16 else sample
         with torch.no_grad():
-            result, scores = eval_step(task, generator, models, sample, **kwargs)
+            if kwargs["zero_shot"]:
+                result, scores = zero_shot_step(task, generator, models, sample)
+            else:
+                result, scores = eval_step(task, generator, models, sample, **kwargs)
         results += result
         score_sum += sum(scores) if scores is not None else 0
         score_cnt += len(scores) if scores is not None else 0

@@ -97,6 +97,15 @@ def main(cfg: FairseqConfig) -> None:
             model = fsdp_wrap(task.build_model(cfg.model))
     else:
         model = task.build_model(cfg.model)
+    
+    # bitfit
+    if cfg.model.bitfit:
+        for name, param in model.named_parameters():
+            if ("layer_norm" in name and "bias" in name) or ("fc" in name and "bias" in name):
+                param.requires_grad = True
+            else:
+                param.requires_grad = False
+
     criterion = task.build_criterion(cfg.criterion)
     logger.info(model)
     logger.info("task: {}".format(task.__class__.__name__))

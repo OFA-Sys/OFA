@@ -34,6 +34,64 @@ def drop_path(x, drop_prob: float = 0.0, training: bool = False):
     output = x.div(keep_prob) * random_tensor
     return output
 
+def init_bert_weights(module):
+    """Initialize the weights."""
+    if isinstance(module, (nn.Linear, nn.Embedding)):
+        # std defaults to 0.02, this might need to be changed
+        module.weight.data.normal_(mean=0.0, std=0.02)
+    elif isinstance(module, nn.LayerNorm):
+        module.bias.data.zero_()
+        module.weight.data.fill_(1.0)
+    if isinstance(module, nn.Linear) and module.bias is not None:
+        module.bias.data.zero_()
+
+
+class Adapter_Layer(torch.nn.Module):
+    def __init__(self,
+                 d_model=None,
+                 down_size=None,
+                 dropout=0.0,
+                 init_option="bert",
+                 adapter_scalar="1.0"):
+        super().__init__()
+        self.n_embd = d_model
+        self.down_size = down_size
+
+
+        if adapter_scalar == "learnable_scalar":
+            self.scale = nn.Parameter(torch.ones(1))
+        else:
+            self.scale = float(adapter_scalar)
+
+        self.down_proj = nn.Linear(self.n_embd, self.down_size)
+        self.non_linear_func = nn.ReLU()
+        self.up_proj = nn.Linear(self.down_size, self.n_embd)
+
+        self.dropout = dropout
+        if init_option == "bert":
+            self.apply(init_bert_weights)
+        elif init_option == "lora":
+            with torch.no_grad():
+                nn.init.kaiming_uniform_(self.down_proj.weight, a=math.sqrt(5))
+                nn.init.zeros_(self.up_proj.weight)
+                nn.init.zeros_(self.down_proj.bias)
+                nn.init.zeros_(self.up_proj.bias)
+
+    def forward(self, x, add_residual=True, residual=None):
+        residual = x if residual is None else residual
+
+        down = self.down_proj(x)
+        down = self.non_linear_func(down)
+        down = nn.functional.dropout(down, p=self.dropout, training=self.training)
+        up = self.up_proj(down)
+        up = up * self.scale
+        if add_residual:
+            output = up + residual
+        else:
+            output = up
+
+        return output
+
 
 class DropPath(nn.Module):
     """Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks)."""
@@ -64,10 +122,13 @@ class TransformerEncoderLayer(nn.Module):
         args (argparse.Namespace): parsed command-line arguments
     """
 
-    def __init__(self, args, drop_path_rate=0.0):
+    def __init__(self, args, drop_path_rate=0.0, use_adapter=False, adapter_dim=200):
         super().__init__()
         self.args = args
+        self.use_adapter = use_adapter
         self.embed_dim = args.encoder_embed_dim
+        if use_adapter:
+            self.adapter = Adapter_Layer(d_model=self.embed_dim, down_size=adapter_dim)
         self.quant_noise = getattr(args, 'quant_noise_pq', 0)
         self.quant_noise_block_size = getattr(args, 'quant_noise_pq_block_size', 8) or 8
         self.self_attn = self.build_self_attention(self.embed_dim, args)
@@ -163,7 +224,8 @@ class TransformerEncoderLayer(nn.Module):
         x,
         encoder_padding_mask: Optional[Tensor],
         attn_mask: Optional[Tensor] = None,
-        self_attn_bias: Optional[Tensor] = None
+        self_attn_bias: Optional[Tensor] = None,
+        prompt_kv: Optional[Tensor] = None
     ):
         """
         Args:
@@ -201,7 +263,8 @@ class TransformerEncoderLayer(nn.Module):
             key_padding_mask=encoder_padding_mask,
             need_weights=False,
             attn_mask=attn_mask,
-            attn_bias=self_attn_bias
+            attn_bias=self_attn_bias,
+            prompt_kv=prompt_kv
         )
         if self.attn_ln is not None:
             x = self.attn_ln(x)
@@ -219,6 +282,8 @@ class TransformerEncoderLayer(nn.Module):
             x = self.ffn_layernorm(x)
         x = self.fc2(x)
         x = self.dropout_module(x)
+        if self.use_adapter:
+            x = self.adapter(x)
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
         x = self.residual_connection(x, residual)
@@ -245,10 +310,13 @@ class TransformerDecoderLayer(nn.Module):
     """
 
     def __init__(
-        self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False, drop_path_rate=0.0
-    ):
+        self, args, no_encoder_attn=False, add_bias_kv=False, add_zero_attn=False, \
+            drop_path_rate=0.0, use_adapter=False, adapter_dim=200):
         super().__init__()
         self.embed_dim = args.decoder_embed_dim
+        self.use_adapter = use_adapter
+        if use_adapter == True:
+            self.adapter = Adapter_Layer(d_model=self.embed_dim, down_size=adapter_dim)
         self.dropout_module = FairseqDropout(
             args.dropout, module_name=self.__class__.__name__
         )
@@ -373,7 +441,8 @@ class TransformerDecoderLayer(nn.Module):
         need_attn: bool = False,
         need_head_weights: bool = False,
         self_attn_bias: Optional[Tensor] = None,
-        cross_attn_bias: Optional[Tensor] = None
+        cross_attn_bias: Optional[Tensor] = None,
+        prompt_kv: Optional[Tensor] = None
     ):
         """
         Args:
@@ -437,7 +506,8 @@ class TransformerDecoderLayer(nn.Module):
             incremental_state=incremental_state,
             need_weights=False,
             attn_mask=self_attn_mask,
-            attn_bias=self_attn_bias
+            attn_bias=self_attn_bias,
+            prompt_kv=prompt_kv
         )
         if self.self_attn_ln is not None:
             x = self.self_attn_ln(x)
@@ -489,6 +559,8 @@ class TransformerDecoderLayer(nn.Module):
             x = self.ffn_layernorm(x)
         x = self.fc2(x)
         x = self.dropout_module(x)
+        if self.use_adapter == True:
+            x = self.adapter(x)
         if self.w_resid is not None:
             residual = torch.mul(self.w_resid, residual)
         x = self.residual_connection(x, residual)

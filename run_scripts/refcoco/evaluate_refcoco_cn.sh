@@ -8,12 +8,14 @@ export GPUS_PER_NODE=1
 
 user_dir=../../ofa_module
 bpe_dir=../../utils/BERT_CN_dict
-selected_cols=0,3,1,2
+selected_cols=0,3,1,2   # make sure that you index "id, image, text, box"
 
-data=../../dataset/refcoco_cn_data/refcoco+_test_sample.tsv
-path=../../checkpoints/refcocoplus_cn_large.pt
+# Choose your dataset split and the corresponding checkpoint
+data=../../dataset/refcoco_cn_data/refcoco_val.tsv
+path=../../checkpoints/refcoco_cn_large.pt
 result_path=../../results/refcoco
 split='refcoco_val'
+
 python3 ../../evaluate.py \
     ${data} \
     --path=${path} \
