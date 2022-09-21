@@ -59,6 +59,14 @@ ema_start_update=0
 # As mentioned in the readme, you can choose from allcand or beamsearch evaluation, default to allcand
 val_inference_type=allcand
 
+# Specify whether to activate unconstrained VQA finetuning, which does not use a pre-defined candidate answer set
+# If --unconstrained-training is acitvated, --ans2label-file will **not be used even if it is specified**
+# Meanwhile, --val-inference-type must be set to **beamsearch**
+# By default, we follow the constrained finetuning as we mentioned in OFA paper, the candidate answer set shall be specified by --ans2label-file
+# For more details about this option, please refer to issue #123 and PR #124
+unconstrained_training_flag=""
+# unconstrained_training_flag="--unconstrained-training"
+
 for max_epoch in {15,}; do
   echo "max_epoch "${max_epoch}
   for warmup_ratio in {0.04,}; do
@@ -119,6 +127,7 @@ for max_epoch in {15,}; do
             --find-unused-parameters \
             --freeze-encoder-embedding \
             --freeze-decoder-embedding \
+            ${unconstrained_training_flag} \
             --ans2label-file=${ans2label_file} \
             --valid-batch-size=20 \
             --add-type-embedding \
