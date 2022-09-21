@@ -4,6 +4,8 @@
 # which does not use a fixed candidate answer set (trainval_ans2label.pkl).
 # For more details about the unconstrained finetuning, refer to Line 62-68 in train_vqa_distributed.sh
 
+# Usage: bash evaluate_vqa_unconstrained.sh ${split} ${ckpt_path}
+
 # The port for communication. Note that if you want to run multiple tasks on the same machine,
 # you need to specify different port numbers.
 export MASTER_PORT=8082
@@ -15,7 +17,7 @@ bpe_dir=../../utils/BPE
 split=$1
 
 data=../../dataset/vqa_data/vqa_${split}.tsv
-path=../../checkpoints/vqa_large_best.pt
+path=$2 # please speficy your path of unconstrainedly finetuned checkpoint
 result_path=../../results/vqa_${split}_unconstrained
 selected_cols=0,5,2,3,4
 
