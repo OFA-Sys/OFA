@@ -604,10 +604,7 @@ class SequenceGenerator(nn.Module):
         prefix_toks = prefix_tokens[:, step].unsqueeze(-1).repeat(1, beam_size).view(-1)
         prefix_lprobs = lprobs.gather(-1, prefix_toks.unsqueeze(-1))
         prefix_mask = prefix_toks.ne(self.pad)
-        if self.constraint_trie is None:
-            lprobs[prefix_mask] = torch.min(prefix_lprobs) - 1
-        else:
-            lprobs[prefix_mask] = -math.inf
+        lprobs[prefix_mask] = -math.inf
         lprobs[prefix_mask] = lprobs[prefix_mask].scatter(
             -1, prefix_toks[prefix_mask].unsqueeze(-1), prefix_lprobs[prefix_mask]
         )
