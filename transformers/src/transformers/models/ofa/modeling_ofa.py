@@ -1888,8 +1888,8 @@ class OFAModel(OFAPreTrainedModel):
                 sample_patch_num=sample_patch_num,
             )
 
-        if decoder_input_ids.eq(self.config.pad_token_id).any():
-            attention_mask = decoder_input_ids.eq(self.padding_idx)
+        # if decoder_input_ids.eq(self.config.pad_token_id).any():
+        #     attention_mask = decoder_input_ids.eq(self.padding_idx)
 
         encoder_hidden_states = encoder_outputs.last_hidden_state
         encoder_attention_mask = _expand_mask(
@@ -1953,7 +1953,8 @@ class OFAModel(OFAPreTrainedModel):
             "use_cache": use_cache,
         }
 
-    def prepare_decoder_input_ids_from_labels(self, labels: torch.Tensor):
+    def prepare_decoder_input_ids_from_labels(sel
+    f, labels: torch.Tensor):
         return shift_tokens_right(labels, self.config.pad_token_id, self.config.decoder_start_token_id)
 
     def _prepare_encoder_decoder_kwargs_for_generation(
