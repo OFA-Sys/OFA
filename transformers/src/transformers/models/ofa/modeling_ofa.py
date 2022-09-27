@@ -1893,7 +1893,7 @@ class OFAModel(OFAPreTrainedModel):
 
         encoder_hidden_states = encoder_outputs.last_hidden_state
         encoder_attention_mask = _expand_mask(
-            ~encoder_outputs.padding_mask, encoder_hidden_states.dtype, decoder_input_ids.shape[-1]
+                ~encoder_outputs.padding_mask, encoder_hidden_states.dtype, decoder_input_ids[:, -1:].shape[-1]
         )
         src_pos_embed = encoder_outputs.position_embedding
 
@@ -1935,8 +1935,8 @@ class OFAModel(OFAPreTrainedModel):
         attention_mask = decoder_input_ids.new_ones(decoder_input_ids.shape)
 
         # cut decoder_input_ids if past is used
-        if past is not None:
-            decoder_input_ids = decoder_input_ids[:, -1:]
+        # if past is not None:
+        #     decoder_input_ids = decoder_input_ids[:, -1:]
 
         return {
             "input_ids": None,
