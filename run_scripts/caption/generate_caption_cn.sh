@@ -7,7 +7,6 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 export GPUS_PER_NODE=8
 
 user_dir=../../ofa_module
-bpe=bert
 bpe_dir=../../utils/BERT_CN_dict
 
 data=../../dataset/muge_caption_data/caption_test.tsv
@@ -31,4 +30,4 @@ python3 -m torch.distributed.launch --nproc_per_node=${GPUS_PER_NODE} --master_p
     --max-len-b=128 \
     --no-repeat-ngram-size=3 \
     --num-workers=0 \
-    --model-overrides="{\"data\":\"${data}\",\"bpe\":\"${bpe}\",\"bpe_dir\":\"${bpe_dir}\",\"eval_cider\":False,\"selected_cols\":\"${selected_cols}\"}"
+    --model-overrides="{\"data\":\"${data}\",\"bpe_dir\":\"${bpe_dir}\",\"eval_cider\":False,\"selected_cols\":\"${selected_cols}\"}"
