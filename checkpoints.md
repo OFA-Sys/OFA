@@ -11,6 +11,7 @@ We provide links for you to download our checkpoints, including pretrained and f
 
 ## Finetuning (OFA-Huge)
 * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/caption_huge_best.pt"> Finetuned checkpoint for Caption on COCO </a>
+* <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/vqa_huge_best.pt"> Finetuned checkpoint for VQAv2 </a>
 
 ## Finetuning (OFA-Large)
 
