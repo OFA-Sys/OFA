@@ -1888,13 +1888,18 @@ class OFAModel(OFAPreTrainedModel):
                 sample_patch_num=sample_patch_num,
             )
 
-        if decoder_input_ids.eq(self.config.pad_token_id).any():
-            attention_mask = decoder_input_ids.eq(self.padding_idx)
+        # if decoder_input_ids.eq(self.config.pad_token_id).any():
+        #     attention_mask = decoder_input_ids.eq(self.padding_idx)
 
         encoder_hidden_states = encoder_outputs.last_hidden_state
-        encoder_attention_mask = _expand_mask(
-            ~encoder_outputs.padding_mask, encoder_hidden_states.dtype, decoder_input_ids.shape[-1]
-        )
+        if past_key_values is not None and len(past_key_values)>0:
+            encoder_attention_mask = _expand_mask(
+                ~encoder_outputs.padding_mask, encoder_hidden_states.dtype, decoder_input_ids[:, -1:].shape[-1]
+            )
+        else:
+            encoder_attention_mask = _expand_mask(
+                ~encoder_outputs.padding_mask, encoder_hidden_states.dtype, decoder_input_ids.shape[-1]
+            )
         src_pos_embed = encoder_outputs.position_embedding
 
         decoder_outputs = self.decoder(
@@ -1935,8 +1940,8 @@ class OFAModel(OFAPreTrainedModel):
         attention_mask = decoder_input_ids.new_ones(decoder_input_ids.shape)
 
         # cut decoder_input_ids if past is used
-        if past is not None:
-            decoder_input_ids = decoder_input_ids[:, -1:]
+        # if past is not None:
+        #     decoder_input_ids = decoder_input_ids[:, -1:]
 
         return {
             "input_ids": None,
