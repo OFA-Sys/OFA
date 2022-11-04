@@ -14,8 +14,6 @@ from torch import Tensor
 from .ngram_repeat_block import NGramRepeatBlock
 
 
-
-
 def _expand_mask(mask: torch.Tensor, dtype: torch.dtype, tgt_len: Optional[int] = None):
     r"""
     Expands attention_mask from `[bsz, seq_len]` to `[bsz, 1, tgt_seq_len, src_seq_len]`.
@@ -24,7 +22,10 @@ def _expand_mask(mask: torch.Tensor, dtype: torch.dtype, tgt_len: Optional[int] 
     tgt_len = tgt_len if tgt_len is not None else src_len
 
     expanded_mask = mask[:, None, None, :].expand(bsz, 1, tgt_len, src_len).to(dtype)
-    return expanded_mask.masked_fill(expanded_mask.bool(), torch.finfo(dtype).min)
+    inverted_mask = 1.0 - expanded_mask
+
+    return inverted_mask.masked_fill(inverted_mask.bool(), torch.finfo(dtype).min)
+
 
 class SequenceGenerator(nn.Module):
     def __init__(
@@ -801,12 +802,12 @@ class EnsembleModel(nn.Module):
             if self.has_encoder():
                 encoder_out = encoder_outs[i]
                 encoder_hidden_states = encoder_out.last_hidden_state
-                encoder_attention_mask = _expand_mask(encoder_out.padding_mask, encoder_hidden_states.dtype,
+                encoder_attention_mask = _expand_mask(~encoder_out.padding_mask, encoder_hidden_states.dtype,
                                                       tokens.shape[-1])
                 src_pos_embed = encoder_out.position_embedding
 
                 # if tokens.eq(self.single_model.config.pad_token_id).any():
-                attention_mask = tokens.eq(self.single_model.padding_idx)
+                attention_mask = ~tokens.eq(self.single_model.padding_idx)
 
 
             # decode each model
