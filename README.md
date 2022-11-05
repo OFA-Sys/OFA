@@ -372,7 +372,7 @@ bash evaluate_vqa_allcand_distributed.sh val # specify 'val' or 'test'
 </pre>
 </details>
 
-## Referring Expression Comprehension 
+## Visual Grounding (Referring Expression Comprehension)
 Here provides procedures for you to prepare data, train, and evaluate your model on visual grounding. 
 <details>
     <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>
