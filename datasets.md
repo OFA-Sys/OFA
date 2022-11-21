@@ -42,3 +42,8 @@ We provide links to download our preprocessed dataset. If you would like to proc
  * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/glue_data/rte_data.zip"> Dataset for RTE </a>
  * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/glue_data/sst2_data.zip"> Dataset for SST2 </a>
  * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/gigaword_data/gigaword_data.zip"> Dataset for Gigaword </a>
+
+## OFA Raw Images for Case Study
+ * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/datasets/ofa_images.zip"> OFA Raw Images for Case Study </a>
+
+Here we provide raw image files for visualization examples in OFA.
