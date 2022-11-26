@@ -11,6 +11,7 @@ import os
 
 import torch
 import torch.distributed as dist
+from fairseq import utils
 
 from data import data_utils
 from tasks.nlg_tasks.gigaword import fix_tokenization
@@ -40,6 +41,51 @@ def eval_caption(task, generator, models, sample, **kwargs):
         detok_hypo_str = decode_fn(hypos[i][0]["tokens"], task.tgt_dict, task.bpe, generator)
         results.append({"image_id": str(sample_id), "caption": detok_hypo_str.translate(transtab).strip()})
     return results, None
+
+
+def eval_caption_cn(task, generator, models, sample, **kwargs):
+    hypos = task.inference_step(generator, models, sample)
+    results = []
+    for i, sample_id in enumerate(sample["id"].tolist()):
+        detok_hypo_str = decode_fn(
+            hypos[i][0]["tokens"], task.tgt_dict, task.bpe, generator
+        )
+        results.append(
+            {
+                "image_id": str(sample_id),
+                "caption": detok_hypo_str.strip(),
+            }
+        )
+    return results, None
+
+
+def eval_ocr(task, generator, models, sample, **kwargs):
+    gen_out = task.inference_step(generator, models, sample)
+    hyps, refs, results = [], [], []
+    for i, sample_id in enumerate(sample["id"].tolist()):
+        decode_tokens = decode_fn(gen_out[i][0]["tokens"], task.tgt_dict, task.bpe, generator).strip()
+        hyps.append(decode_tokens.strip().replace(" ", ""))
+        if sample["target"]:
+            refs.append(
+                decode_fn(
+                    utils.strip_pad(sample["target"][i], task.tgt_dict.pad()),
+                    task.tgt_dict, task.bpe, generator
+                )
+                .strip()
+                .replace(" ", "")
+            )
+        results.append(
+            {
+                "image_id": str(sample_id),
+                "ocr": decode_tokens.strip().replace(" ", ""),
+            }
+        )
+    if refs:
+        acc = [1.0 if hyp == ref else 0.0 for hyp, ref in zip(hyps, refs)]
+    else:
+        acc = None
+
+    return results, acc
 
 
 def eval_vqa_gen(task, generator, models, sample, **kwargs):
@@ -302,6 +348,10 @@ def eval_image_classify(task, generator, models, sample, **kwargs):
 def eval_step(task, generator, models, sample, **kwargs):
     if task.cfg._name == 'caption':
         return eval_caption(task, generator, models, sample, **kwargs)
+    elif task.cfg._name == "caption_cn":
+        return eval_caption_cn(task, generator, models, sample, **kwargs)
+    elif task.cfg._name == "ocr":
+        return eval_ocr(task, generator, models, sample, **kwargs)
     elif task.cfg._name == 'vqa_gen':
         return eval_vqa_gen(task, generator, models, sample, **kwargs)
     elif task.cfg._name == 'refcoco':

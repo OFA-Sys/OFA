@@ -9,3 +9,5 @@ pytorch_lightning
 einops
 datasets
 rouge_score
+python-Levenshtein
+zhconv
