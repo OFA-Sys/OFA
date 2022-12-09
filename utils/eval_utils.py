@@ -14,6 +14,7 @@ import torch.distributed as dist
 
 from data import data_utils
 from tasks.nlg_tasks.gigaword import fix_tokenization
+import editdistance
 
 
 def get_symbols_to_strip_from_output(generator):
@@ -30,6 +31,17 @@ def decode_fn(x, tgt_dict, bpe, generator, tokenizer=None):
     if tokenizer is not None:
         x = tokenizer.decode(x)
     return x
+
+def strip_pad(tensor, pad):
+    return tensor[tensor.ne(pad)]
+
+def _calculate_error_rate(hyps, refs):
+    """each line is "<text> (None-<index>)" """
+    assert (len(hyps) == len(refs))
+    err_rates = [
+        (editdistance.eval(hyp.split(), ref.split()), len(ref.split())) for hyp, ref in zip(hyps, refs)
+    ]
+    return err_rates
 
 
 def eval_caption(task, generator, models, sample, **kwargs):
@@ -298,6 +310,22 @@ def eval_image_classify(task, generator, models, sample, **kwargs):
     results = [{"uniq_id": id, "answer": hyp} for id, hyp in zip(sample["id"].tolist(), hyps)]
     return results, scores
 
+def eval_asr(task, generator, models, sample, **kwargs):
+    transtab = str.maketrans({key: None for key in string.punctuation})
+    gen_out = task.inference_step(generator, models, sample)
+
+    hyps, refs, results = [], [], []
+
+    for i, sample_id in enumerate(sample["id"].tolist()):
+        decode_tokens = decode_fn(gen_out[i][0]["tokens"], task.tgt_dict, task.bpe, generator)
+        hyps.append(decode_tokens.translate(transtab).strip())
+        results.append({"speech_id": str(sample_id), "transcript": decode_tokens.strip().translate(transtab)})
+
+        decode_target = decode_fn(strip_pad(sample["target"][i], task.tgt_dict.pad()), task.tgt_dict, task.bpe, generator)
+        refs.append(decode_target.translate(transtab).strip())
+
+    scores = _calculate_error_rate(hyps, refs)
+    return results, scores
 
 def eval_step(task, generator, models, sample, **kwargs):
     if task.cfg._name == 'caption':
@@ -316,6 +344,8 @@ def eval_step(task, generator, models, sample, **kwargs):
         return eval_gigaword(task, generator, models, sample, **kwargs)
     elif task.cfg._name == 'image_classify':
         return eval_image_classify(task, generator, models, sample, **kwargs)
+    elif task.cfg._name == 'unify_speech_text_task' or task.cfg._name == 'speech_unify_cn_big_fbank':
+        return eval_asr(task, generator, models, sample, **kwargs)
     else:
         raise NotImplementedError
 

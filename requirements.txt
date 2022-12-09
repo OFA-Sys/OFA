@@ -9,3 +9,6 @@ pytorch_lightning
 einops
 datasets
 rouge_score
+soundfile
+editdistance
+librosa
