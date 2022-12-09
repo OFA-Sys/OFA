@@ -218,7 +218,6 @@ class UnifyDataset(OFADataset):
         self.text2phone_tokenizer = None
         if text2phone_path is not None:
             self.blank_id = self.phone_dict.index("<unk>")
-            self.phone_mask_idx = self.phone_dict.index("#1")
             self.text2phone_tokenizer = Text2Phone(text2phone_path)
 
     def set_epoch(self, epoch, **unused):

@@ -152,7 +152,7 @@ class UnifySpeechTextTask(OFATask):
         phone_dict = cls.load_dictionary(cfg.phone_dict_path)
         if cfg.text2phone_path is None:
             phone_dict.add_symbol("<blank>")
-        phone_dict.add_symbol("<mask>")
+            phone_dict.add_symbol("<mask>")
 
         # src_dict.add_symbol("<phone_blank>")
         # tgt_dict.add_symbol("<phone_blank>")
@@ -358,6 +358,3 @@ class UnifySpeechTextTask(OFATask):
         """Return the phone :class:`~fairseq.data.Dictionary`."""
         return self.phone_dict
 
-    @property
-    def train_stage(self):
-        return self.train_stage
