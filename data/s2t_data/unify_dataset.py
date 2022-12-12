@@ -29,6 +29,7 @@ from fairseq.data.audio.audio_utils import (
 )
 from pathlib import Path
 import soundfile as sf
+import librosa
 import torchaudio
 from typing import List
 
@@ -187,7 +188,8 @@ class UnifyDataset(OFADataset):
         lang="zh",
         text2phone_path=None,
         train_stage=2,
-        n_frames_per_step=1
+        n_frames_per_step=1,
+        sample_rate=16000,
     ):
         super().__init__(split, dataset, bpe, src_dict, tgt_dict)
         self.phone_dict = phone_dict
@@ -213,6 +215,7 @@ class UnifyDataset(OFADataset):
             self.data_cfg.get_feature_transforms(split, split.startswith("train"))
         )
         self.n_frames_per_step = n_frames_per_step
+        self.sample_rate = sample_rate
         self.blank_id = self.phone_dict.index("<blank>")
         self.phone_mask_idx = self.phone_dict.index("<mask>")
         self.text2phone_tokenizer = None
@@ -353,11 +356,8 @@ class UnifyDataset(OFADataset):
             speed = random.choice([0.9, 1.0, 1.1])
         else:
             speed = 1.0
-        # wav, sr = sf.read(BytesIO(base64.urlsafe_b64decode(wav_data)))
-        wav, sr = sf.read(wav_data)
-        # if speech_id == "BAC009S0002W0122":
-        #     print(speech_id, wav, sr)
-        #     speed = 0.9
+        # wav, sr = sf.read(wav_data)
+        wav, sr = librosa.load(wav_data, self.sample_rate)
         # spec_augmentation
         fbank = self.prepare_fbank(torch.tensor([wav], dtype=torch.float32), sr, speed, speech_id)
 
@@ -467,28 +467,6 @@ class UnifyDataset(OFADataset):
             line=phone_item, add_if_not_exist=False, append_eos=False).long()
         return tokens
 
-    def _phone_seq_augmentation(self, phone_seq, max_repeat=3):
-
-        new_phone_seq = []
-        old_phone = self.blank_id
-        for phone in phone_seq:
-            sil_repeat = random.randint(1, 10)
-            if sil_repeat < 6:
-                new_phone_seq.extend([self.blank_id] * max(sil_repeat, max_repeat))
-            # 如果连续两个phone_item重复, 必须加sil
-            elif phone == old_phone:
-                new_phone_seq.append(self.blank_id)
-
-            # 重复
-            repeat = random.randint(1, 10)
-            if repeat < 6:
-                new_phone_seq.extend([phone] * max(repeat, max_repeat))
-            else:
-                new_phone_seq.append(phone)
-
-            old_phone = phone
-        return new_phone_seq
-
     def add_noise_to_phone(self, phone, p, random_p=0.1):
         num_to_mask = int(math.ceil(phone.size(0) * p))
         indices = torch.randperm(phone.size(0))[:num_to_mask]
@@ -553,9 +531,9 @@ class UnifyDataset(OFADataset):
 
         mask = False
         mask_prob = None
-        # if self.split == "train" and self.train_stage != 1:
-        #     mask = True
-        #     mask_prob = 0.3
+        if self.split == "train" and self.train_stage != 1:
+            mask = True
+            mask_prob = 0.3
 
         res_v1 = collate(
             samples_v1,

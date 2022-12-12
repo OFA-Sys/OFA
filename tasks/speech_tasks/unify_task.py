@@ -79,6 +79,10 @@ class UnifySpeechTextConfig(OFAConfig):
         default=1,
         metadata={"help": "n_frames_per_step of fbank"}
     )
+    sample_rate: int = field(
+        default=16000,
+        metadata={"help": "sample rate of wav"}
+    )
     phone_dict_path: Optional[str] = field(
         default=None,
         metadata={"help": "phone_dict_path"}
@@ -227,7 +231,8 @@ class UnifySpeechTextTask(OFATask):
             lang=self.cfg.lang,
             text2phone_path=self.text2phone_path,
             train_stage=self.train_stage,
-            n_frames_per_step=self.cfg.n_frames_per_step
+            n_frames_per_step=self.cfg.n_frames_per_step,
+            sample_rate=self.cfg.sample_rate,
         )
 
     def get_batch_iterator(
