@@ -7,6 +7,11 @@ import logging
 import re
 import torch.utils.data
 from fairseq.data import FairseqDataset
+import string       
+
+CHINESE_PUNCTUATION = '＂＃＄％＆＇（）＊＋，－／：；＜＝＞＠［＼］＾＿｀｛｜｝～｟｠｢｣､\u3000、〃〈〉《》「」『』【】〔〕〖〗〘〙〚〛〜〝〞〟〰〾〿–—‘’‛“”„‟…‧﹏﹑﹔·！？｡。'      
+ENGLISH_PUNCTUATION = string.punctuation
+
 
 logger = logging.getLogger(__name__)
 
@@ -77,3 +82,14 @@ class OFADataset(FairseqDataset):
             caption = ' '.join(caption_words[:max_words])
 
         return caption
+
+    def pre_chinese(self, text, max_words):     
+        text = text.lower().replace(CHINESE_PUNCTUATION, " ").replace(ENGLISH_PUNCTUATION, " ")     
+        text = re.sub(      
+            r"\s{2,}",      
+            ' ',        
+            text,       
+        )       
+        text = text.rstrip('\n')        
+        text = text.strip(' ')[:max_words]      
+        return text

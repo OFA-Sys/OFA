@@ -46,6 +46,7 @@ We support the inference of OFA in Huggingface Transformers. Check the [README](
 
 
 # News
+* 2022.12.7: Released the MMSpeech an ASR pre-training method based on OFA. Check our paper [here](https://arxiv.org/abs/2212.00500)! Please see the [README_mmspeech.md](README_mmspeech.md) for further details.
 * 2022.8.16: Released the **Chinese** version of OFA. **OFA-CN** needs only switching to `bpe_dir=../../utils/BERT_CN_dict` and `bpe=bert` and using our provided Chinese checkpoints in [checkpoints_cn.md](checkpoints_cn.md). Temporarily, we only provide base-size and large-size pretrained checkpoints and finetuned checkpoints on [MUGE Caption](https://tianchi.aliyun.com/muge) and the Chinese version of RefCOCO(-/+/g) (to release soon). 
 * 2022.8.5: Released support of **prompt tuning** for OFA. Check our paper [here](https://arxiv.org/abs/2208.02532)! Please see the [prompt_tuning.md](prompt_tuning.md) for further details.
 * 2022.7.7: Updated support of OFA on **huggingface transformers** (fixed bugs in forward, add sequence generator from Fairseq to ensure performance, etc.). Refer to the doc [transformers.md](transformers.md) and the branch `feature/add_transformers`. 

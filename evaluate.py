@@ -85,6 +85,24 @@ def main(cfg: DictConfig, **kwargs):
     # loading the dataset should happen after the checkpoint has been loaded so we can give it the saved task config
     task.load_dataset(cfg.dataset.gen_subset, task_cfg=saved_cfg.task)
 
+    if cfg.generation.lm_path is not None:
+        overrides["data"] = cfg.task.data
+
+        try:
+            lms, _ = checkpoint_utils.load_model_ensemble(
+                [cfg.generation.lm_path], arg_overrides=overrides, task=None
+            )
+        except:
+            logger.warning(
+                f"Failed to load language model! Please make sure that the language model dict is the same "
+                f"as target dict and is located in the data dir ({cfg.task.data})"
+            )
+            raise
+
+        assert len(lms) == 1
+    else:
+        lms = [None]
+
     # Move models to GPU
     for model, ckpt_path in zip(models, utils.split_paths(cfg.common_eval.path)):
         if kwargs['ema_eval']:
@@ -121,7 +139,8 @@ def main(cfg: DictConfig, **kwargs):
     )
 
     # Initialize generator
-    generator = task.build_generator(models, cfg.generation)
+    extra_gen_cls_kwargs = {"lm_model": lms[0], "lm_weight": cfg.generation.lm_weight}
+    generator = task.build_generator(models, cfg.generation, extra_gen_cls_kwargs=extra_gen_cls_kwargs)
 
     results = []
     score_sum = torch.FloatTensor([0]).cuda()
@@ -137,8 +156,13 @@ def main(cfg: DictConfig, **kwargs):
             else:
                 result, scores = eval_step(task, generator, models, sample, **kwargs)
         results += result
-        score_sum += sum(scores) if scores is not None else 0
-        score_cnt += len(scores) if scores is not None else 0
+        if isinstance(scores[0], tuple):
+            score_sum += sum([s[0] for s in scores])
+            score_cnt += sum([s[1] for s in scores])
+        else:
+            score_sum += sum(scores) if scores is not None else 0
+            score_cnt += len(scores) if scores is not None else 0
+        
         progress.log({"sentences": sample["nsentences"]})
 
     merge_results(task, cfg, logger, score_cnt, score_sum, results)
