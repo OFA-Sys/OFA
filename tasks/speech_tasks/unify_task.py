@@ -119,12 +119,13 @@ class UnifySpeechTextTask(OFATask):
         self.pure_text_dataset = None
         self.pure_audio_dataset = None
         self.speech_text_dataset = None
-        if self.cfg.text_data is not None:
-            self.pure_text_dataset = FileDataset(self.cfg.text_data, self.cfg.text_selected_cols)
-        if self.cfg.audio_data is not None and self.train_stage == 2:
-            self.pure_audio_dataset = FileDataset(self.cfg.audio_data, self.cfg.audio_selected_cols)
-        if self.cfg.speech_text_data is not None:
-            self.speech_text_dataset = FileDataset(self.cfg.speech_text_data, self.cfg.speech_text_selected_cols)
+        if self.train_stage < 4:
+            if self.cfg.text_data is not None:
+                self.pure_text_dataset = FileDataset(self.cfg.text_data, self.cfg.text_selected_cols)
+            if self.cfg.audio_data is not None and self.train_stage == 2:
+                self.pure_audio_dataset = FileDataset(self.cfg.audio_data, self.cfg.audio_selected_cols)
+            if self.cfg.speech_text_data is not None:
+                self.speech_text_dataset = FileDataset(self.cfg.speech_text_data, self.cfg.speech_text_selected_cols)
         if self.train_stage == 1:
             self.valid_dataset = FileDataset(self.cfg.valid_data, self.cfg.text_selected_cols)
         else:
@@ -205,7 +206,7 @@ class UnifySpeechTextTask(OFATask):
             dataset = self.valid_dataset
         else:
             if self.train_stage == 1:
-                dataset = self.phone_text_dataset
+                dataset = self.pure_text_dataset
             elif self.train_stage == 2:
                 dataset = self.pure_audio_dataset
             else:
