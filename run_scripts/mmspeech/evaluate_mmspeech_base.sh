@@ -14,6 +14,7 @@ text2phone_dict_path=../../utils/phone/zh/text2phone_dict.txt
 phone_dict_path=../../utils/phone/zh/phone_dict.txt
 config_yaml_path=${data_dir}/fbank_config.yaml
 
+data=${data_dir}/aishell_test.tsv
 valid_data=${data_dir}/aishell_test.tsv
 path=../../checkpoints/mmspeech_base_best.pt
 result_path=../../results/asr
