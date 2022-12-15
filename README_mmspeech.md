@@ -49,6 +49,15 @@ Experiments on AISHELL-1 show that our proposed method achieves state-of-the-art
 
 
 ## Quick start
+### Installation
+
+Note that we update the fairseq version for mmspeech.
+
+```bash
+git clone https://github.com/OFA-Sys/OFA
+pip install -r requirements.txt
+```
+
 ### Data preparation
 
 Input files for all tasks include three columns: "speech_id, wav_path, text", delimited by a "\t". 
