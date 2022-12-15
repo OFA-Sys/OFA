@@ -14,6 +14,7 @@ text2phone_dict_path=../../utils/phone/zh/text2phone_dict.txt
 phone_dict_path=../../utils/phone/zh/phone_dict.txt
 config_yaml_path=${data_dir}/fbank_config.yaml
 
+data=${data_dir}/aishell_test.tsv
 valid_data=${data_dir}/aishell_test.tsv
 path=../../checkpoints/mmspeech_base_best.pt
 result_path=../../results/asr
@@ -37,5 +38,5 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 python3 -m torch.distributed.launch --nproc_per_nod
     --no-repeat-ngram-size=5 \
     --fp16 \
     --num-workers=0 \
-    --model-overrides="{\"valid_data\":\"${valid_data}\",\"eval_wer\":True}" \
+    --model-overrides="{\"valid_data\":\"${valid_data}\",\"config_yaml_path\":\"${config_yaml_path}\",\"train_stage\":4,\"eval_wer\":True}" \
     --constraint-range="4,21134"
