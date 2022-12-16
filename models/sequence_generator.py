@@ -368,6 +368,16 @@ class SequenceGenerator(nn.Module):
                     lm_out, log_probs=True, sample=None
                 )
                 probs = probs[:, -1, :] * self.lm_weight
+
+                # align lm vocab with ofa vocab
+                if probs.shape[1] < lprobs.shape[1]:
+                    probs = torch.cat([probs, probs.new_zeros([probs.size(0), lprobs.shape[1] - probs.shape[1]],
+                                                              dtype=torch.float64)], dim=1)
+                    probs[:, self.constraint_end:] = -math.inf
+                    probs[:, 4:self.constraint_start] = -math.inf
+                elif probs.shape[1] > lprobs.shape[1]:
+                    raise NotImplementedError
+
                 lprobs += probs
             # handle prefix tokens (possibly with different lengths)
             if (
