@@ -26,7 +26,6 @@ We provide links for you to download our checkpoints, including pretrained and f
 * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/imagenet_1k_large_best.pt"> Finetuned checkpoint for ImageNet-1K </a>
 * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/gigaword_large_best.pt"> Finetuned checkpoint for Gigaword </a>
 
-
 ## Finetuning (OFA-Base)
 * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/caption_base_best.pt"> Finetuned base checkpoint for Caption on COCO </a>
 * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/refcoco_base_best.pt"> Finetuned base checkpoint for RefCOCO </a>
@@ -35,3 +34,11 @@ We provide links for you to download our checkpoints, including pretrained and f
 * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/vqa_base_best.pt"> Finetuned base checkpoint for VQAv2 </a>
 * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/snli_ve_base_best.pt"> Finetuned base checkpoint for SNLI-VE </a>
 * <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/image_gen_base_best.pt"> Finetuned base checkpoint for Text-to-Image Generation on COCO  </a>
+
+## Pretrained Language Models
+To follow our multimodal pretraining, we suggest using pretrained language models for the initialization. Note that for the base-size and large-size models, we directly use BART-base and BART-large, and for the other sizes, we pretrained the tiny-size, medium size, and huge-size OFA-based language models. 
+* <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_tiny_plaintext.pt"> Tiny-size encoder-decoder language model (OFA) </a>
+* <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_medium_plaintext.pt"> Medium-size encoder-decoder language model (OFA) </a>
+* <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/bart_base.pt"> Base-size encoder-decoder language model (BART) </a>
+* <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/bart_large.pt"> Large-size encoder-decoder language model (BART) </a>
+* <a href="https://ofa-beijing.oss-cn-beijing.aliyuncs.com/checkpoints/ofa_huge_plaintext.pt"> Huge-size encoder-decoder language model (OFA) </a>
