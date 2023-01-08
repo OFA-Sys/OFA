@@ -51,7 +51,7 @@ def BatchNorm2d(out_chan, momentum=0.1, eps=1e-3):
 
 
 def make_token_bucket_position(bucket_size, max_position=DEFAULT_MAX_SOURCE_POSITIONS):
-    context_pos = torch.arange(max_position, dtype=torch.long)[:, None]
+    context_pos = torch.arange(max_position, dtype=torch.long)[:, None]s
     memory_pos = torch.arange(max_position, dtype=torch.long)[None, :]
     relative_pos = context_pos - memory_pos
     sign = torch.sign(relative_pos)
