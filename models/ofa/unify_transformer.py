@@ -178,6 +178,9 @@ class TransformerModel(FairseqEncoderDecoderModel):
         parser.add_argument('--freeze-encoder', action='store_true',
                             help='freeze the parameters in the encoder')
 
+        parser.add_argument('--train_mue', action='store_true',
+                            help='use early exiting in model')
+        
 
         parser.add_argument('--adapter', action='store_true',
                             help='use adapter in the model')
@@ -424,16 +427,27 @@ class TransformerModel(FairseqEncoderDecoderModel):
 
     @classmethod
     def build_encoder(cls, args, src_dict, embed_tokens):
-        return TransformerEncoder(args, src_dict, embed_tokens)
+        if args.train_mue:
+            return TransformerEncoder_MuE(args, src_dict, embed_tokens)
+        else:
+            return TransformerEncoder(args, src_dict, embed_tokens)
 
     @classmethod
     def build_decoder(cls, args, tgt_dict, embed_tokens):
-        return TransformerDecoder(
-            args,
-            tgt_dict,
-            embed_tokens,
-            no_encoder_attn=getattr(args, "no_cross_attention", False),
-        )
+        if args.train_mue:
+            return TransformerDecoder_MuE(
+                args,
+                tgt_dict,
+                embed_tokens,
+                no_encoder_attn=getattr(args, "no_cross_attention", False),
+                )
+        else:
+            return TransformerDecoder(
+                args,
+                tgt_dict,
+                embed_tokens,
+                no_encoder_attn=getattr(args, "no_cross_attention", False),
+                )
 
     # TorchScript doesn't support optional arguments with variable length (**kwargs).
     # Current workaround is to add union of all arguments in child classes.
@@ -769,7 +783,8 @@ class TransformerEncoder(FairseqEncoder):
         code_masks: Optional[torch.Tensor] = None,
         return_all_hiddens: bool = False,
         token_embeddings: Optional[torch.Tensor] = None,
-        sample_patch_num: Optional[int] = None
+        sample_patch_num: Optional[int] = None,
+        **kwargs
     ):
         """
         Args:
@@ -1320,6 +1335,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         alignment_heads: Optional[int] = None,
         src_lengths: Optional[Any] = None,
         return_all_hiddens: bool = False,
+        **kwargs
     ):
         """
         Args:
@@ -1648,6 +1664,568 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             )
         return state_dict
 
+
+class TransformerEncoder_MuE(TransformerEncoder):
+    """
+    Transformer encoder consisting of *args.encoder_layers* layers. Each layer
+    is a :class:`TransformerEncoderLayer`.
+
+    Args:
+        args (argparse.Namespace): parsed command-line arguments
+        dictionary (~fairseq.data.Dictionary): encoding dictionary
+        embed_tokens (torch.nn.Embedding): input embedding
+    """
+
+    def __init__(self, args, dictionary, embed_tokens):
+        self.args = args
+        super().__init__(args, dictionary, embed_tokens)
+
+    def forward_embedding(
+        self,
+        src_tokens,
+        image_embed: Optional[torch.Tensor] = None,
+        image_embed_2: Optional[torch.Tensor] = None,
+        token_embedding: Optional[torch.Tensor] = None,
+        pos_embed: Optional[torch.Tensor] = None,
+        image_pos_embed: Optional[torch.Tensor] = None,
+        image_pos_embed_2: Optional[torch.Tensor] = None
+    ):
+        # embed tokens and positions
+        if token_embedding is None:
+            token_embedding = self.embed_tokens(src_tokens)
+        x = embed = self.embed_scale * token_embedding
+        if self.entangle_position_embedding and pos_embed is not None:
+            x += pos_embed
+        if self.type_embedding is not None:
+            x += self.type_embedding(src_tokens.new_zeros(x.size()[:2]))
+        if self.layernorm_embedding is not None:
+            x = self.layernorm_embedding(x)
+        x = self.dropout_module(x)
+        if self.quant_noise is not None:
+            x = self.quant_noise(x)
+
+        # embed raw images
+        if image_embed is not None:
+            image_embed = self.image_proj(image_embed)
+            image_x = image_embed = self.embed_scale * image_embed
+            if self.entangle_position_embedding and image_pos_embed is not None:
+                image_x += image_pos_embed
+            if self.type_embedding is not None:
+                image_x += self.type_embedding(src_tokens.new_ones(image_x.size()[:2]))
+            if self.patch_layernorm_embedding is not None:
+                image_x = self.patch_layernorm_embedding(image_x)
+            image_x = self.dropout_module(image_x)
+            if self.quant_noise is not None:
+                image_x = self.quant_noise(image_x)
+            x = [image_x, x]
+            embed = torch.cat([image_embed, embed], dim=1)
+
+        if image_embed_2 is not None:
+            assert self.type_embedding is not None
+            image_embed_2 = self.image_proj(image_embed_2)
+            image_x_2 = image_embed_2 = self.embed_scale * image_embed_2
+            if self.entangle_position_embedding and image_pos_embed_2 is not None:
+                image_x_2 += image_pos_embed_2
+            if self.type_embedding is not None:
+                image_x_2 += self.type_embedding(src_tokens.new_full(image_x_2.size()[:2], fill_value=2))
+            if self.patch_layernorm_embedding is not None:
+                image_x_2 = self.patch_layernorm_embedding(image_x_2)
+            image_x_2 = self.dropout_module(image_x_2)
+            if self.quant_noise is not None:
+                image_x_2 = self.quant_noise(image_x_2)
+            x = torch.cat([image_x_2, x], dim=1)
+            embed = torch.cat([image_embed_2, embed], dim=1)
+
+        return x, embed
+
+    def forward(
+        self,
+        src_tokens,
+        src_lengths,
+        is_train: bool = True,
+        patch_images: Optional[torch.Tensor] = None,
+        patch_images_2: Optional[torch.Tensor] = None,
+        patch_masks: Optional[torch.Tensor] = None,
+        code_masks: Optional[torch.Tensor] = None,
+        return_all_hiddens: bool = False,
+        token_embeddings: Optional[torch.Tensor] = None,
+        sample_patch_num: Optional[int] = None,
+        **kwargs
+    ):
+        """
+        Args:
+            src_tokens (LongTensor): tokens in the source language of shape
+                `(batch, src_len)`
+            src_lengths (torch.LongTensor): lengths of each source sentence of
+                shape `(batch)`
+            return_all_hiddens (bool, optional): also return all of the
+                intermediate hidden states (default: False).
+            token_embeddings (torch.Tensor, optional): precomputed embeddings
+                default `None` will recompute embeddings
+
+        Returns:
+            dict:
+                - **encoder_out** (Tensor): the last encoder layer's output of
+                  shape `(src_len, batch, embed_dim)`
+                - **encoder_padding_mask** (ByteTensor): the positions of
+                  padding elements of shape `(batch, src_len)`
+                - **encoder_embedding** (Tensor): the (scaled) embedding lookup
+                  of shape `(batch, src_len, embed_dim)`
+                - **encoder_states** (List[Tensor]): all intermediate
+                  hidden states of shape `(src_len, batch, embed_dim)`.
+                  Only populated if *return_all_hiddens* is True.
+        """
+        return self.forward_scriptable(src_tokens,
+                                       src_lengths,
+                                       is_train,
+                                       patch_images,
+                                       patch_images_2,
+                                       patch_masks,
+                                       return_all_hiddens,
+                                       token_embeddings,
+                                       sample_patch_num,
+                                       **kwargs)
+
+    # TorchScript doesn't support super() method so that the scriptable Subclass
+    # can't access the base class model in Torchscript.
+    # Current workaround is to add a helper function with different name and
+    # call the helper function from scriptable Subclass.
+    def forward_scriptable(
+        self,
+        src_tokens,
+        src_lengths,
+        is_train: bool = True,
+        patch_images: Optional[torch.Tensor] = None,
+        patch_images_2: Optional[torch.Tensor] = None,
+        patch_masks: Optional[torch.Tensor] = None,
+        return_all_hiddens: bool = False,
+        token_embeddings: Optional[torch.Tensor] = None,
+        sample_patch_num: Optional[int] = None,
+        **kwargs
+    ):
+        """
+        Args:
+            src_tokens (LongTensor): tokens in the source language of shape
+                `(batch, src_len)`
+            src_lengths (torch.LongTensor): lengths of each source sentence of
+                shape `(batch)`
+            return_all_hiddens (bool, optional): also return all of the
+                intermediate hidden states (default: False).
+            token_embeddings (torch.Tensor, optional): precomputed embeddings
+                default `None` will recompute embeddings
+
+        Returns:
+            dict:
+                - **encoder_out** (Tensor): the last encoder layer's output of
+                  shape `(src_len, batch, embed_dim)`
+                - **encoder_padding_mask** (ByteTensor): the positions of
+                  padding elements of shape `(batch, src_len)`
+                - **encoder_embedding** (Tensor): the (scaled) embedding lookup
+                  of shape `(batch, src_len, embed_dim)`
+                - **encoder_states** (List[Tensor]): all intermediate
+                  hidden states of shape `(src_len, batch, embed_dim)`.
+                  Only populated if *return_all_hiddens* is True.
+        """
+        image_embed = None
+        image_embed_2 = None
+        image_pos_embed = None
+        image_pos_embed_2 = None
+        if patch_images is not None:
+            image_embed, image_num_patches, image_padding_mask, image_position_ids, image_pos_embed = \
+                self.get_patch_images_info(patch_images, sample_patch_num, src_tokens.device)
+            image_padding_mask[~patch_masks] = True
+        if patch_images_2 is not None:
+            image_embed_2, image_num_patches_2, image_padding_mask_2, image_position_ids_2, image_pos_embed_2 = \
+                self.get_patch_images_info(patch_images_2, sample_patch_num, src_tokens.device)
+            image_padding_mask_2[~patch_masks] = True
+
+        encoder_padding_mask = src_tokens.eq(self.padding_idx)
+        if patch_images is not None:
+            encoder_padding_mask_cat = torch.cat([image_padding_mask, encoder_padding_mask], dim=1)
+        if patch_images_2 is not None:
+            encoder_padding_mask = torch.cat([image_padding_mask_2, encoder_padding_mask], dim=1)
+        has_pads = (src_tokens.device.type == "xla" or encoder_padding_mask.any())
+
+        pos_embed = self.embed_positions(utils.new_arange(src_tokens))
+        embed, encoder_embedding = self.forward_embedding(
+            src_tokens, image_embed, image_embed_2, token_embeddings,
+            pos_embed, image_pos_embed, image_pos_embed_2
+        )
+        x = embed[1]
+        image_x = embed[0]
+
+        # account for padding while computing the representation
+        if has_pads:
+            x = x * (1 - encoder_padding_mask.unsqueeze(-1).type_as(x))
+            image_x = image_x * (1 - image_padding_mask.unsqueeze(-1).type_as(image_x))
+
+        # B x T x C -> T x B x C
+        x = x.transpose(0, 1)
+        image_x = image_x.transpose(0, 1)
+
+        pos_embed = self.pos_ln(pos_embed)
+        if patch_images is not None:
+            image_pos_embed = self.image_pos_ln(image_pos_embed)
+            pos_embed_cat = torch.cat([image_pos_embed, pos_embed], dim=1)
+        if patch_images_2 is not None:
+            image_pos_embed_2 = self.image_pos_ln(image_pos_embed_2)
+            pos_embed = torch.cat([image_pos_embed_2, pos_embed], dim=1)
+        
+
+        pos_q = self.pos_q_linear(pos_embed).view(
+            x.size(1), x.size(0), self.num_attention_heads, -1
+        ).transpose(1, 2) * self.pos_scaling
+        pos_k = self.pos_k_linear(pos_embed).view(
+            x.size(1), x.size(0), self.num_attention_heads, -1
+        ).transpose(1, 2)
+        abs_pos_bias = torch.matmul(pos_q, pos_k.transpose(2, 3))
+
+        pos_q = self.pos_q_linear(image_pos_embed).view(
+            image_x.size(1), image_x.size(0), self.num_attention_heads, -1
+        ).transpose(1, 2) * self.pos_scaling
+        pos_k = self.pos_k_linear(image_pos_embed).view(
+            image_x.size(1), image_x.size(0), self.num_attention_heads, -1
+        ).transpose(1, 2)
+        image_abs_pos_bias = torch.matmul(pos_q, pos_k.transpose(2, 3))
+
+        encoder_states = []
+        encoder_states_img = []
+        return_all_hiddens = True
+        if return_all_hiddens:
+            encoder_states.append(x)
+            encoder_states_img.append(image_x)
+
+        # encoder layers
+        for idx, layer in enumerate(self.layers):
+            self_attn_bias = abs_pos_bias.clone()
+            self_attn_bias += self.get_rel_pos_bias(src_tokens, idx)
+            self_attn_bias = self_attn_bias.reshape(-1, x.size(0), x.size(0))
+            
+            x = layer(
+                x, encoder_padding_mask=encoder_padding_mask if has_pads else None, self_attn_bias=self_attn_bias, w=w
+            )
+            if not is_train:
+                similarity = torch.cosine_similarity(F.normalize(x.clone().contiguous().view(1, -1)), F.normalize(encoder_states[-1].clone().contiguous().view(1, -1)) )
+                if similarity > kwargs["txt_thres"]:
+                    break
+            if return_all_hiddens:
+                assert encoder_states is not None
+                encoder_states.append(x)
+        idx_y = idx
+        for idx, layer in enumerate(self.layers):
+            self_attn_bias = image_abs_pos_bias.clone()
+            if patch_images_2 is not None:
+                self_attn_bias[:, :, :image_num_patches_2, :image_num_patches_2] += \
+                    self.get_image_rel_pos_bias(image_position_ids_2, idx)
+                self_attn_bias[:, :, image_num_patches_2:image_num_patches_2+image_num_patches, image_num_patches_2:image_num_patches_2+image_num_patches] += \
+                    self.get_image_rel_pos_bias(image_position_ids, idx)
+            elif patch_images is not None:
+                self_attn_bias += \
+                    self.get_image_rel_pos_bias(image_position_ids, idx)
+            self_attn_bias = image_abs_pos_bias.reshape(-1, image_x.size(0), image_x.size(0))
+            
+            image_x = layer(
+                image_x, encoder_padding_mask=image_padding_mask if has_pads else None, self_attn_bias=self_attn_bias, w=w
+            )
+            if not is_train:
+                similarity = torch.cosine_similarity(F.normalize(image_x.clone().contiguous().view(1, -1)), F.normalize(encoder_states_img[-1].clone().contiguous().view(1, -1)) )
+                if similarity > kwargs["img_thres"]:
+                    break
+            if return_all_hiddens:
+                assert encoder_states_img is not None
+                encoder_states_img.append(image_x)
+        
+        x = torch.cat([image_x, x])
+        
+        if self.layer_norm is not None:
+            x = self.layer_norm(x)
+
+        # The Pytorch Mobile lite interpreter does not supports returning NamedTuple in
+        # `forward` so we use a dictionary instead.
+        # TorchScript does not support mixed values so the values are all lists.
+        # The empty list is equivalent to None.
+        return {
+            "encoder_out": [x],  # T x B x C
+            "encoder_padding_mask": [encoder_padding_mask_cat],  # B x T
+            "encoder_embedding": [],  # B x T x C
+            "encoder_states": [encoder_states, encoder_states_img],  # List[T x B x C]
+            "src_tokens": [],
+            "src_lengths": [],
+            "position_embeddings": [pos_embed_cat],  # B x T x C
+            "exit_layer": [idx+1, idx_y+1]
+        }
+
+
+class TransformerDecoder_MuE(TransformerDecoder):
+    """
+    Transformer decoder consisting of *args.decoder_layers* layers. Each layer
+    is a :class:`TransformerDecoderLayer`.
+
+    Args:
+        args (argparse.Namespace): parsed command-line arguments
+        dictionary (~fairseq.data.Dictionary): decoding dictionary
+        embed_tokens (torch.nn.Embedding): output embedding
+        no_encoder_attn (bool, optional): whether to attend to encoder outputs
+            (default: False).
+    """
+
+    def __init__(
+        self,
+        args,
+        dictionary,
+        embed_tokens,
+        no_encoder_attn=False,
+        output_projection=None,
+    ):
+        self.args = args
+        super().__init__(args, dictionary, embed_tokens, no_encoder_attn, output_projection,)
+        
+    def forward(
+        self,
+        prev_output_tokens,
+        is_train: bool = True,
+        code_masks: Optional[torch.Tensor] = None,
+        encoder_out: Optional[Dict[str, List[Tensor]]] = None,
+        incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]] = None,
+        features_only: bool = False,
+        full_context_alignment: bool = False,
+        alignment_layer: Optional[int] = None,
+        alignment_heads: Optional[int] = None,
+        src_lengths: Optional[Any] = None,
+        return_all_hiddens: bool = False,
+        **kwargs
+    ):
+        """
+        Args:
+            prev_output_tokens (LongTensor): previous decoder outputs of shape
+                `(batch, tgt_len)`, for teacher forcing
+            encoder_out (optional): output from the encoder, used for
+                encoder-side attention, should be of size T x B x C
+            incremental_state (dict): dictionary used for storing state during
+                :ref:`Incremental decoding`
+            features_only (bool, optional): only return features without
+                applying output layer (default: False).
+            full_context_alignment (bool, optional): don't apply
+                auto-regressive mask to self-attention (default: False).
+
+        Returns:
+            tuple:
+                - the decoder's output of shape `(batch, tgt_len, vocab)`
+                - a dictionary with any model-specific outputs
+        """
+
+        x, extra = self.extract_features(
+            prev_output_tokens,
+            code_masks=code_masks,
+            encoder_out=encoder_out,
+            incremental_state=incremental_state,
+            full_context_alignment=full_context_alignment,
+            alignment_layer=alignment_layer,
+            alignment_heads=alignment_heads,
+            is_train=is_train,
+            **kwargs
+        )
+
+        if not features_only:
+            x = self.output_layer(x)
+        return x, extra
+
+    def extract_features(
+        self,
+        prev_output_tokens,
+        code_masks: Optional[torch.Tensor],
+        encoder_out: Optional[Dict[str, List[Tensor]]],
+        is_train: bool = True,
+        incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]] = None,
+        full_context_alignment: bool = False,
+        alignment_layer: Optional[int] = None,
+        alignment_heads: Optional[int] = None,
+        **kwargs
+    ):
+        return self.extract_features_scriptable(
+            prev_output_tokens,
+            code_masks,
+            encoder_out,
+            incremental_state,
+            full_context_alignment,
+            alignment_layer,
+            alignment_heads,
+            is_train=is_train,
+            **kwargs
+        )
+
+    """
+    A scriptable subclass of this class has an extract_features method and calls
+    super().extract_features, but super() is not supported in torchscript. A copy of
+    this function is made to be used in the subclass instead.
+    """
+
+    def extract_features_scriptable(
+        self,
+        prev_output_tokens,
+        code_masks: Optional[torch.Tensor],
+        encoder_out: Optional[Dict[str, List[Tensor]]],
+        is_train: bool = True,
+        thres: float = 1.0,
+        incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]] = None,
+        full_context_alignment: bool = False,
+        alignment_layer: Optional[int] = None,
+        alignment_heads: Optional[int] = None,
+        **kwargs
+    ):
+        """
+        Similar to *forward* but only return features.
+
+        Includes several features from "Jointly Learning to Align and
+        Translate with Transformer Models" (Garg et al., EMNLP 2019).
+
+        Args:
+            full_context_alignment (bool, optional): don't apply
+                auto-regressive mask to self-attention (default: False).
+            alignment_layer (int, optional): return mean alignment over
+                heads at this layer (default: last layer).
+            alignment_heads (int, optional): only average alignment over
+                this many heads (default: all heads).
+
+        Returns:
+            tuple:
+                - the decoder's features of shape `(batch, tgt_len, embed_dim)`
+                - a dictionary with any model-specific outputs
+        """
+        bs, slen = prev_output_tokens.size()
+        if alignment_layer is None:
+            alignment_layer = self.num_layers - 1
+
+        enc: Optional[Tensor] = None
+        padding_mask: Optional[Tensor] = None
+        if encoder_out is not None and len(encoder_out["encoder_out"]) > 0:
+            enc = encoder_out["encoder_out"][0]
+            assert (
+                enc.size()[1] == bs
+            ), f"Expected enc.shape == (t, {bs}, c) got {enc.shape}"
+        if encoder_out is not None and len(encoder_out["encoder_padding_mask"]) > 0:
+            padding_mask = encoder_out["encoder_padding_mask"][0]
+
+        bsz, tgt_len = prev_output_tokens.shape
+        token_position_idx = utils.new_arange(prev_output_tokens)
+        tgt_pos_embed = self.embed_positions(token_position_idx)
+        if code_masks is not None and torch.any(code_masks):
+            image_position_idx = self.image_position_idx[:prev_output_tokens.size(1)].unsqueeze(0).expand(bsz, tgt_len)
+            tgt_pos_embed[code_masks] = self.embed_image_positions(image_position_idx)[code_masks]
+
+        # self attn position bias
+        self_abs_pos_bias = self.get_pos_info(prev_output_tokens, tgt_pos_embed, use_image=False)
+
+        if code_masks is not None and torch.any(code_masks):
+            self_image_abs_pos_bias = self.get_pos_info(prev_output_tokens, tgt_pos_embed, use_image=True)
+            self_abs_pos_bias[code_masks] = self_image_abs_pos_bias[code_masks]
+        # cross attn position bias
+        src_pos_embed = encoder_out['position_embeddings'][0]
+        cross_abs_pos_bias = self.get_pos_info(prev_output_tokens, tgt_pos_embed, src_pos_embed=src_pos_embed)
+        if code_masks is not None and torch.any(code_masks):
+            cross_image_abs_pos_bias = self.get_pos_info(prev_output_tokens, tgt_pos_embed, src_pos_embed=src_pos_embed, use_image=True)
+            cross_abs_pos_bias[code_masks] = cross_image_abs_pos_bias[code_masks]
+        cross_abs_pos_bias = cross_abs_pos_bias.reshape(-1, *cross_abs_pos_bias.size()[-2:])
+
+        all_prev_output_tokens = prev_output_tokens.clone()
+        if incremental_state is not None:
+            prev_output_tokens = prev_output_tokens[:, -1:]
+            cross_abs_pos_bias = cross_abs_pos_bias[:, -1:, :]
+            tgt_pos_embed = tgt_pos_embed[:, -1:, :]
+
+        # embed tokens and positions
+        x = self.embed_scale * self.embed_tokens(prev_output_tokens)
+
+        if self.quant_noise is not None:
+            x = self.quant_noise(x)
+
+        if self.project_in_dim is not None:
+            x = self.project_in_dim(x)
+
+        if self.entangle_position_embedding is not None and not self.args.disable_entangle:
+            x += tgt_pos_embed
+
+        if self.layernorm_embedding is not None:
+            if code_masks is None or not code_masks.any() or not getattr(self, "code_layernorm_embedding", False):
+                x = self.layernorm_embedding(x)
+            elif code_masks is not None and code_masks.all():
+                x = self.code_layernorm_embedding(x)
+            else:
+                x[~code_masks] = self.layernorm_embedding(x[~code_masks])
+                x[code_masks] = self.code_layernorm_embedding(x[code_masks])
+
+        x = self.dropout_module(x)
+
+        # B x T x C -> T x B x C
+        x = x.transpose(0, 1)
+
+        self_attn_padding_mask: Optional[Tensor] = None
+        if self.cross_self_attention or prev_output_tokens.eq(self.padding_idx).any():
+            self_attn_padding_mask = prev_output_tokens.eq(self.padding_idx)
+
+        # decoder layers
+        attn: Optional[Tensor] = None
+        inner_states: List[Optional[Tensor]] = [x]
+        inner_out_states: List[Optional[Tensor]] = []
+        for idx, layer in enumerate(self.layers):
+            if incremental_state is None and not full_context_alignment:
+                self_attn_mask = self.buffered_future_mask(x)
+            else:
+                self_attn_mask = None
+
+            self_attn_bias = self_abs_pos_bias.clone()
+            if code_masks is None or not code_masks.any():
+                self_attn_bias += self.get_rel_pos_bias(all_prev_output_tokens, idx).unsqueeze(0)
+            elif code_masks is not None and code_masks.all():
+                self_attn_bias += self.get_image_rel_pos_bias(all_prev_output_tokens, idx).unsqueeze(0)
+            else:
+                self_attn_bias[~code_masks] += self.get_rel_pos_bias(all_prev_output_tokens, idx).unsqueeze(0)
+                self_attn_bias[code_masks] += self.get_image_rel_pos_bias(all_prev_output_tokens, idx).unsqueeze(0)
+            self_attn_bias = self_attn_bias.reshape(-1, *self_attn_bias.size()[-2:])
+            if incremental_state is not None:
+                self_attn_bias = self_attn_bias[:, -1:, :]
+        
+            x, layer_attn, saved_states = layer(
+                x,
+                enc,
+                padding_mask,
+                incremental_state,
+                self_attn_mask=self_attn_mask,
+                self_attn_padding_mask=self_attn_padding_mask,
+                need_attn=bool((idx == alignment_layer)),
+                need_head_weights=bool((idx == alignment_layer)),
+                self_attn_bias=self_attn_bias,
+                cross_attn_bias=cross_abs_pos_bias
+            )
+            if not is_train:
+                similarity = torch.cosine_similarity(F.normalize(x.clone().contiguous().view(1, -1)), F.normalize(inner_states[-1].clone().contiguous().view(1, -1)))
+                if similarity > kwargs["decoder_thres"]:       
+                    for i in range(idx + 1, len(self.layers)):
+                        incremental_state = self.layers[i].self_attn._set_input_buffer(incremental_state, saved_states[0])
+                        incremental_state = self.layers[i].encoder_attn._set_input_buffer(incremental_state, saved_states[1])
+                    break
+            inner_states.append(x)
+            inner_out_states.append(self.output_layer(self.layer_norm(x).transpose(0, 1)))
+            if layer_attn is not None and idx == alignment_layer:
+                attn = layer_attn.float().to(x)
+            
+        if attn is not None:
+            if alignment_heads is not None:
+                attn = attn[:alignment_heads]
+
+            # average probabilities over heads
+            attn = attn.mean(dim=0)
+
+        if self.layer_norm is not None:
+            x = self.layer_norm(x)
+
+        # T x B x C -> B x T x C
+        x = x.transpose(0, 1)
+
+        if self.project_out_dim is not None:
+            x = self.project_out_dim(x)
+
+        return x, {"attn": [attn], "inner_states": inner_states, "exit_layer": idx + 1, "inner_out_states": inner_out_states}
 
 def Embedding(num_embeddings, embedding_dim, padding_idx=None, zero_init=False):
     m = nn.Embedding(num_embeddings, embedding_dim, padding_idx=padding_idx)

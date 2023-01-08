@@ -213,6 +213,7 @@ class SequenceGenerator(nn.Module):
         prefix_tokens: Optional[Tensor] = None,
         constraints: Optional[Tensor] = None,
         bos_token: Optional[int] = None,
+        **kwargs
     ):
         model = EnsembleModel(models)
         incremental_states = torch.jit.annotate(
