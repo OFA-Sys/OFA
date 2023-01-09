@@ -156,7 +156,7 @@ def main(cfg: DictConfig, **kwargs):
             else:
                 result, scores = eval_step(task, generator, models, sample, **kwargs)
         results += result
-        if isinstance(scores[0], tuple):
+        if scores and isinstance(scores[0], tuple):
             score_sum += sum([s[0] for s in scores])
             score_cnt += sum([s[1] for s in scores])
         else:
