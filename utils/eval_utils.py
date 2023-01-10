@@ -11,9 +11,11 @@ import os
 
 import torch
 import torch.distributed as dist
+from fairseq import utils
 
 from data import data_utils
 from tasks.nlg_tasks.gigaword import fix_tokenization
+import editdistance
 
 
 def get_symbols_to_strip_from_output(generator):
@@ -31,10 +33,21 @@ def decode_fn(x, tgt_dict, bpe, generator, tokenizer=None):
         x = tokenizer.decode(x)
     return x
 
+def strip_pad(tensor, pad):
+    return tensor[tensor.ne(pad)]
+
+def _calculate_error_rate(hyps, refs):
+    """each line is "<text> (None-<index>)" """
+    assert (len(hyps) == len(refs))
+    err_rates = [
+        (editdistance.eval(hyp.split(), ref.split()), len(ref.split())) for hyp, ref in zip(hyps, refs)
+    ]
+    return err_rates
+
 
 def eval_caption(task, generator, models, sample, **kwargs):
     transtab = str.maketrans({key: None for key in string.punctuation})
-    hypos = task.inference_step(generator, models, sample)
+    hypos = task.inference_step(generator, models, sample, **kwargs)
     results = []
     for i, sample_id in enumerate(sample["id"].tolist()):
         detok_hypo_str = decode_fn(hypos[i][0]["tokens"], task.tgt_dict, task.bpe, generator)
@@ -42,9 +55,54 @@ def eval_caption(task, generator, models, sample, **kwargs):
     return results, None
 
 
+def eval_caption_cn(task, generator, models, sample, **kwargs):
+    hypos = task.inference_step(generator, models, sample, **kwargs)
+    results = []
+    for i, sample_id in enumerate(sample["id"].tolist()):
+        detok_hypo_str = decode_fn(
+            hypos[i][0]["tokens"], task.tgt_dict, task.bpe, generator
+        )
+        results.append(
+            {
+                "image_id": str(sample_id),
+                "caption": detok_hypo_str.strip(),
+            }
+        )
+    return results, None
+
+
+def eval_ocr(task, generator, models, sample, **kwargs):
+    gen_out = task.inference_step(generator, models, sample, **kwargs)
+    hyps, refs, results = [], [], []
+    for i, sample_id in enumerate(sample["id"].tolist()):
+        decode_tokens = decode_fn(gen_out[i][0]["tokens"], task.tgt_dict, task.bpe, generator).strip()
+        hyps.append(decode_tokens.strip().replace(" ", ""))
+        if sample["target"]:
+            refs.append(
+                decode_fn(
+                    utils.strip_pad(sample["target"][i], task.tgt_dict.pad()),
+                    task.tgt_dict, task.bpe, generator
+                )
+                .strip()
+                .replace(" ", "")
+            )
+        results.append(
+            {
+                "image_id": str(sample_id),
+                "ocr": decode_tokens.strip().replace(" ", ""),
+            }
+        )
+    if refs:
+        acc = [1.0 if hyp == ref else 0.0 for hyp, ref in zip(hyps, refs)]
+    else:
+        acc = None
+
+    return results, acc
+
+
 def eval_vqa_gen(task, generator, models, sample, **kwargs):
     if kwargs['beam_search_vqa_eval']:
-        hypos = task.inference_step(generator, models, sample, prefix_tokens=sample['prefix_tokens'])
+        hypos = task.inference_step(generator, models, sample, prefix_tokens=sample['prefix_tokens'], **kwargs)
         results = []
         for i, sample_id in enumerate(sample["id"].tolist()):
             prefix_len = sample['prefix_tokens'][i].ne(1).sum().item()
@@ -127,7 +185,7 @@ def eval_refcoco(task, generator, models, sample, **kwargs):
         ious = area_interacts / (area_predictions + area_targets - area_interacts + 1e-6)
         return ((ious >= thresh) & (interacts_w > 0) & (interacts_h > 0)).float()
 
-    gen_out = task.inference_step(generator, models, sample)
+    gen_out = task.inference_step(generator, models, sample, **kwargs)
     hyps = []
     for i in range(len(gen_out)):
         hyps.append(gen_out[i][0]["tokens"][:-1] - len(task.src_dict) + task.cfg.num_bins)
@@ -150,7 +208,8 @@ def eval_snli_ve(task, generator, models, sample, **kwargs):
         sample["net_input"]["src_tokens"],
         src_lengths=sample["net_input"]["src_lengths"],
         patch_images=sample["net_input"]["patch_images"],
-        patch_masks=sample["net_input"]["patch_masks"]
+        patch_masks=sample["net_input"]["patch_masks"],
+        **kwargs
     )
     device = sample["net_input"]["src_tokens"].device
     eos_item = torch.tensor([task.src_dict.eos()])
@@ -188,7 +247,7 @@ def eval_snli_ve(task, generator, models, sample, **kwargs):
             encoder_out["position_embeddings"][0].repeat_interleave(valid_size, dim=0)
         ]
 
-        decoder_out = models[0].decoder(valid_prev_output, encoder_out=new_encoder_out)
+        decoder_out = models[0].decoder(valid_prev_output, encoder_out=new_encoder_out, **kwargs)
         decoder_out[0].masked_fill_(~valid_constraint_masks, -math.inf)
         lprobs = models[0].get_normalized_probs(decoder_out, log_probs=True)
         scores = lprobs.gather(dim=-1, index=valid_tgt.unsqueeze(-1)).squeeze(-1)
@@ -298,10 +357,30 @@ def eval_image_classify(task, generator, models, sample, **kwargs):
     results = [{"uniq_id": id, "answer": hyp} for id, hyp in zip(sample["id"].tolist(), hyps)]
     return results, scores
 
+def eval_asr(task, generator, models, sample, **kwargs):
+    transtab = str.maketrans({key: None for key in string.punctuation})
+    gen_out = task.inference_step(generator, models, sample)
+
+    hyps, refs, results = [], [], []
+
+    for i, sample_id in enumerate(sample["id"].tolist()):
+        decode_tokens = decode_fn(gen_out[i][0]["tokens"], task.tgt_dict, task.bpe, generator)
+        hyps.append(decode_tokens.translate(transtab).strip())
+        results.append({"speech_id": str(sample_id), "transcript": decode_tokens.strip().translate(transtab)})
+
+        decode_target = decode_fn(strip_pad(sample["target"][i], task.tgt_dict.pad()), task.tgt_dict, task.bpe, generator)
+        refs.append(decode_target.translate(transtab).strip())
+
+    scores = _calculate_error_rate(hyps, refs)
+    return results, scores
 
 def eval_step(task, generator, models, sample, **kwargs):
     if task.cfg._name == 'caption':
         return eval_caption(task, generator, models, sample, **kwargs)
+    elif task.cfg._name == "caption_cn":
+        return eval_caption_cn(task, generator, models, sample, **kwargs)
+    elif task.cfg._name == "ocr":
+        return eval_ocr(task, generator, models, sample, **kwargs)
     elif task.cfg._name == 'vqa_gen':
         return eval_vqa_gen(task, generator, models, sample, **kwargs)
     elif task.cfg._name == 'refcoco':
@@ -316,6 +395,8 @@ def eval_step(task, generator, models, sample, **kwargs):
         return eval_gigaword(task, generator, models, sample, **kwargs)
     elif task.cfg._name == 'image_classify':
         return eval_image_classify(task, generator, models, sample, **kwargs)
+    elif task.cfg._name == 'unify_speech_text_task' or task.cfg._name == 'speech_unify_cn_big_fbank':
+        return eval_asr(task, generator, models, sample, **kwargs)
     else:
         raise NotImplementedError
 

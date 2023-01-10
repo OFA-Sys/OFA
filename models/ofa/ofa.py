@@ -385,6 +385,8 @@ def ofa_large_architecture(args):
     args.scale_heads = getattr(args, "scale_heads", False)
     args.scale_resids = getattr(args, "scale_resids", False)
 
+    args.orig_patch_image_size = getattr(args, "orig_patch_image_size", 256)
+
 
 @register_model_architecture("ofa", "ofa_base")
 def ofa_base_architecture(args):
@@ -423,7 +425,7 @@ def ofa_medium_architecture(args):
 
 
 @register_model_architecture("ofa", "ofa_tiny")
-def ofa_medium_architecture(args):
+def ofa_tiny_architecture(args):
     args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 256)
     args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4 * 256)
     args.encoder_layers = getattr(args, "encoder_layers", 4)

@@ -34,6 +34,10 @@ class OFAConfig(FairseqDataclass):
         default=None,
         metadata={"help": "selected cols"},
     )
+    bpe: Optional[str] = field(
+        default='gpt2',
+        metadata={"help": "which bpe to use"},
+    )
     bpe_dir: Optional[str] = field(
         default=None,
         metadata={"help": "bpe dir"},
@@ -56,6 +60,9 @@ class OFAConfig(FairseqDataclass):
     )
     patch_image_size: int = field(
         default=480, metadata={"help": "patch image size"}
+    )
+    orig_patch_image_size: int = field(
+        default=256, metadata={"help": "patch image size"}
     )
     num_bins: int = field(
         default=1000, metadata={"help": "number of quantization bins"}
@@ -151,13 +158,22 @@ class OFATask(FairseqTask):
 
     def build_model(self, cfg: FairseqDataclass):
         model = super().build_model(cfg)
-        bpe_dict = {
-            "_name": "gpt2",
-            "gpt2_encoder_json": os.path.join(self.cfg.bpe_dir, "encoder.json"),
-            "gpt2_vocab_bpe": os.path.join(self.cfg.bpe_dir, "vocab.bpe")
-        }
-        bpe_dict = DictConfig(bpe_dict)
-        self.bpe = self.build_bpe(bpe_dict)
+        if self.cfg.bpe == 'bert':
+            bpe_dict = {
+                "_name": "bert",
+                "bpe_vocab_file": os.path.join(self.cfg.bpe_dir, "vocab.txt"),
+                "bpe_cased": False
+            }
+            bpe_dict = DictConfig(bpe_dict)
+            self.bpe = self.build_bpe(bpe_dict)
+        else:
+            bpe_dict = {
+                "_name": "gpt2",
+                "gpt2_encoder_json": os.path.join(self.cfg.bpe_dir, "encoder.json"),
+                "gpt2_vocab_bpe": os.path.join(self.cfg.bpe_dir, "vocab.bpe")
+            }
+            bpe_dict = DictConfig(bpe_dict)
+            self.bpe = self.build_bpe(bpe_dict)
         return model
 
     def build_generator(

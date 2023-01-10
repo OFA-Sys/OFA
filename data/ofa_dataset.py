@@ -7,6 +7,11 @@ import logging
 import re
 import torch.utils.data
 from fairseq.data import FairseqDataset
+import string       
+
+CHINESE_PUNCTUATION = '＂＃＄％＆＇（）＊＋，－／：；＜＝＞＠［＼］＾＿｀｛｜｝～｟｠｢｣､\u3000、〃〈〉《》「」『』【】〔〕〖〗〘〙〚〛〜〝〞〟〰〾〿–—‘’‛“”„‟…‧﹏﹑﹔·！？｡。'      
+ENGLISH_PUNCTUATION = string.punctuation
+
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +47,7 @@ class OFADataset(FairseqDataset):
             s = torch.cat([s, self.eos_item])
         return s
 
-    def pre_question(self, question, max_ques_words):
+    def pre_question(self, question, max_ques_words=None):
         question = question.lower().lstrip(",.!?*#:;~").replace('-', ' ').replace('/', ' ')
 
         question = re.sub(
@@ -55,12 +60,12 @@ class OFADataset(FairseqDataset):
 
         # truncate question
         question_words = question.split(' ')
-        if len(question_words) > max_ques_words:
+        if max_ques_words is not None and len(question_words) > max_ques_words:
             question = ' '.join(question_words[:max_ques_words])
 
         return question
 
-    def pre_caption(self, caption, max_words):
+    def pre_caption(self, caption, max_words=None):
         caption = caption.lower().lstrip(",.!?*#:;~").replace('-', ' ').replace('/', ' ').replace('<person>', 'person')
 
         caption = re.sub(
@@ -73,7 +78,18 @@ class OFADataset(FairseqDataset):
 
         # truncate caption
         caption_words = caption.split(' ')
-        if len(caption_words) > max_words:
+        if max_words is not None and len(caption_words) > max_words:
             caption = ' '.join(caption_words[:max_words])
 
         return caption
+
+    def pre_chinese(self, text, max_words):     
+        text = text.lower().replace(CHINESE_PUNCTUATION, " ").replace(ENGLISH_PUNCTUATION, " ")     
+        text = re.sub(      
+            r"\s{2,}",      
+            ' ',        
+            text,       
+        )       
+        text = text.rstrip('\n')        
+        text = text.strip(' ')[:max_words]      
+        return text

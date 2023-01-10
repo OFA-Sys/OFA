@@ -2,6 +2,5 @@
 .DS_Store
 .vscode
 __pycache__
-checkpoints
-results
-logs
+logs/
+vqa_logs/

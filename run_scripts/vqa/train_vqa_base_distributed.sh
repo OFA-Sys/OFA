@@ -48,7 +48,6 @@ max_src_length=80
 max_object_length=30
 max_tgt_length=30
 num_bins=1000
-patch_image_size=480
 
 uses_ema="--uses-ema"
 store_ema="--store-ema"
@@ -59,6 +58,14 @@ ema_start_update=0
 # Specify the inference type in validation after each fine-tuning epoch
 # As mentioned in the readme, you can choose from allcand or beamsearch evaluation, default to allcand
 val_inference_type=allcand
+
+# Specify whether to activate unconstrained VQA finetuning, which does not use a pre-defined candidate answer set
+# If --unconstrained-training is acitvated, --ans2label-file will **not be used even if it is specified**
+# Meanwhile, --val-inference-type must be set to **beamsearch**
+# By default, we follow the constrained finetuning as we mentioned in OFA paper, the candidate answer set shall be specified by --ans2label-file
+# For more details about this option, please refer to issue #123 and PR #124
+unconstrained_training_flag=""
+# unconstrained_training_flag="--unconstrained-training"
 
 for max_epoch in {15,}; do
   echo "max_epoch "${max_epoch}
@@ -120,6 +127,7 @@ for max_epoch in {15,}; do
             --find-unused-parameters \
             --freeze-encoder-embedding \
             --freeze-decoder-embedding \
+            ${unconstrained_training_flag} \
             --ans2label-file=${ans2label_file} \
             --valid-batch-size=20 \
             --add-type-embedding \

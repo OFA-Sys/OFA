@@ -501,7 +501,7 @@ class Trainer(object):
 
             # load model parameters
             try:
-                if self.cfg.checkpoint.use_ema_weights_to_init_param and "extra_state" in state and "ema" in state["extra_state"]:
+                if getattr(self.cfg.checkpoint, "use_ema_weights_to_init_param", None) and "extra_state" in state and "ema" in state["extra_state"]:
                     logger.info("use_ema_weights_to_init_param = True, will use EMA weights in the ckpt to init the model param...")
                     ema_state_dict = state["extra_state"]["ema_fp32_params"] if "ema_fp32_params" in state["extra_state"] else state["extra_state"]["ema"]
                     self.model.load_state_dict(

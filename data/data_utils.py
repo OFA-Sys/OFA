@@ -74,6 +74,44 @@ def collate_tokens(
         copy_tensor(v, res[i][size - len(v) :] if left_pad else res[i][: len(v)])
     return res
 
+def collater_audio(audios, pad_audio, max_sample_size, random_crop=False):
+    audio_sizes = [len(s) for s in audios]
+    if pad_audio:
+        audio_size = min(max(audio_sizes), max_sample_size)
+    else:
+        audio_size = min(min(audio_sizes), max_sample_size)
+    collated_audios = audios[0].new_zeros(len(audios), audio_size)
+    padding_mask = (
+        torch.BoolTensor(collated_audios.shape).fill_(False)
+        # if self.pad_audio else None
+    )
+    audio_starts = [0 for _ in audios]
+    for i, audio in enumerate(audios):
+        diff = len(audio) - audio_size
+        if diff == 0:
+            collated_audios[i] = audio
+        elif diff < 0:
+            collated_audios[i] = torch.cat([audio, audio.new_full((-diff,), 0.0)])
+            padding_mask[i, diff:] = True
+        else:
+            collated_audios[i], audio_starts[i] = crop_to_max_size(
+                audio, audio_size, random_crop
+            )
+    return collated_audios, padding_mask, audio_starts
+
+def crop_to_max_size(wav, target_size, random_crop):
+    size = len(wav)
+    diff = size - target_size
+    if diff <= 0:
+        return wav, 0
+
+    start, end = 0, target_size
+    if random_crop:
+        start = np.random.randint(0, diff + 1)
+        end = size - diff + start
+    return wav[start:end], start
+
+
 
 def load_indexed_dataset(
     path, dictionary=None, dataset_impl=None, combine=False, default="cached"

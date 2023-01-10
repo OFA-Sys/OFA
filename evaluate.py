@@ -18,6 +18,7 @@ from omegaconf import DictConfig
 
 from utils import checkpoint_utils
 from utils.eval_utils import eval_step, merge_results
+from utils.zero_shot_utils import zero_shot_step
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -84,6 +85,24 @@ def main(cfg: DictConfig, **kwargs):
     # loading the dataset should happen after the checkpoint has been loaded so we can give it the saved task config
     task.load_dataset(cfg.dataset.gen_subset, task_cfg=saved_cfg.task)
 
+    if cfg.generation.lm_path is not None:
+        overrides["data"] = cfg.task.data
+
+        try:
+            lms, _ = checkpoint_utils.load_model_ensemble(
+                [cfg.generation.lm_path], arg_overrides=overrides, task=None
+            )
+        except:
+            logger.warning(
+                f"Failed to load language model! Please make sure that the language model dict is the same "
+                f"as target dict and is located in the data dir ({cfg.task.data})"
+            )
+            raise
+
+        assert len(lms) == 1
+    else:
+        lms = [None]
+
     # Move models to GPU
     for model, ckpt_path in zip(models, utils.split_paths(cfg.common_eval.path)):
         if kwargs['ema_eval']:
@@ -120,7 +139,8 @@ def main(cfg: DictConfig, **kwargs):
     )
 
     # Initialize generator
-    generator = task.build_generator(models, cfg.generation)
+    extra_gen_cls_kwargs = {"lm_model": lms[0], "lm_weight": cfg.generation.lm_weight}
+    generator = task.build_generator(models, cfg.generation, extra_gen_cls_kwargs=extra_gen_cls_kwargs)
 
     results = []
     score_sum = torch.FloatTensor([0]).cuda()
@@ -131,10 +151,22 @@ def main(cfg: DictConfig, **kwargs):
         sample = utils.move_to_cuda(sample) if use_cuda else sample
         sample = utils.apply_to_sample(apply_half, sample) if cfg.common.fp16 else sample
         with torch.no_grad():
-            result, scores = eval_step(task, generator, models, sample, **kwargs)
+            if kwargs["zero_shot"]:
+                result, scores = zero_shot_step(task, generator, models, sample)
+            else:
+                result, scores = eval_step(task, generator, models, sample, **kwargs)
         results += result
-        score_sum += sum(scores) if scores is not None else 0
-        score_cnt += len(scores) if scores is not None else 0
+        # For image captioning, score is None
+        if scores is None:
+            score_sum = 0
+            score_cnt = 0
+        elif isinstance(scores[0], tuple):
+            score_sum += sum([s[0] for s in scores])
+            score_cnt += sum([s[1] for s in scores])
+        else:
+            score_sum += sum(scores)
+            score_cnt += len(scores)
+        
         progress.log({"sentences": sample["nsentences"]})
 
     merge_results(task, cfg, logger, score_cnt, score_sum, results)
@@ -145,10 +177,17 @@ def cli_main():
     parser.add_argument("--ema-eval", action='store_true', help="Use EMA weights to make evaluation.")
     parser.add_argument("--beam-search-vqa-eval", action='store_true', help="Use beam search for vqa evaluation (faster inference speed but sub-optimal result), if not specified, we compute scores for each answer in the candidate set, which is slower but can obtain best result.")
     parser.add_argument("--zero-shot", action='store_true')
+    parser.add_argument('--img_thres', type=float, metavar='D', default=1.0,
+                            help='image theshold for early exiting model')
+    parser.add_argument('--txt_thres', type=float, metavar='D', default=1.0,
+                        help='text theshold for early exiting model')
+    parser.add_argument('--decoder_thres', type=float, metavar='D', default=1.0,
+                        help='decoder theshold for early exiting model')
     args = options.parse_args_and_arch(parser)
     cfg = convert_namespace_to_omegaconf(args)
     distributed_utils.call_main(
-        cfg, main, ema_eval=args.ema_eval, beam_search_vqa_eval=args.beam_search_vqa_eval, zero_shot=args.zero_shot
+        cfg, main, ema_eval=args.ema_eval, beam_search_vqa_eval=args.beam_search_vqa_eval, zero_shot=args.zero_shot,
+        img_thres=args.img_thres, txt_thres=args.txt_thres, decoder_thres=args.decoder_thres, is_train=False
     )
 
 

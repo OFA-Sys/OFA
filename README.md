@@ -6,26 +6,14 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 <p align="center">
     <br>
-    <img src="examples/OFA_logo_tp.svg" width="150" />
+    <img src="examples/OFA_logo_tp_path.svg" width="150" />
     <br>
 <p>
-<p align="center">
-    <a href="https://github.com/huggingface/transformers/blob/master/LICENSE">
-        <img alt="GitHub" src="https://img.shields.io/github/license/huggingface/transformers.svg?color=blue">
-    </a>
-    <a href="https://huggingface.co/ofa-sys">
-        <img alt="spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue">
-    </a>
-    <a href="colab.md"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="DOI"></a>
-</p>
+<br>
 
-<h4 align="center">
-    <p>
-        <a href="http://arxiv.org/abs/2202.03052">Paper</a> |
-        <b>Blog</b>
-    <p>
-</h4>
-<br></br>
+<p align="center">
+        <a href="modelscope.md">ModelScope</a>&nbsp ｜ &nbsp<a href="checkpoints.md">Checkpoints</a>&nbsp ｜ &nbsp<a href="colab.md">Colab</a>&nbsp ｜ &nbsp<a href="https://huggingface.co/ofa-sys">Demo</a>&nbsp ｜ &nbsp<a href="http://arxiv.org/abs/2202.03052">Paper </a>&nbsp ｜ &nbspBlog
+</p>
 
 <p align="center">
     <br>
@@ -35,37 +23,46 @@ This source code is licensed under the Apache 2.0 license found in the LICENSE f
 
 [colab]: <https://colab.research.google.com/assets/colab-badge.svg>
 
-OFA is a unified multimodal pretrained model that unifies modalities (i.e., cross-modality, vision, language) and tasks 
-(e.g., image generation, visual grounding, image captioning, image classification, text generation, etc.) 
-to a simple sequence-to-sequence learning framework. For more information, please refer to our paper: [OFA: Unifying Architectures, Tasks, and Modalities Through a Simple Sequence-to-Sequence Learning Framework](http://arxiv.org/abs/2202.03052).
-    
-We welcome contributions to our project. Feel free to contact us or send us issues/PRs!
+OFA is a unified sequence-to-sequence pretrained model (support **English** and **Chinese**) that unifies modalities (i.e., cross-modality, vision, language) and tasks (**finetuning** and **prompt tuning** are supported): image captioning (1st at the [MSCOCO Leaderboard](https://competitions.codalab.org/competitions/3221#results)), VQA ([link](https://eval.ai/web/challenges/challenge-page/830/leaderboard/2278)), visual grounding, text-to-image generation, text classification, text generation, image classification, etc. We provide **step-by-step** instructions for pretraining and finetuning and corresponding checkpoints (check official ckpt \[[EN](checkpoints.md)|[CN](checkpoints_cn.md)\] or [Hugging Face ckpt](https://huggingface.co/OFA-Sys)).
+
+We sincerely welcome contributions to our project. Feel free to contact us or send us issues / PRs!
 <br></br>
 
 
 # Online Demos
 We provide online demo via Hugging Face Spaces for you to interact with our pretrained and finetuned models. Below are the links to the demos:
-* [Generic Interface](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)
-* [Image Captioning](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)
-* [Text-to-Image Generation](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)
-* [Visual Grounding](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)
-* [Visual Question Answering](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)
+* Image Captioning \[[ModelScope](https://modelscope.cn/#/models/damo/ofa_image-caption_coco_large_en/summary)  |  [Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Image_Caption)\]
+* Visual Grounding \[[ModelScope](https://modelscope.cn/#/models/damo/ofa_visual-grounding_refcoco_large_en/summary) | [Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Grounding)\]
+* Visual Question Answering \[[ModelScope](https://modelscope.cn/#/models/damo/ofa_visual-question-answering_pretrain_large_en/summary) | [Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Visual_Question_Answering)\]
+* Text-to-Image Generation \[[ModelScope](https://modelscope.cn/#/models/damo/ofa_text-to-image-synthesis_coco_large_en/summary) | [Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Text2Image_Generation)\]
+* Generic Interface \[[Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-Generic_Interface)\]
+* Chinese OCR \[[ModelScope](https://modelscope.cn/studios/damo/ofa_ocr_pipeline/summary)  |  [Spaces](https://huggingface.co/spaces/OFA-Sys/OFA-OCR)\]
+
 
 Also we provide Colab notebooks for you to better perceive the procedures. Click [here](colab.md) to check them out!
 <br></br>
 
+# Use in Hugging Face Transformers
+We support the inference of OFA in Hugging Face Transformers. Check the [README](transformers.md) and [Colab Notebook](https://colab.research.google.com/drive/1Ho81RBV8jysZ7e0FhsSCk_v938QeDuy3?usp=sharing) for more information. Codes are released in this branch https://github.com/OFA-Sys/OFA/tree/feature/add_transformers
+<br><br>
 
-# News 
-* 2022.7.7: Updated support of OFA on **huggingface transformers** (fixed bugs in forward, add sequence generator from Fairseq to ensure performance, etc.). Refer to the doc [transformers.md](transformers.md) and the branch `feature/add_transformers`. 
+
+# News
+* 2022.12.20: Released OFA-OCR, a model for Chinese text recognition based on OFA. Check our [paper](https://arxiv.org/abs/2212.09297) and [demo](https://modelscope.cn/studios/damo/ofa_ocr_pipeline/summary).
+* 2022.12.7: Released the MMSpeech an ASR pre-training method based on OFA. Check our paper [here](https://arxiv.org/abs/2212.00500)! Please see the [README_mmspeech.md](README_mmspeech.md) for further details.
+* 2022.8.16: Released the **Chinese** version of OFA. **OFA-CN** needs only switching to `bpe_dir=../../utils/BERT_CN_dict` and `bpe=bert` and using our provided Chinese checkpoints in [checkpoints_cn.md](checkpoints_cn.md). Temporarily, we only provide base-size and large-size pretrained checkpoints and finetuned checkpoints on [MUGE Caption](https://tianchi.aliyun.com/muge) and the Chinese version of RefCOCO(-/+/g) (to release soon). 
+* 2022.8.5: Released support of **prompt tuning** for OFA. Check our paper [here](https://arxiv.org/abs/2208.02532)! Please see the [prompt_tuning.md](prompt_tuning.md) for further details.
+* 2022.7.7: Updated support of OFA on **Hugging Face transformers** (fixed bugs in forward, add sequence generator from Fairseq to ensure performance, etc.). Refer to the doc [transformers.md](transformers.md) and the branch `feature/add_transformers`. 
 * 2022.6.17: Released the pretrained checkpoint of **OFA-Huge**. To use it, set `--arch=ofa_huge` in the script.
 * 2022.5.15: OFA was accepted by **ICML 2022**
-* 2022.4.28: Add support of inference on **huggingface transformers**. For how to use it, please refer to the doc [transformers.md](transformers.md) and our [huggingface models](https://huggingface.co/OFA-Sys). 
+* 2022.4.28: Add support of inference on **Hugging Face transformers**. For how to use it, please refer to the doc [transformers.md](transformers.md) and our [Hugging Face models](https://huggingface.co/OFA-Sys). 
 * 2022.4.16: Released lightweight pretrained models **OFA-Medium** (~93M params) and **OFA-Tiny** (~33M params) in [checkpoints.md](checkpoints.md). To use them, you just need to load the corresponding checkpoint and set `--arch=ofa_medium` or `--arch=ofa_tiny` in the scripts.
-* 2022.3.23: Added [Encouraging Loss](https://arxiv.org/pdf/2110.06537.pdf) as a feature. See [README_EncouragingLoss.md](README_EncouragingLoss.md). Leveraging this feature, OFA-Large has achieved improved results in both VQA (**test-std acc: 80.67**) and Image Classification (**test acc: 85.6**) recently.
+
 <details>
     <summary><b>More News</b></summary>
     <p>
         <ul>
+            <li>2022.3.23: Added [Encouraging Loss](https://arxiv.org/pdf/2110.06537.pdf) as a feature. See [README_EncouragingLoss.md](README_EncouragingLoss.md). Leveraging this feature, OFA-Large has achieved improved results in both VQA (**test-std acc: 80.67**) and Image Classification (**test acc: 85.6**) recently.</li>
             <li>2022.3.21: Released codes for pretraining OFA.</li>
             <li>2022.3.18: Released the finetuned <b>OFA-Base</b> (~180M parameters) checkpoints and running scripts for vision & language tasks, including: <b>Caption (146.4 CIDEr), VQA (78.07 on test-std), SNLI-VE (89.3 on dev), RefCOCO (90.67 on testA), RefCOCO+ (87.15 on testA) and RefCOCOg (82.31 on test-u)</b>.</li>
             <li>2022.3.11: Released the finetuning & inference code/checkpoints for <b>Gigaword</b>.</li>
@@ -159,7 +156,50 @@ pip install -r requirements.txt
 See [datasets.md](datasets.md) and [checkpoints.md](checkpoints.md).
 <br></br>
 
-# Pretraining
+# Training & Inference
+Below we provide methods for training and inference on different tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts mentioned in this section are prepared for OFA-Large. For reproducing the downstreaming results of OFA-Base, we have also provided the corresponding finetuning and inference scripts for OFA-Base in the `run_scripts/` folder.
+
+We recommend that your workspace directory should be organized like this: 
+```
+OFA/
+├── checkpoints/
+│   ├── ofa_base.pt
+│   ├── ofa_large.pt
+│   ├── caption_large_best_clean.pt
+│   └── ...
+├── criterions/
+├── data/
+├── dataset/
+│   ├── caption_data/
+│   ├── gigaword_data/
+│   └── ...
+├── fairseq/
+├── models/
+├── run_scripts/
+├── tasks/
+├── train.py
+├── trainer.py
+└── utils/
+```
+
+
+## Image Processing
+To ensure the efficiency of processing data, we did not store images with small files, but instead we encode them to base64 strings.
+Transforming image files to base64 strings is simple. Run the following code:
+```python
+from PIL import Image
+from io import BytesIO
+import base64
+
+img = Image.open(file_name) # path to file
+img_buffer = BytesIO()
+img.save(img_buffer, format=img.format)
+byte_data = img_buffer.getvalue()
+base64_str = base64.b64encode(byte_data) # bytes
+base64_str = base64_str.decode("utf-8") # str
+```
+
+## Pretraining
 Below we provide methods for pretraining OFA.
 
 <details>
@@ -193,34 +233,6 @@ bash pretrain_ofa_large.sh # Pretrain OFA-Large. For OFA-Base, use pretrain_ofa_
 INFO: Loaded checkpoint ../../checkpoints/ofa_large.pt
 </pre>
 </details>
-
-<br></br>
-
-# Finetuning & Inference
-Below we provide methods for finetuning and inference on different downstream tasks. We provide both pretrained OFA-Large and OFA-Base in [checkpoints.md](checkpoints.md). The scripts mentioned in this section are prepared for OFA-Large. For reproducing the downstreaming results of OFA-Base, we have also provided the corresponding finetuning and inference scripts for OFA-Base in the `run_scripts/` folder.
-
-We recommend that your workspace directory should be organized like this: 
-```
-OFA/
-├── checkpoints/
-│   ├── ofa_base.pt
-│   ├── ofa_large.pt
-│   ├── caption_large_best_clean.pt
-│   └── ...
-├── criterions/
-├── data/
-├── dataset/
-│   ├── caption_data/
-│   ├── gigaword_data/
-│   └── ...
-├── fairseq/
-├── models/
-├── run_scripts/
-├── tasks/
-├── train.py
-├── trainer.py
-└── utils/
-```
 
 ## Image Captioning
 We provide procedures to reproduce our results of image captioning on our paper below.
@@ -364,7 +376,7 @@ bash evaluate_vqa_allcand_distributed.sh val # specify 'val' or 'test'
 </pre>
 </details>
 
-## Referring Expression Comprehension 
+## Visual Grounding (Referring Expression Comprehension)
 Here provides procedures for you to prepare data, train, and evaluate your model on visual grounding. 
 <details>
     <summary><b>1. Prepare the Dataset & Checkpoints</b></summary>

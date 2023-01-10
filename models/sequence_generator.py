@@ -213,6 +213,7 @@ class SequenceGenerator(nn.Module):
         prefix_tokens: Optional[Tensor] = None,
         constraints: Optional[Tensor] = None,
         bos_token: Optional[int] = None,
+        **kwargs
     ):
         model = EnsembleModel(models)
         incremental_states = torch.jit.annotate(
@@ -223,7 +224,13 @@ class SequenceGenerator(nn.Module):
             ],
         )
         net_input = sample["net_input"]
-
+        if "img_thres" in kwargs:
+            net_input["img_thres"] = kwargs["img_thres"]
+        if "txt_thres" in kwargs:
+            net_input["txt_thres"] = kwargs["txt_thres"]
+        if "is_train" in kwargs:
+            net_input["is_train"] = kwargs["is_train"]
+    
         if "src_tokens" in net_input:
             src_tokens = net_input["src_tokens"]
             # length of the source text being the character length except EndOfSentence and pad
@@ -333,6 +340,16 @@ class SequenceGenerator(nn.Module):
             original_batch_idxs = torch.arange(0, bsz).type_as(tokens)
 
         for step in range(max_len + 1):  # one extra step for EOS marker
+            
+            # Decay early exiting theshold for decoder layers
+            # small modification comparing with original paper.
+            # Details can be found in https://arxiv.org/abs/2211.11152
+            if step < (max_len + 1) / 3:
+                decoder_thes = 1.0
+            elif "decoder_thres" in kwargs:
+                decoder_thes = 0.9 * kwargs["decoder_thres"] + \
+                    0.1 * math.exp(-1 * (step + 1) / (max_len + 1))
+
             # reorder decoder internal states based on the prev choice of beams
             if reorder_state is not None:
                 if batch_idxs is not None:
@@ -359,7 +376,8 @@ class SequenceGenerator(nn.Module):
                     constraint_end=self.constraint_end,
                     gen_code=self.gen_code,
                     zero_shot=self.zero_shot,
-                    prefix_tokens=prefix_tokens
+                    prefix_tokens=prefix_tokens,
+                    decoder_thes=decoder_thes
                 )
 
             if self.lm_model is not None:
@@ -368,6 +386,16 @@ class SequenceGenerator(nn.Module):
                     lm_out, log_probs=True, sample=None
                 )
                 probs = probs[:, -1, :] * self.lm_weight
+
+                # align lm vocab with ofa vocab
+                if probs.shape[1] < lprobs.shape[1]:
+                    probs = torch.cat([probs, probs.new_zeros([probs.size(0), lprobs.shape[1] - probs.shape[1]],
+                                                              dtype=torch.float64)], dim=1)
+                    probs[:, self.constraint_end:] = -math.inf
+                    probs[:, 4:self.constraint_start] = -math.inf
+                elif probs.shape[1] > lprobs.shape[1]:
+                    raise NotImplementedError
+
                 lprobs += probs
             # handle prefix tokens (possibly with different lengths)
             if (
@@ -604,10 +632,7 @@ class SequenceGenerator(nn.Module):
         prefix_toks = prefix_tokens[:, step].unsqueeze(-1).repeat(1, beam_size).view(-1)
         prefix_lprobs = lprobs.gather(-1, prefix_toks.unsqueeze(-1))
         prefix_mask = prefix_toks.ne(self.pad)
-        if self.constraint_trie is None:
-            lprobs[prefix_mask] = torch.min(prefix_lprobs) - 1
-        else:
-            lprobs[prefix_mask] = -math.inf
+        lprobs[prefix_mask] = -math.inf
         lprobs[prefix_mask] = lprobs[prefix_mask].scatter(
             -1, prefix_toks[prefix_mask].unsqueeze(-1), prefix_lprobs[prefix_mask]
         )
@@ -811,7 +836,8 @@ class EnsembleModel(nn.Module):
         constraint_end=None,
         gen_code=False,
         zero_shot=False,
-        prefix_tokens=None
+        prefix_tokens=None,
+        decoder_thes=1.0
     ):
         log_probs = []
         avg_attn: Optional[Tensor] = None
@@ -827,6 +853,8 @@ class EnsembleModel(nn.Module):
                     code_masks=code_mask,
                     encoder_out=encoder_out,
                     incremental_state=incremental_states[i],
+                    is_train=False,
+                    decoder_thres=decoder_thes
                 )
             else:
                 if hasattr(model, "decoder"):
