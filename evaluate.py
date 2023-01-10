@@ -160,8 +160,8 @@ def main(cfg: DictConfig, **kwargs):
             score_sum += sum([s[0] for s in scores])
             score_cnt += sum([s[1] for s in scores])
         else:
-            score_sum += sum(scores) if scores is not None else 0
-            score_cnt += len(scores) if scores is not None else 0
+            score_sum += sum(scores)
+            score_cnt += len(scores)
         
         progress.log({"sentences": sample["nsentences"]})
 
@@ -173,10 +173,17 @@ def cli_main():
     parser.add_argument("--ema-eval", action='store_true', help="Use EMA weights to make evaluation.")
     parser.add_argument("--beam-search-vqa-eval", action='store_true', help="Use beam search for vqa evaluation (faster inference speed but sub-optimal result), if not specified, we compute scores for each answer in the candidate set, which is slower but can obtain best result.")
     parser.add_argument("--zero-shot", action='store_true')
+    parser.add_argument('--img_thres', type=float, metavar='D', default=1.0,
+                            help='image theshold for early exiting model')
+    parser.add_argument('--txt_thres', type=float, metavar='D', default=1.0,
+                        help='text theshold for early exiting model')
+    parser.add_argument('--decoder_thres', type=float, metavar='D', default=1.0,
+                        help='decoder theshold for early exiting model')
     args = options.parse_args_and_arch(parser)
     cfg = convert_namespace_to_omegaconf(args)
     distributed_utils.call_main(
-        cfg, main, ema_eval=args.ema_eval, beam_search_vqa_eval=args.beam_search_vqa_eval, zero_shot=args.zero_shot
+        cfg, main, ema_eval=args.ema_eval, beam_search_vqa_eval=args.beam_search_vqa_eval, zero_shot=args.zero_shot,
+        img_thres=args.img_thres, txt_thres=args.txt_thres, decoder_thres=args.decoder_thres, is_train=False
     )
 
 

@@ -47,7 +47,7 @@ def _calculate_error_rate(hyps, refs):
 
 def eval_caption(task, generator, models, sample, **kwargs):
     transtab = str.maketrans({key: None for key in string.punctuation})
-    hypos = task.inference_step(generator, models, sample)
+    hypos = task.inference_step(generator, models, sample, **kwargs)
     results = []
     for i, sample_id in enumerate(sample["id"].tolist()):
         detok_hypo_str = decode_fn(hypos[i][0]["tokens"], task.tgt_dict, task.bpe, generator)
@@ -56,7 +56,7 @@ def eval_caption(task, generator, models, sample, **kwargs):
 
 
 def eval_caption_cn(task, generator, models, sample, **kwargs):
-    hypos = task.inference_step(generator, models, sample)
+    hypos = task.inference_step(generator, models, sample, **kwargs)
     results = []
     for i, sample_id in enumerate(sample["id"].tolist()):
         detok_hypo_str = decode_fn(
@@ -72,7 +72,7 @@ def eval_caption_cn(task, generator, models, sample, **kwargs):
 
 
 def eval_ocr(task, generator, models, sample, **kwargs):
-    gen_out = task.inference_step(generator, models, sample)
+    gen_out = task.inference_step(generator, models, sample, **kwargs)
     hyps, refs, results = [], [], []
     for i, sample_id in enumerate(sample["id"].tolist()):
         decode_tokens = decode_fn(gen_out[i][0]["tokens"], task.tgt_dict, task.bpe, generator).strip()
@@ -102,7 +102,7 @@ def eval_ocr(task, generator, models, sample, **kwargs):
 
 def eval_vqa_gen(task, generator, models, sample, **kwargs):
     if kwargs['beam_search_vqa_eval']:
-        hypos = task.inference_step(generator, models, sample, prefix_tokens=sample['prefix_tokens'])
+        hypos = task.inference_step(generator, models, sample, prefix_tokens=sample['prefix_tokens'], **kwargs)
         results = []
         for i, sample_id in enumerate(sample["id"].tolist()):
             prefix_len = sample['prefix_tokens'][i].ne(1).sum().item()
@@ -185,7 +185,7 @@ def eval_refcoco(task, generator, models, sample, **kwargs):
         ious = area_interacts / (area_predictions + area_targets - area_interacts + 1e-6)
         return ((ious >= thresh) & (interacts_w > 0) & (interacts_h > 0)).float()
 
-    gen_out = task.inference_step(generator, models, sample)
+    gen_out = task.inference_step(generator, models, sample, **kwargs)
     hyps = []
     for i in range(len(gen_out)):
         hyps.append(gen_out[i][0]["tokens"][:-1] - len(task.src_dict) + task.cfg.num_bins)
@@ -208,7 +208,8 @@ def eval_snli_ve(task, generator, models, sample, **kwargs):
         sample["net_input"]["src_tokens"],
         src_lengths=sample["net_input"]["src_lengths"],
         patch_images=sample["net_input"]["patch_images"],
-        patch_masks=sample["net_input"]["patch_masks"]
+        patch_masks=sample["net_input"]["patch_masks"],
+        **kwargs
     )
     device = sample["net_input"]["src_tokens"].device
     eos_item = torch.tensor([task.src_dict.eos()])
@@ -246,7 +247,7 @@ def eval_snli_ve(task, generator, models, sample, **kwargs):
             encoder_out["position_embeddings"][0].repeat_interleave(valid_size, dim=0)
         ]
 
-        decoder_out = models[0].decoder(valid_prev_output, encoder_out=new_encoder_out)
+        decoder_out = models[0].decoder(valid_prev_output, encoder_out=new_encoder_out, **kwargs)
         decoder_out[0].masked_fill_(~valid_constraint_masks, -math.inf)
         lprobs = models[0].get_normalized_probs(decoder_out, log_probs=True)
         scores = lprobs.gather(dim=-1, index=valid_tgt.unsqueeze(-1)).squeeze(-1)

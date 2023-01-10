@@ -265,7 +265,8 @@ class MultiheadAttention(nn.Module):
                 .view(-1, bsz * self.num_heads, self.head_dim)
                 .transpose(0, 1)
             )
-
+        
+        saved_state_new = {}
         if saved_state is not None:
             # saved states are stored with shape (bsz, num_heads, seq_len, head_dim)
             if "prev_key" in saved_state:
@@ -298,13 +299,15 @@ class MultiheadAttention(nn.Module):
                 src_len=k.size(1),
                 static_kv=static_kv,
             )
-
-            saved_state["prev_key"] = k.view(bsz, self.num_heads, -1, self.head_dim)
-            saved_state["prev_value"] = v.view(bsz, self.num_heads, -1, self.head_dim)
-            saved_state["prev_key_padding_mask"] = key_padding_mask
+            # There are reference bugs if change saved_state directly.
+            # This causes error during inference in early exiting models (MuE) 
+            # However, this has no influence on original OFA models.
+            saved_state_new["prev_key"] = k.view(bsz, self.num_heads, -1, self.head_dim)
+            saved_state_new["prev_value"] = v.view(bsz, self.num_heads, -1, self.head_dim)
+            saved_state_new["prev_key_padding_mask"] = key_padding_mask
             # In this branch incremental_state is never None
             assert incremental_state is not None
-            incremental_state = self._set_input_buffer(incremental_state, saved_state)
+            incremental_state = self._set_input_buffer(incremental_state, saved_state_new)
         assert k is not None
         assert k.size(1) == src_len
 
