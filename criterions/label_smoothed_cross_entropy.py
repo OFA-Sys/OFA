@@ -217,9 +217,12 @@ class AdjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
     def get_lprobs_and_target(self, model, net_output, sample):
         conf = sample['conf'][:, None, None] if 'conf' in sample and sample['conf'] is not None else 1
         constraint_masks = None
+        # some weird bug will occur without this operation and following out-place operation.
+        # This operation doesn't change logic. 
+        net_output = list(net_output)
         if "constraint_masks" in sample and sample["constraint_masks"] is not None:
             constraint_masks = sample["constraint_masks"]
-            net_output[0].masked_fill_(~constraint_masks, -math.inf)
+            net_output[0] = net_output[0].masked_fill_(~constraint_masks, -math.inf)
         if self.constraint_start is not None and self.constraint_end is not None:
             net_output[0][:, :, 4:self.constraint_start] = -math.inf
             net_output[0][:, :, self.constraint_end:] = -math.inf
@@ -341,3 +344,65 @@ class AdjustLabelSmoothedCrossEntropyCriterion(FairseqCriterion):
         to True will improves distributed training speed.
         """
         return True
+
+@register_criterion(
+    "MuE_Task_Loss", dataclass=AdjustLabelSmoothedCrossEntropyCriterionConfig
+)
+class MuE_Task_Loss(AdjustLabelSmoothedCrossEntropyCriterion):
+    def __init__(
+        self,
+        task,
+        sentence_avg,
+        label_smoothing,
+        ignore_prefix_size=0,
+        ignore_eos=False,
+        report_accuracy=False,
+        drop_worst_ratio=0,
+        drop_worst_after=0,
+        use_rdrop=False,
+        reg_alpha=1.0,
+        sample_patch_num=196,
+        constraint_range=None
+    ):
+        super().__init__(
+            task,
+            sentence_avg,
+            label_smoothing,
+            ignore_prefix_size,
+            ignore_eos,
+            report_accuracy,
+            drop_worst_ratio,
+            drop_worst_after,
+            use_rdrop,
+            reg_alpha,
+            sample_patch_num,
+            constraint_range)
+    
+    def compute_loss(self, model, net_output, sample, update_num, reduce=True):
+        loss_all = 0.0
+        nll_loss_all = 0.0
+        ntokens = 0
+        print("using MuE Task loss")
+        for state in net_output[1]["inner_out_states"]:
+            lprobs, target, constraint_masks = self.get_lprobs_and_target(model, [state], sample)
+            if constraint_masks is not None:
+                constraint_masks = constraint_masks[target != self.padding_idx]
+            lprobs = lprobs[target != self.padding_idx]
+            target = target[target != self.padding_idx]
+            loss, nll_loss, ntokens = label_smoothed_nll_loss(
+                lprobs,
+                target,
+                self.eps,
+                update_num,
+                reduce=reduce,
+                drop_worst_ratio=self.drop_worst_ratio,
+                drop_worst_after=self.drop_worst_after,
+                use_rdrop=self.use_rdrop,
+                reg_alpha=self.reg_alpha,
+                constraint_masks=constraint_masks,
+                constraint_start=self.constraint_start,
+                constraint_end=self.constraint_end
+            )
+            loss_all += loss
+            nll_loss_all += nll_loss
+        return loss_all, nll_loss_all, ntokens

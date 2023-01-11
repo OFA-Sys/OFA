@@ -1,3 +1,6 @@
 .idea/*
 .DS_Store
 .vscode
+__pycache__
+logs/
+vqa_logs/
