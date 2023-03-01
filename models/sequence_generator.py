@@ -230,6 +230,8 @@ class SequenceGenerator(nn.Module):
             net_input["txt_thres"] = kwargs["txt_thres"]
         if "is_train" in kwargs:
             net_input["is_train"] = kwargs["is_train"]
+        if "decoder_thres" in kwargs:
+            net_input["decoder_thres"] = kwargs["decoder_thres"]
     
         if "src_tokens" in net_input:
             src_tokens = net_input["src_tokens"]
