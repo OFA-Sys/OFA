@@ -105,7 +105,7 @@ We list the parameters and pretrained checkpoints of OFAs below. For finetuned c
 <br></br>
 
 # Results
-Below we demonstrate the results of OFAs on cross-modal understanding and generation. 
+Below we demonstrate the results of OFAs on cross-modal understanding and generation. You can find more results of MuE model in [MuE](https://arxiv.org/abs/2211.11152)
 
 <table border="1" width="100%">
     <tr align="center">
@@ -254,6 +254,9 @@ We provide procedures to reproduce our results of image captioning on our paper 
 cd run_scripts/caption
 nohup sh train_caption_stage1.sh > train_stage1.out &  # stage 1, train with cross-entropy loss
 nohup sh train_caption_stage2.sh > train_stage2.out &  # stage 2, load the best ckpt of stage1 and train with CIDEr optimization 
+# If you need to finetune MuE model, please apply the following script
+nohup sh train_caption_stage1_base_MuE.sh > train_stage1.out &
+# The stage2 uses the same script above
 </pre>
 </details>
 <details>
@@ -263,6 +266,9 @@ nohup sh train_caption_stage2.sh > train_stage2.out &  # stage 2, load the best 
     </p>
 <pre>
 cd run_scripts/caption ; sh evaluate_caption.sh  # inference & evaluate
+# If you want to evaluate your MuE Model
+sh evaluate_caption_base_MuE.sh
+# You can adjust img_thres, txt_thres, and decoder_thres to achieve better performance and speed trade-off.
 </pre>
 </details>
 
@@ -429,6 +435,8 @@ We provide steps for you to reproduce our results in visual entailment. See the 
 <pre>
 cd run_scripts/snli_ve
 nohup sh train_snli_ve.sh > train_snli_ve.out &  # finetune for snli_ve
+# If you need to finetune MuE model, please apply the following script
+nohup sh train_snli_ve_base_MuE.sh > train_snli_ve_MuE.out &
 </pre>
 </details>
 <details>
@@ -438,6 +446,9 @@ nohup sh train_snli_ve.sh > train_snli_ve.out &  # finetune for snli_ve
     </p>
 <pre>
 cd run_scripts/snli_ve ; sh evaluate_snli_ve.sh dev  # specify 'dev' or 'test'
+# If you want to evaluate your MuE Model
+sh evaluate_snli_ve_base_MuE.sh
+# You can adjust img_thres, txt_thres, and decoder_thres to achieve better performance and speed trade-off.
 </pre>
 </details>
    
@@ -599,6 +610,21 @@ Please cite our paper if you find it helpful :)
   journal   = {CoRR},
   volume    = {abs/2202.03052},
   year      = {2022}
+}
+
+@article{tang2022you,
+  title={You Need Multiple Exiting: Dynamic Early Exiting for Accelerating Unified Vision Language Model},
+  author={Tang, Shengkun and
+   Wang, Yaqing and
+   Kong, Zhenglun and
+   Zhang, Tianchi and
+   Li, Yao and
+   Ding, Caiwen and
+   Wang, Yanzhi and
+   Liang, Yi and
+   Xu, Dongkuan},
+  journal={arXiv preprint arXiv:2211.11152},
+  year={2022}
 }
 ```
 <br></br>
