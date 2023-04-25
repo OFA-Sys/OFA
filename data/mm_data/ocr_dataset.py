@@ -9,7 +9,7 @@ import logging
 import warnings
 import random
 import functools
-
+import numpy as np
 import torch
 import base64
 from torchvision import transforms
