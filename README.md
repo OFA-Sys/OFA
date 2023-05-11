@@ -48,6 +48,7 @@ We support the inference of OFA in Hugging Face Transformers. Check the [README]
 
 
 # News
+* 2023.5.11: Two papers ([OFA-OCR](https://arxiv.org/abs/2212.09297) and [OFA-prompt](https://arxiv.org/abs/2208.02532)) are accepted by ACL. The evaluation scripts and checkpoints of OFA-OCR are released.
 * 2023.1.11: Released MuE (https://arxiv.org/abs/2211.11152), which significantly accelerates OFA with little performance degradation. Many thanks to the first author, Shengkun Tang (@Tangshengku). See the branch `feature/MuE` and [PR](https://github.com/OFA-Sys/OFA/pull/336) for more information.
 * 2022.12.20: Released OFA-OCR, a model for Chinese text recognition based on OFA. Check our [paper](https://arxiv.org/abs/2212.09297) and [demo](https://modelscope.cn/studios/damo/ofa_ocr_pipeline/summary).
 * 2022.12.7: Released the MMSpeech an ASR pre-training method based on OFA. Check our paper [here](https://arxiv.org/abs/2212.00500)! Please see the [README_mmspeech.md](README_mmspeech.md) for further details.
@@ -581,7 +582,7 @@ To contact us, never hestitate to send an email to `zheluo.wp@alibaba-inc.com` o
 
 
 # Citation
-Please cite our paper if you find it helpful :)
+Please cite our papers if you find them helpful :)
 
 ```
 @article{wang2022ofa,
@@ -603,3 +604,33 @@ Please cite our paper if you find it helpful :)
 }
 ```
 <br></br>
+```
+@article{ofa_ocr,
+  author       = {Junyang Lin and
+                  Xuancheng Ren and
+                  Yichang Zhang and
+                  Gao Liu and
+                  Peng Wang and
+                  An Yang and
+                  Chang Zhou},
+  title        = {Transferring General Multimodal Pretrained Models to Text Recognition},
+  journal      = {CoRR},
+  volume       = {abs/2212.09297},
+  year         = {2022}
+}
+```
+<br><br>
+```
+@article{ofa_prompt,
+  author       = {Hao Yang and
+                  Junyang Lin and
+                  An Yang and
+                  Peng Wang and
+                  Chang Zhou and
+                  Hongxia Yang},
+  title        = {Prompt Tuning for Generative Multimodal Pretrained Models},
+  journal      = {CoRR},
+  volume       = {abs/2208.02532},
+  year         = {2022}
+}
+```
