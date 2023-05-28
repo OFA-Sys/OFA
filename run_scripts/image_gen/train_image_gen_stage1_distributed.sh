@@ -52,11 +52,11 @@ VQGAN_CONFIG_PATH=../../checkpoints/vqgan/model.yaml
 CLIP_MODEL_PATH=../../checkpoints/clip/ViT-B-16.pt
 GEN_IMAGES_PATH=../../results/image_gen_stage1
 
-for total_num_updates in {40000,}; do
+for total_num_updates in 40000; do
   echo "total_num_updates "${total_num_updates}
-  for warmup_updates in {2000,}; do
+  for warmup_updates in 2000; do
     echo "warmup_updates "${warmup_updates}  
-    for lr in {1e-3,}; do
+    for lr in 1e-3; do
       echo "lr "${lr}
 
         log_file=${log_dir}/${total_num_updates}"_"${warmup_updates}"_"${lr}"_rank"${RANK}".log"

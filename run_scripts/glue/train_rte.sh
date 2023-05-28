@@ -35,11 +35,11 @@ max_tgt_length=30
 num_bins=1000
 prompt_type="src"
 
-for max_epoch in {5,7,10}; do
+for max_epoch in 5 7 10; do
   echo "max_epoch "${max_epoch}
-  for lr in {1e-4,7e-5,6e-5,5e-5,3e-5}; do
+  for lr in 1e-4 7e-5 6e-5 5e-5 3e-5; do
     echo "lr "${lr}
-    for update_freq in {8,4,2}; do
+    for update_freq in 8 4 2; do
       echo "update_freq "${update_freq}
 
       log_file=${log_dir}/${max_epoch}"_"${lr}"_"${update_freq}".log"

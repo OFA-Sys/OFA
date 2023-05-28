@@ -67,13 +67,13 @@ val_inference_type=allcand
 unconstrained_training_flag=""
 # unconstrained_training_flag="--unconstrained-training"
 
-for max_epoch in {15,}; do
+for max_epoch in 15; do
   echo "max_epoch "${max_epoch}
-  for warmup_ratio in {0.04,}; do
+  for warmup_ratio in 0.04; do
     echo "warmup_updates "${warmup_updates}  
-    for lr in {5e-5,}; do
+    for lr in 5e-5; do
       echo "lr "${lr}
-      for patch_image_size in {480,}; do
+      for patch_image_size in 480; do
         echo "patch_image_size "${patch_image_size}
 
         log_file=${log_dir}/${max_epoch}"_"${warmup_ratio}"_"${lr}"_"${patch_image_size}"_rank"${RANK}".log"
