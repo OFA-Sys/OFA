@@ -36,11 +36,11 @@ max_src_length=512
 max_tgt_length=64
 num_bins=1000
 
-for max_epoch in {6,}; do
+for max_epoch in 6; do
   echo "max_epoch "${max_epoch}
-  for lr in {1e-4,}; do
+  for lr in 1e-4; do
     echo "lr "${lr}
-      for noise_ratio in {0.2,}; do
+      for noise_ratio in 0.2; do
         echo "noise_ratio "${noise_ratio}
 
       log_file=${log_dir}/${max_epoch}"_"${lr}"_"${noise_ratio}".log"

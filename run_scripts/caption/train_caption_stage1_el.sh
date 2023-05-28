@@ -37,11 +37,11 @@ patch_image_size=480
 eval_cider_cached=${data_dir}/cider_cached_tokens/coco-valid-words.p
 drop_worst_ratio=0.05 # modified from 0.2 for el
 log_end=0.75  # for el
-for max_epoch in {2,}; do
+for max_epoch in 2; do
   echo "max_epoch "${max_epoch}
-  for warmup_ratio in {0.06,}; do
+  for warmup_ratio in 0.06; do
     echo "warmup_ratio "${warmup_ratio}
-    for drop_worst_after in {2500,}; do
+    for drop_worst_after in 2500; do
       echo "drop_worst_after "${drop_worst_after}
 
       log_file=${log_dir}/${max_epoch}"_"${warmup_ratio}"_"${drop_worst_after}_el${log_end}_".log"

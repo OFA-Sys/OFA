@@ -67,13 +67,13 @@ val_inference_type=allcand
 unconstrained_training_flag=""
 # unconstrained_training_flag="--unconstrained-training"
 
-for total_num_updates in {40000,}; do
+for total_num_updates in 40000; do
   echo "total_num_updates "${total_num_updates}
-  for warmup_updates in {1000,}; do
+  for warmup_updates in 1000; do
     echo "warmup_updates "${warmup_updates}  
-    for lr in {5e-5,}; do
+    for lr in 5e-5; do
       echo "lr "${lr}
-      for patch_image_size in {480,}; do
+      for patch_image_size in 480; do
         echo "patch_image_size "${patch_image_size}
 
         log_file=${log_dir}/${total_num_updates}"_"${warmup_updates}"_"${lr}"_"${patch_image_size}"_rank"${RANK}".log"

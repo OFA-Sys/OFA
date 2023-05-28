@@ -36,9 +36,9 @@ num_bins=1000
 patch_image_size=480
 prompt_type="prev_output"
 
-for max_epoch in {6,}; do
+for max_epoch in 6; do
   echo "max_epoch "${max_epoch}
-  for lr in {2e-5,}; do
+  for lr in 2e-5; do
     echo "lr "${lr}
 
     log_file=${log_dir}/${max_epoch}"_"${lr}".log"
