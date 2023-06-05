@@ -634,3 +634,12 @@ Please cite our papers if you find them helpful :)
   year         = {2022}
 }
 ```
+<br><br>
+```
+@article{mmspeech,
+  title={MMSpeech: Multi-modal Multi-task Encoder-Decoder Pre-training for Speech Recognition},
+  author={Zhou, Xiaohuan and Wang, Jiaming and Cui, Zeyu and Zhang, Shiliang and Yan, Zhijie and Zhou, Jingren and Zhou, Chang},
+  journal={arXiv preprint arXiv:2212.00500},
+  year={2022}
+}
+```
