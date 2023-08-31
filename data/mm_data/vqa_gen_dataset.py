@@ -163,7 +163,7 @@ class VqaGenDataset(OFADataset):
         ref_dict = {item.split('|!+')[1]: float(item.split('|!+')[0]) for item in ref.split('&&')}
         answer = max(ref_dict, key=ref_dict.get)
         conf = torch.tensor([ref_dict[answer]])
-        tgt_item = self.encode_text(" {}".format(answer))
+        tgt_item = self.encode_text(" {}".format(answer), length=self.max_tgt_length)
 
         if self.add_object and predict_objects is not None:
             predict_object_seq = ' '.join(predict_objects.strip().split('&&')[:self.max_object_length])
