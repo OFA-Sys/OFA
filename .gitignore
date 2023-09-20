@@ -1,3 +1,7 @@
 .idea/*
 .DS_Store
 .vscode
+__pycache__
+tensorboard
+wandb
+results
