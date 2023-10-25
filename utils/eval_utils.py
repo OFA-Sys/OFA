@@ -17,6 +17,93 @@ from data import data_utils
 from tasks.nlg_tasks.gigaword import fix_tokenization
 import editdistance
 
+def bin2coord(bin_list, box_size, w, h, num_bins):
+    max_img_size = max(w, h)
+    coord_list = []
+    coord_list += [bin_list[0] / (num_bins - 1) * box_size / max_img_size * w]
+    coord_list += [bin_list[1] / (num_bins - 1) * box_size / max_img_size * h]
+    coord_list += [bin_list[2] / (num_bins - 1) * box_size / max_img_size * w]
+    coord_list += [bin_list[3] / (num_bins - 1) * box_size / max_img_size * h]
+    return coord_list
+
+def toks2triplets(toks, bpe, num_bins, img_size, reverse_pred_obj=False, reverse_sub_obj=False):
+    def decode(x):
+        return bpe.decode(x)
+
+    triplets = []
+    curr_sub = ''
+    curr_obj = ''
+    curr_pred = ''
+    state = None
+    toks.append('<sub>')
+    for i, tok in enumerate(toks):
+        # print(tok, '|'.join([curr_sub, curr_obj, curr_pred]), triplets)
+        if tok == '<sub>':
+            state = 'sub'
+            curr_sub = ''
+            if len(curr_obj) > 0 and len(triplets) > 0 and len(triplets[-1]) == 2:
+                triplets[-1].append(decode(curr_obj).strip())
+
+        elif tok == '<pred>':
+            state = 'pred'
+            if len(curr_obj) > 0 and len(triplets) > 0 and len(triplets[-1]) == 2: 
+                triplets[-1].append(decode(curr_obj).strip())
+            triplets.append([decode(curr_sub).strip()])
+            curr_pred = ''
+        elif tok == '<obj>':
+            state = 'obj'
+            if len(triplets) > 0:
+                triplets[-1].append(decode(curr_pred).strip())
+            curr_obj = ''
+            
+        else:
+            if state == 'sub':
+                curr_sub += ' ' + tok
+            elif state == 'obj':
+                curr_obj += ' ' + tok
+            elif state == 'pred':
+                curr_pred += ' ' + tok
+
+    # print(triplets)
+    to_remove = []
+    for i, trip in enumerate(triplets):
+        if len(trip) < 3:
+            print('Triplet too short, this should not happen:', trip)
+            to_remove.append(i)
+            continue
+        if len(trip) > 3:
+            print('Triplet too long, this should not happen:', trip)
+            triplets[i] = trip = trip[:3]
+        if reverse_pred_obj:
+            trip[1], trip[2] = trip[2], trip[1]
+        if reverse_sub_obj:
+            trip[0], trip[2] = trip[2], trip[0]
+        if '<rare>' in trip[1]:
+            trip[1] = trip[1].replace('<rare>', '').strip()
+        for j in [0, 2]:
+            if '<bin' in trip[j]:
+                label, bins = trip[j].split('<bin_', 1)
+                bins = '<bin_' + bins
+                bin_list = [int(bin.split('>')[0]) for bin in bins.strip().split('<bin_')[1:]]
+                if len(bin_list) < 4:
+                    print('Box too short, this should not happen:', trip[j])
+                    to_remove.append(i)
+                    break
+                box = bin2coord(bin_list, 1024, img_size[0], img_size[1], num_bins)
+                trip[j] = (label, box)
+            else: 
+                print('No box, this should not happen:', trip[j])
+                to_remove.append(i)
+                break
+    
+    for i in sorted(to_remove, reverse=True):
+        del triplets[i]
+    
+    for trip in triplets:
+        assert len(trip) == 3 and len(trip[0]) == 2 and len(trip[2]) == 2, trip
+
+    return triplets
+
 
 def get_symbols_to_strip_from_output(generator):
     if hasattr(generator, "symbols_to_strip_from_output"):

@@ -1,3 +1,10 @@
 .idea/*
 .DS_Store
 .vscode
+__pycache__
+tensorboard
+wandb
+results
+run_scripts/**/*.log
+dataset
+checkpoints

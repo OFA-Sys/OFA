@@ -427,6 +427,10 @@ class TransformerModel(FairseqEncoderDecoderModel):
             args.checkpoint_activations = True  # offloading implies checkpointing
         encoder = cls.build_encoder(args, src_dict, encoder_embed_tokens)
         decoder = cls.build_decoder(args, tgt_dict, decoder_embed_tokens)
+        if getattr(args, "freeze_encoder", False):
+            encoder.requires_grad_(False)
+        if getattr(args, "freeze_decoder", False):
+            decoder.requires_grad_(False)
         if getattr(args, "encoder_prompt", False) or getattr(
                 args, "decoder_prompt", False):
             encoder.requires_grad_(False)
