@@ -3,6 +3,7 @@
 # This source code is licensed under the Apache 2.0 license 
 # found in the LICENSE file in the root directory.
 
+import copy
 from dataclasses import dataclass, field
 import itertools
 import json
@@ -77,7 +78,7 @@ class SceneGraphTask(OFATask):
         idx_to_predicate = [None] * (len(self.vg_json['idx_to_predicate']) + 1)
         for idx, pred in self.vg_json['idx_to_predicate'].items():
             idx_to_predicate[int(idx)] = pred
-        self.sgMeanRecall = SGMeanRecall(self.result_dict, len(idx_to_predicate) + 1, idx_to_predicate)
+        self.sgMeanRecall = SGMeanRecall(self.result_dict, len(idx_to_predicate), idx_to_predicate)
         self.sgRecall.register_container(self.sg_mode)
         self.sgMeanRecall.register_container(self.sg_mode)
     
@@ -185,9 +186,7 @@ class SceneGraphTask(OFATask):
 
             triplets = []
             for sent in sents[i]:
-                if self.valid_count % 100 == 0: print(sent)
                 triplets.extend(toks2triplets(sent.split(), self.bpe, self.cfg.num_bins, img_size))
-            # print(triplets)
             
             pred_boxes = []
             pred_rel_inds = []
@@ -294,7 +293,7 @@ class SceneGraphTask(OFATask):
 
         return loss, sample_size, logging_output
     
-    def post_validate(self, model, stats, agg):
+    def get_valid_stats(self, cfg, trainer, agg_val):
         # if torch.distributed.get_rank() == 0:
         #     self.sg_evaluator.print_stats()
         # print('post validate', stats)
@@ -311,9 +310,10 @@ class SceneGraphTask(OFATask):
                 else:
                     if type(d1[k]) == list and type(v) == list:
                         d1[k] += v
-                    elif type(d1[k]) == float:
-                        assert d1[k] == 0.0
+                    elif type(v) == np.float64 or type(d1[k]) == float:
+                        assert d1[k] == 0.0 and v == 0.0, (k, d1[k], v)
 
+        # self.result_dict = copy.deepcopy(gather_list[0])
         for i in range(1, group_size):
             merge_dict(self.result_dict, gather_list[i])
         
@@ -325,6 +325,21 @@ class SceneGraphTask(OFATask):
         print_str += self.sgMeanRecall.generate_print_string(self.sg_mode)
         print(print_str)
 
+        for key, value in self.result_dict.items():
+            if type(value) == dict:
+                for k, v in value.items():
+                    if type(v) == np.float64 or type(v) == float:
+                        agg_val[f'{key}@{k}'] = v
+                    else:
+                        # print(key, len(v))
+                        pass
+    
+        self.sgRecall.register_container(self.sg_mode)
+        self.sgMeanRecall.register_container(self.sg_mode)
+
+        return agg_val
+
+    def post_validate(self, model, stats, agg):
         self.valid_count = 0
 
     def reduce_metrics(self, logging_outputs, criterion):

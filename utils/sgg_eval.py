@@ -120,6 +120,7 @@ class SGRecall(SceneGraphEvaluation):
                 pred_triplet_boxes,
                 iou_thres,
                 phrdet=mode=='phrdet',
+                skip_box_match=True
             )
         else:
             pred_to_gt = [[]]
@@ -477,6 +478,37 @@ class SGNGMeanRecall(SceneGraphEvaluation):
             self.result_dict[mode + '_ng_mean_recall'][k] = sum_recall / float(num_rel_no_bg)
         return
 
+
+"""
+Location Free Recall:
+Ignore matching bounding boxes
+"""
+class SGLocationFreeRecall(SceneGraphEvaluation):
+    def __init__(self, result_dict):
+        super(SGLocationFreeRecall, self).__init__(result_dict)
+
+    def register_container(self, mode):
+        self.result_dict[mode + '_loc_free_recall'] = {20: [], 50: [], 100: []}
+
+    def generate_print_string(self, mode):
+        result_str = 'SGG eval: '
+        for k, v in self.result_dict[mode + '_loc_free_recall'].items():
+            result_str += '   lfR @ %d: %.4f; ' % (k, np.mean(v))
+        result_str += ' for mode=%s, type=Location Free Recall.' % mode
+        result_str += '\n'
+        return result_str
+
+    def calculate_recall(self, global_container, local_container, mode):
+        pred_to_gt = local_container['pred_to_gt']
+        gt_rels = local_container['gt_rels']
+
+        for k in self.result_dict[mode + '_loc_free_recall']:
+            # Location Free Recall
+            match = reduce(np.union1d, pred_to_gt[:k])
+            loc_free_match = len(match) - len(gt_rels)
+            loc_free_rec_i = float(loc_free_match) / float(len(gt_rels))
+            self.result_dict[mode + '_loc_free_recall'][k].append(loc_free_rec_i)
+
 """
 Accumulate Recall:
 calculate recall on the whole dataset instead of each image
@@ -531,7 +563,7 @@ def _triplet(relations, classes, boxes, predicate_scores=None, class_scores=None
 
 
 def _compute_pred_matches(gt_triplets, pred_triplets,
-                 gt_boxes, pred_boxes, iou_thres, phrdet=False):
+                 gt_boxes, pred_boxes, iou_thres, phrdet=False, skip_box_match=False):
     """
     Given a set of predicted triplets, return the list of matching GT's for each of the
     given predictions
@@ -544,6 +576,9 @@ def _compute_pred_matches(gt_triplets, pred_triplets,
     keeps = intersect_2d(gt_triplets, pred_triplets)
     gt_has_match = keeps.any(1)
     pred_to_gt = [[] for x in range(pred_boxes.shape[0])]
+
+    if skip_box_match:
+        iou_thres = 0.0
 
     for gt_ind, gt_box, keep_inds in zip(np.where(gt_has_match)[0],
                                          gt_boxes[gt_has_match],
@@ -568,5 +603,15 @@ def _compute_pred_matches(gt_triplets, pred_triplets,
 
         for i in np.where(keep_inds)[0][inds]:
             pred_to_gt[i].append(int(gt_ind))
+    
+    # Print comprehensie debug info
+    # print('--------------------------')
+    # print('gt_triplets', gt_triplets)
+    # print('pred_triplets', pred_triplets)
+    # print('gt_boxes', gt_boxes)
+    # print('pred_boxes', pred_boxes)
+    # print('pred_to_gt', pred_to_gt)
+    # print('--------------------------')
+
     return pred_to_gt
 

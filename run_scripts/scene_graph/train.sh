@@ -2,7 +2,7 @@
 
 # The port for communication. Note that if you want to run multiple tasks on the same machine,
 # you need to specify different port numbers.
-export MASTER_PORT=6062
+export MASTER_PORT=6063
 # export NCCL_DEBUG=INFO
 # export NCCL_SOCKET_IFNAME=eno1
 
@@ -13,21 +13,18 @@ mkdir -p $log_dir $save_dir
 bpe_dir=../../utils/BPE
 user_dir=../../ofa_module
 data_dir=/data/hulab/zcai75/OFA_data/vg
-data=${data_dir}/vg_train_full.tsv,${data_dir}/vg_val_toy.tsv
-# restore_file=/data/hulab/zcai75/checkpoints/OFA/scene_graph_checkpoints/_2_3e-5_512_/checkpoint1.pt
-# restore_file=/data/hulab/zcai75/checkpoints/OFA/scene_graph_checkpoints/prompt_tuning_2_3e-5_512_prompt_tuning_sgdet/checkpoint1.pt 
-# restore_file=/data/hulab/zcai75/checkpoints/OFA/scene_graph_checkpoints/adapter_10_3e-5_512_sgdet/checkpoint10.pt 
-# restore_file=/data/hulab/zcai75/checkpoints/OFA/scene_graph_checkpoints/adapter_all_cand_20_3e-5_512_sgdet/checkpoint19.pt
-restore_file=/data/hulab/zcai75/checkpoints/OFA/scene_graph_checkpoints/adapter_all_cand_20_3e-5_512_sgcls/checkpoint_last.pt
+data=${data_dir}/vg_train_full.tsv,${data_dir}/vg_val_toy_1000.tsv
+# restore_file=/data/hulab/zcai75/checkpoints/OFA/scene_graph_checkpoints/adapter_20_3e-5_512_sgdet/checkpoint_last.pt 
+restore_file=/data/hulab/zcai75/checkpoints/OFA/scene_graph_checkpoints/adapter_20_3e-5_512_sgcls/checkpoint_last.pt 
 # restore_file=/data/hulab/zcai75/checkpoints/OFA/ofa_base.pt
 
-tag=adapter_all_cand
+tag=adapter-skip-box-match
 task=scene_graph
 arch=ofa_base
 criterion=adjust_label_smoothed_cross_entropy
 label_smoothing=0.1
 lr=3e-5
-max_epoch=20
+max_epoch=40
 warmup_ratio=0.06
 batch_size=8
 update_freq=4
@@ -67,7 +64,7 @@ mkdir -p $save_path
     # --encoder-prompt-length=${encoder_prompt_length} \
     # --decoder-prompt-length=${decoder_prompt_length} \
 
-CUDA_VISIBLE_DEVICES=0,1 python3 -m torch.distributed.launch --nproc_per_node=2 --master_port=${MASTER_PORT} ../../train.py \
+CUDA_VISIBLE_DEVICES=2,3 python3 -m torch.distributed.launch --nproc_per_node=2 --master_port=${MASTER_PORT} ../../train.py \
     $data \
     --sg-mode=${sg_mode} \
     --bpe-dir=${bpe_dir} \
@@ -100,7 +97,7 @@ CUDA_VISIBLE_DEVICES=0,1 python3 -m torch.distributed.launch --nproc_per_node=2 
     --wandb-project=OFA-VG \
     --fixed-validation-seed=7 \
     --keep-best-checkpoints=1 \
-    --save-interval=1 --validate-interval=3 --validate-interval-updates=1 \
+    --save-interval=3 --validate-interval=8 --validate-interval-updates=0 \
     --all-gather-list-size=2097152 \
     --eval-args='{"beam":5,"max_len_a":0,"max_len_b":999,"no_repeat_ngram_size":5}' \
     --best-checkpoint-metric=loss --maximize-best-checkpoint-metric \
@@ -110,7 +107,9 @@ CUDA_VISIBLE_DEVICES=0,1 python3 -m torch.distributed.launch --nproc_per_node=2 
     --add-type-embedding \
     --scale-attn \
     --scale-fc \
-    --freeze-encoder \
+    --encoder-prompt \
+    --decoder-prompt \
+    --adapter \
     --scale-heads \
     --disable-entangle \
     --num-bins=${num_bins} \
