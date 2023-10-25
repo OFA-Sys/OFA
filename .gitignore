@@ -5,3 +5,4 @@ __pycache__
 tensorboard
 wandb
 results
+run_scripts/**/*.log
